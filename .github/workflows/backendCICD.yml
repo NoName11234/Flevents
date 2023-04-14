@@ -38,7 +38,7 @@ jobs:
       - name: Test with Maven
         run: mvn -Dtest=FleventsBackendApplicationTests test --file flevents-backend/pom.xml
       #Test the application using Maven - all Tests
-      - name: Test with Maven
+      - name: Test with Maven - all
         run: mvn test --file flevents-backend/pom.xml
       #Build the application using Maven
       - name: Build with Maven
