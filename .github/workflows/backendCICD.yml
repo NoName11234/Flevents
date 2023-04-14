@@ -1,0 +1,49 @@
+# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+
+name: Maven Package
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+   #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
+      - uses: actions/checkout@v1
+      #Set up JDK 17
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '17'
+      #Set up Maven cache
+      - name: Cache Maven packages
+        #This action allows caching dependencies and build outputs to improve workflow execution time.
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/flevents-backend/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      #Test the application using Maven
+      - name: Test with Maven
+        run: mvn -Dtest=FleventsBackendApplicationTests test --file flevents-backend/pom.xml
+      #Build the application using Maven
+      - name: Build with Maven
+        run: mvn -B package -DskipTests --file flevents-backend/pom.xml
+      #Build the application using Maven
+      - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          #Set artifact name
+          name: artifact
+          #From this path
+          path: flevents-backend/target/flevents-backend-0.0.1-SNAPSHOT.jar

@@ -1,0 +1,52 @@
+/**
+ * src/styles/settings.scss
+ *
+ * Configures SASS variables and Vuetify overwrites
+ */
+
+// https://next.vuetifyjs.com/features/sass-variables/`
+// @use 'vuetify' with (
+//   $color-pack: false
+// );
+
+.gap {
+  gap: 0.25rem;
+}
+.gap.flex-row {
+  gap: 0.25rem;
+}
+.gap.flex-column {
+  gap: 0.45rem
+}
+.gap-2 {
+  gap: 0.45rem;
+}
+.gap-2.flex-row {
+  gap: 0.45rem;
+}
+.gap-2.flex-column {
+  gap: 0.65rem
+}
+.gap-3 {
+  gap: 0.65rem;
+}
+.gap-3.flex-row {
+  gap: 0.65rem;
+}
+.gap-3.flex-column {
+  gap: 0.85rem
+}
+
+.bg-gradient {
+  background: linear-gradient(-45deg, #c698ff, #ffa6ba);
+}
+
+input::-webkit-calendar-picker-indicator {
+  background-color: rgba(131, 131, 131, 0.075);
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.75rem;
+}
+input::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(131, 131, 131, 0.15);
+}
