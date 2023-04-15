@@ -53,6 +53,14 @@ public class FleventsAccountService {
         return information;
     }
 
+    public Optional<FleventsAccount> getAccountByMail(String mail){
+        return fleventsAccountRepository.findByEmail(mail);
+    }
+
+    public FleventsAccount saveAccount(FleventsAccount account){
+        return fleventsAccountRepository.save(account);
+    }
+
     public List<EventInformation> getExploreEvents(String accountId){
         //TODO: Implement
         FleventsAccount account = fleventsAccountRepository.findById(accountId).get();
