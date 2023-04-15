@@ -125,4 +125,15 @@ public class OrganizationService {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    public List<OrganizationInformation> getManagedOrganization(String accountId){
+        //TODO: Implement
+        List<OrganizationAccount> organizations = organizationAccountRepository.findByAccount_UuidAndRole(accountId, OrganizationRole.admin);
+        List<OrganizationInformation> informationList = organizations.stream().map(organizationAccount -> {
+            OrganizationInformation organizationInformation = mapper.map(organizationAccount.getOrganization(),OrganizationInformation.class);
+            organizationInformation.setRole(organizationAccount.getRole());
+            return organizationInformation;
+        }).collect(Collectors.toList());
+        return informationList;
+    }
 }

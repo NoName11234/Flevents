@@ -1,57 +1,60 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.controller.FleventsAccountController;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import jakarta.mail.MessagingException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class FleventsAccountControllerService {
+
+    private FleventsAccountService fleventsAccountService;
+    private EventService eventService;
+    private OrganizationService organizationService;
+
+    public FleventsAccountControllerService(FleventsAccountService fleventsAccountService, EventService eventService, OrganizationService organizationService){
+        this.fleventsAccountService = fleventsAccountService;
+        this.eventService = eventService;
+        this.organizationService = organizationService;
+    }
     public ResponseEntity getAccountPreview( String email, String secret){
-        return ;
+        return fleventsAccountService.getAccountPreview(email, secret);
     }
 
     public AccountInformation getAccountInfo(String accountId){
-        return ;
+        return fleventsAccountService.getAccountInfo(accountId);
     }
 
     public List<EventInformation> getBookedEvents(String accountId){
-        return ;
+        return eventService.getRegisteredEvents(accountId);
     }
 
     public List<EventInformation> getManagedEvents(String accountId){
-        return ;
+        return eventService.getManagedEvents(accountId);
     }
 
     public List<EventInformation> getExploreEvents(String accountId){
-        return ;
+        return fleventsAccountService.getExploreEvents(accountId);
     }
 
     public List<OrganizationInformation> getManagedOrganization(String accountId){
-        return ;
+        return organizationService.getManagedOrganization(accountId);
     }
 
     public ResponseEntity createAccount(FleventsAccount account){
-        return ;
+        return fleventsAccountService.createAccount(account);
     }
 
     public ResponseEntity resetPassword(String email){
-        return ;
+        return fleventsAccountService.resetPassword(email);
     }
 
     public ResponseEntity editAccount(String accountId, FleventsAccount account){
-        return ;
+        return fleventsAccountService.editAccount(accountId, account);
     }
 }
