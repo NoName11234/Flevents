@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1c6377ce-7b65-46bd-9418-b608171c6a13" name="Changes" comment="feat: fix time displayed">
-      <change afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EventService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EventControllerService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/FleventsAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/FleventsAccountController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/FleventsAccountControllerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/FleventsAccountControllerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/FleventsAccountService.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/FleventsAccountService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/OrganizationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/OrganizationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/EventController.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/EventController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EventService.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EventService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +90,7 @@
       <workItem from="1680606442042" duration="36885000" />
       <workItem from="1680703503490" duration="7954000" />
       <workItem from="1681498465071" duration="3537000" />
-      <workItem from="1681544404390" duration="11399000" />
+      <workItem from="1681544404390" duration="12700000" />
     </task>
     <task id="LOCAL-00001" summary="merge: manually merge new version in dev">
       <created>1680340351816</created>
@@ -289,16 +287,5 @@
     <MESSAGE value="feat: add Deletion of Event" />
     <MESSAGE value="feat: fix time displayed" />
     <option name="LAST_COMMIT_MESSAGE" value="feat: fix time displayed" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/EventController.java</url>
-          <line>182</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

@@ -11,6 +11,7 @@ import de.flyndre.fleventsbackend.repositories.EventRepository;
 import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
 import de.flyndre.fleventsbackend.services.EMailService;
 import de.flyndre.fleventsbackend.services.EMailServiceImpl;
+import de.flyndre.fleventsbackend.services.EventControllerService;
 import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -29,38 +30,24 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/events")
 public class EventController {
 
-
-   private final EventRepository eventRepository;
-   private final FleventsAccountRepository accountRepository;
-   private final EventRegistrationRepository eventRegistrationRepository;
-   private final ModelMapper mapper;
-   private final EMailService eMailService;
-   public EventController(ModelMapper mapper, EventRepository eventRepository, FleventsAccountRepository accountRepository, EventRegistrationRepository eventRegistrationRepository, EMailServiceImpl eMailService){
-      this.mapper=mapper;
-      this.eventRepository = eventRepository;
-      this.accountRepository = accountRepository;
-      this.eventRegistrationRepository = eventRegistrationRepository;
-      this.eMailService = eMailService;
+private EventControllerService eventControllerService;
+   public EventController(EventControllerService eventControllerService){
+      this.eventControllerService = eventControllerService;
    }
 
    @GetMapping
    public List<EventInformation> getEvents() {
-      List<Event> events = eventRepository.findAll();
-      return events.stream().map((event) -> mapper.map(event, EventInformation.class)).collect(Collectors.toList());
+      return eventControllerService.getEvents();
    }
 
    @GetMapping("/{eventId}")
    public EventInformation getEventById(@PathVariable String eventId){
-      Event event = eventRepository.findById(eventId).get();
-      return mapper.map(event, EventInformation.class);
+      return eventControllerService.getEventById(eventId);
    }
 
    @DeleteMapping("/{eventId}")
    public HttpStatus deleteEvent(@PathVariable String eventId){
-      Event ev = eventRepository.findById(eventId).get();
-      eventRegistrationRepository.deleteAll(ev.getAttendees());
-      eventRepository.delete(eventRepository.findById(eventId).get());
-      return HttpStatus.OK;
+      return eventControllerService.deleteEvent(eventId);
    }
    @GetMapping("/{eventId}/attendees")
    public ResponseEntity getAttendees(@PathVariable String eventId){
