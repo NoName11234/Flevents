@@ -5,10 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1c6377ce-7b65-46bd-9418-b608171c6a13" name="Changes" comment="feat: fix time displayed">
-      <change afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/ApiService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_04_2023_10_27_[Changes]1/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_04_2023_10_27__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_04_2023_10_27__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_01_04_2023_10_27__Changes_1.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/ApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/controller/ApiController.java" afterDir="false" />
     </list>
@@ -92,7 +88,7 @@
       <workItem from="1680606442042" duration="36885000" />
       <workItem from="1680703503490" duration="7954000" />
       <workItem from="1681498465071" duration="3537000" />
-      <workItem from="1681544404390" duration="661000" />
+      <workItem from="1681544404390" duration="1113000" />
     </task>
     <task id="LOCAL-00001" summary="merge: manually merge new version in dev">
       <created>1680340351816</created>

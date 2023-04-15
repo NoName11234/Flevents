@@ -5,6 +5,7 @@ import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.repositories.*;
 import de.flyndre.fleventsbackend.services.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,20 +22,11 @@ import java.io.IOException;
 @CrossOrigin
 @RequestMapping("/api")
 public class ApiController {
-    private OrganizationRepository organizationRepository;
-    private FleventsAccountRepository fleventsAccountRepository;
-    private OrganizationAccountRepository organizationAccountRepository;
-    private EventRegistrationRepository eventRegistrationRepository;
-    private EventRepository eventRepository;
-    @Autowired
+
     private ApiService apiService;
 
-    public ApiController(OrganizationRepository organizationRepository, FleventsAccountRepository fleventsAccountRepository, OrganizationAccountRepository organizationAccountRepository, EventRegistrationRepository eventRegistrationRepository, EventRepository eventRepository) {
-        this.organizationRepository = organizationRepository;
-        this.fleventsAccountRepository = fleventsAccountRepository;
-        this.organizationAccountRepository = organizationAccountRepository;
-        this.eventRegistrationRepository = eventRegistrationRepository;
-        this.eventRepository = eventRepository;
+    public ApiController(ApiService apiService) {
+        this.apiService = apiService;
     }
 
     @GetMapping("/hello-world")
@@ -43,7 +35,13 @@ public class ApiController {
     }
 
     @GetMapping("/initdb")
-    public void initDB() throws IOException {
-        apiService.initDB();
+    public HttpStatus initDB() {
+        try{
+            apiService.initDB();
+            return HttpStatus.OK;
+        }catch(IOException e){
+            System.out.println(e.toString());
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
     }
 }
