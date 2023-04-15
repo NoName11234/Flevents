@@ -35,3 +35,4 @@ build/
 !/.idea/
 !/.idea/
 !/flevents-backend.iml
+!/src/main/resources/application-local.properties
