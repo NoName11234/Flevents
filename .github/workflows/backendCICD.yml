@@ -5,6 +5,8 @@
 name: Maven Package
 
 on:
+  push:
+      branches: [ "prod" ]
   workflow_dispatch:
 
 
@@ -35,6 +37,9 @@ jobs:
       #Test the application using Maven
       - name: Test with Maven
         run: mvn -Dtest=FleventsBackendApplicationTests test --file flevents-backend/pom.xml
+      #Test the application using Maven - all Tests
+      - name: Test with Maven - all
+        run: mvn test --file flevents-backend/pom.xml
       #Build the application using Maven
       - name: Build with Maven
         run: mvn -B package -DskipTests --file flevents-backend/pom.xml
