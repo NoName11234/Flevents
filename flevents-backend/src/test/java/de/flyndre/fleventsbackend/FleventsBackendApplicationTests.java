@@ -32,6 +32,7 @@ class FleventsBackendApplicationTests {
 	void contextLoads() {
 	}
 
+
 	@Test
 	void getOrgaTest() throws Exception {
 		mockMvc.perform(get("/api/organizations")).andExpect(status().isOk());
