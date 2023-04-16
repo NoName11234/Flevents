@@ -44,6 +44,16 @@ jobs:
             'info@flyndre.de'
             '${{secrets.MAILSECRETPRD}}'
             'flevents.flyndre.de:8080'
+            
+      - name: Read file contents
+        id: read_file
+        uses: andstor/file-reader-action@v1
+        with:
+          path: "flevents-backend/src/main/resources/application.properties"
+
+      - name: File contents
+        run: echo "${ steps.read_file.outputs.contents }"
+        
       #Set up JDK 17
       - name: Set up JDK
         uses: actions/setup-java@v1
