@@ -25,7 +25,7 @@ jobs:
       - name: Set Config
         uses: christian-draeger/write-properties@1.1.0
         with:
-          path: './src/main/resources/application.properties'
+          path: 'flevents-backend/src/main/resources/application.properties'
           property: |
             'spring.datasource.url'
             'spring.datasource.username'
