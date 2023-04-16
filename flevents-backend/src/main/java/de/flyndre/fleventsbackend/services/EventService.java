@@ -1,9 +1,6 @@
 package de.flyndre.fleventsbackend.services;
 
-import de.flyndre.fleventsbackend.Models.Event;
-import de.flyndre.fleventsbackend.Models.EventRegistration;
-import de.flyndre.fleventsbackend.Models.EventRole;
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
@@ -17,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,20 +58,35 @@ public class EventService {
         return informationList;
     }
 
+    /**
+     * @return list of all events
+     */
     public List<EventInformation> getEvents() {
         List<Event> events = eventRepository.findAll();
         return events.stream().map((event) -> mapper.map(event, EventInformation.class)).collect(Collectors.toList());
     }
 
+    /**
+     * @param eventId the id of the event
+     * @return information of the event with the given id
+     */
     public EventInformation getEventInformationById(String eventId){
         Event event = eventRepository.findById(eventId).get();
         return mapper.map(event, EventInformation.class);
     }
 
+    /**
+     * @param eventId the id of the event
+     * @return the event if its existing
+     */
     public Optional<Event> getEventById(String eventId){
         return eventRepository.findById(eventId);
     }
 
+    /**
+     * @param eventId the id of the event to delete
+     * @return the status whether deleting was succesfull or not
+     */
     public HttpStatus deleteEvent(String eventId){
         Event ev = eventRepository.findById(eventId).get();
         eventRegistrationRepository.deleteAll(ev.getAttendees());
@@ -81,6 +94,10 @@ public class EventService {
         return HttpStatus.OK;
     }
 
+    /**
+     * @param eventId the id of the event to get the list of attendees from
+     * @return ResponseEntity with a list with the attendees of the event
+     */
     public ResponseEntity getAttendees(String eventId){
         //TODO: Implement
         List<EventRegistration> registrations = eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.guest);
@@ -94,6 +111,10 @@ public class EventService {
         }).collect(Collectors.toList()),HttpStatus.OK);
     }
 
+    /**
+     * @param eventId the id of the event to get the list of organizers from
+     * @return ResponseEntity with a list with the organizers of the event
+     */
     public ResponseEntity getOrganizers(String eventId){
         //TODO: Implement
         List<EventRegistration> registrations = eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.organizer);
@@ -104,12 +125,32 @@ public class EventService {
         }).collect(Collectors.toList()),HttpStatus.OK);
     }
 
+    /**
+     * creates an event
+     * @param event the event to be created
+     * @return ResponseEntity with information of the created event
+     */
     public ResponseEntity createEvent(Event event){
         //TODO: Implement
         event.setUuid(null);
         return new ResponseEntity<>(mapper.map(eventRepository.save(event),EventInformation.class),HttpStatus.CREATED);
     }
 
+    public ResponseEntity createEventInOrganization(Event event, Optional<FleventsAccount> account, Organization organization){
+        event.setUuid(null);
+        event.setOrganization(organization);
+        event =  eventRepository.saveAndFlush(event);
+        EventRegistration registration = eventRegistrationRepository.save(new EventRegistration(null,event,account.get(),EventRole.organizer));
+        event.setAttendees(Arrays.asList(registration));
+        return new ResponseEntity(mapper.map(event, EventInformation.class),HttpStatus.CREATED);
+    }
+
+    /**
+     * sets the event of a given id to the specified event
+     * @param eventId the id of the event to be set
+     * @param event the event to be set to the given id
+     * @return ResponseEntity with information of the process
+     */
     public ResponseEntity setEventById(String eventId, Event event){
         try{
             Event srcEvent = eventRepository.findById(eventId).get();
@@ -120,6 +161,14 @@ public class EventService {
         }
     }
 
+    /**
+     * sends an invitation email to the given email with a link to register with the specified role to the specified event
+     * @param email the email to send the invitation link to
+     * @param role the role which gets assigned to the invited person
+     * @param account the account to be invited
+     * @param event the event to be invited to
+     * @return ResponseEntity with information of the process
+     */
     public ResponseEntity inviteToEvent(String email, EventRole role, FleventsAccount account, Optional<Event> event){
         //TODO: Implement
         EventRegistration registration = eventRegistrationRepository.save(new EventRegistration(null,event.get(),account,EventRole.invited));
@@ -131,6 +180,13 @@ public class EventService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * @param eventId 
+     * @param accountId
+     * @param token
+     * @param account
+     * @return
+     */
     public ResponseEntity addAccountToEvent(String eventId, String accountId, String token, FleventsAccount account){
 
         //TODO:
