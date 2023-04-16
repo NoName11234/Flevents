@@ -11,6 +11,7 @@ import de.flyndre.fleventsbackend.repositories.EventRepository;
 import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
 import de.flyndre.fleventsbackend.services.EMailService;
 import de.flyndre.fleventsbackend.services.EMailServiceImpl;
+import de.flyndre.fleventsbackend.services.EventControllerService;
 import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -29,204 +30,162 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/events")
 public class EventController {
 
-
-   private final EventRepository eventRepository;
-   private final FleventsAccountRepository accountRepository;
-   private final EventRegistrationRepository eventRegistrationRepository;
-   private final ModelMapper mapper;
-   private final EMailService eMailService;
-   public EventController(ModelMapper mapper, EventRepository eventRepository, FleventsAccountRepository accountRepository, EventRegistrationRepository eventRegistrationRepository, EMailServiceImpl eMailService){
-      this.mapper=mapper;
-      this.eventRepository = eventRepository;
-      this.accountRepository = accountRepository;
-      this.eventRegistrationRepository = eventRegistrationRepository;
-      this.eMailService = eMailService;
+private EventControllerService eventControllerService;
+   public EventController(EventControllerService eventControllerService){
+      this.eventControllerService = eventControllerService;
    }
 
+   /**
+    * @return list of all events
+    */
    @GetMapping
    public List<EventInformation> getEvents() {
-      List<Event> events = eventRepository.findAll();
-      return events.stream().map((event) -> mapper.map(event, EventInformation.class)).collect(Collectors.toList());
+      return eventControllerService.getEvents();
    }
 
+   /**
+    * @param eventId the id of the event
+    * @return information of the event with the given id
+    */
    @GetMapping("/{eventId}")
    public EventInformation getEventById(@PathVariable String eventId){
-      Event event = eventRepository.findById(eventId).get();
-      return mapper.map(event, EventInformation.class);
+      return eventControllerService.getEventById(eventId);
    }
 
+   /**
+    * @param eventId the id of the event to delete
+    * @return the status whether deleting was succesfull or not
+    */
    @DeleteMapping("/{eventId}")
    public HttpStatus deleteEvent(@PathVariable String eventId){
-      Event ev = eventRepository.findById(eventId).get();
-      eventRegistrationRepository.deleteAll(ev.getAttendees());
-      eventRepository.delete(eventRepository.findById(eventId).get());
-      return HttpStatus.OK;
+      return eventControllerService.deleteEvent(eventId);
    }
+
+   /**
+    * @param eventId the id of the event to get the list of attendees from
+    * @return ResponseEntity with a list with the attendees of the event
+    */
    @GetMapping("/{eventId}/attendees")
    public ResponseEntity getAttendees(@PathVariable String eventId){
-      //TODO: Implement
-      List<EventRegistration> registrations = eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.guest);
-      registrations.addAll(eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.invited));
-      registrations.addAll(eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.attendee));
-      registrations.addAll(eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.tutor));
-      return new ResponseEntity(registrations.stream().map(registration ->{
-              AccountInformation information = mapper.map(registration.getAccount(),AccountInformation.class);
-              information.setRole(registration.getRole());
-              return information;
-      }).collect(Collectors.toList()),HttpStatus.OK);
+      return eventControllerService.getAttendees(eventId);
    }
+
+   /**
+    * @param eventId the id of the event to get the list of organizers from
+    * @return ResponseEntity with a list with the organizers of the event
+    */
    @GetMapping("/{eventId}/organizers")
    public ResponseEntity getOrganizers(@PathVariable String eventId){
-      //TODO: Implement
-      List<EventRegistration> registrations = eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.organizer);
-      return new ResponseEntity(registrations.stream().map(registration ->{
-         AccountInformation information = mapper.map(registration.getAccount(),AccountInformation.class);
-         information.setRole(registration.getRole());
-         return information;
-      }).collect(Collectors.toList()),HttpStatus.OK);
+      return eventControllerService.getOrganizers(eventId);
    }
 
 
+   /**
+    * not implemented yet
+    * @param eventId the id of the event to get the attachments from
+    * @return a list with the URIs of the attachments
+    */
    @GetMapping("/{eventId}/attachments")
    public List<URI> getAttachment(@PathVariable String eventId){
       //TODO: Implement
       return new ArrayList<>();
    }
 
+   /**
+    * creates an event
+    * @param event the event to be created
+    * @return ResponseEntity with information of the created event
+    */
    @PostMapping
    public ResponseEntity createEvent(@RequestBody Event event){
-      //TODO: Implement
-      event.setUuid(null);
-      return new ResponseEntity<>(mapper.map(eventRepository.save(event),EventInformation.class),HttpStatus.CREATED);
+      return eventControllerService.createEvent(event);
    }
 
+   /**
+    * sets the event of a given id to the specified event
+    * @param eventId the id of the event to be set
+    * @param event the event to be set to the given id
+    * @return ResponseEntity with information of the process
+    */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event){
-      try{
-         Event srcEvent = eventRepository.findById(eventId).get();
-         srcEvent.merge(event);
-         return new ResponseEntity<>(mapper.map(eventRepository.save(srcEvent),EventInformation.class),HttpStatus.OK);
-      }catch (Exception e){
-         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
+      return eventControllerService.setEventById(eventId,event);
    }
 
+   /**
+    * sends an invitation email to the given email with a link to register with the specified role to the specified event
+    * @param eventId the id of the event to send an invitation to
+    * @param email the email to send the invitation link to
+    * @param role the role which gets assigend to the invited person
+    * @return ResponseEntity with information of the process
+    */
    @PostMapping("/{eventId}/invite")
    public ResponseEntity inviteToEvent(@PathVariable String eventId, @RequestParam() String email,@RequestParam EventRole role){
-      //TODO: Implement
-      Optional<Event> event = eventRepository.findById(eventId);
-      Optional<FleventsAccount> accountOptional = accountRepository.findByEmail(email);
-      if(event.isEmpty()){
-         return new ResponseEntity(HttpStatus.BAD_REQUEST);
-      }
-      FleventsAccount account = null;
-      if(accountOptional.isPresent()){
-         account=accountOptional.get();
-      }else {
-         account= accountRepository.save(new FleventsAccount(null, null,null,email,null,null,null,null));
-      }
-      EventRegistration registration = eventRegistrationRepository.save(new EventRegistration(null,event.get(),account,EventRole.invited));
-      try {
-         eMailService.sendEventInvitaion(event.get(),email, registration.getId() +role.toString());
-      } catch (MessagingException e) {
-         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-
-      return new ResponseEntity<>(HttpStatus.OK);
-
+      return eventControllerService.inviteToEvent(eventId, email, role);
    }
+
+   /**
+    * @param eventId the id of the event to add the account to
+    * @param accountId the id of the account to be added
+    * @param token the token in the invitation link to verify the invitation
+    * @return ResponseEntity with information of the process
+    */
    @PostMapping("/{eventId}/add-account/{accountId}")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam(required = false) String token){
-
-         //TODO:
-      if(token==null){
-         Event event = eventRepository.findById(eventId).get();
-         FleventsAccount account = accountRepository.findById(accountId).get();
-         List<FleventsAccount> accounts = event.getOrganization().getAccounts().stream().map(organizationAccount -> organizationAccount.getAccount()).collect(Collectors.toList());
-         if(accounts.contains(account)){
-            eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.attendee));
-            return new ResponseEntity(HttpStatus.OK);
-         }
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-      }
-      Optional<EventRegistration> optionalEventRegistration = eventRegistrationRepository.findById(token.substring(0,32));
-      if(!optionalEventRegistration.isPresent()){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-      }
-      EventRole role = EventRole.valueOf(token.substring(32));
-      if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId,eventId,role).isPresent()) {
-         return new ResponseEntity(HttpStatus.BAD_REQUEST);
-      }
-         FleventsAccount account = accountRepository.findById(accountId).get();
-         EventRegistration registration = optionalEventRegistration.get();
-         registration.setAccount(account);
-         registration.setRole(role);
-         eventRegistrationRepository.save(registration);
-         return new ResponseEntity<>(HttpStatus.OK);
+      return eventControllerService.addAccountToEvent(eventId, accountId, token);
    }
 
+   /**
+    * @param eventId the id of the event where the role of the account has to be changed
+    * @param accountId the id of the account where the role has to be changed
+    * @param role the role to change the role of the account to
+    * @return ResponseEntity with information of the process
+    */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole role){
-      EventRole currEventRole = EventRole.guest;
-      Event event = eventRepository.findById(eventId).get();
-      for(int i = 0; i < event.getAttendees().size(); i++){
-         if(event.getAttendees().get(i).getAccount().getUuid().equals(accountId) && event.getAttendees().get(i).getRole() != EventRole.organizer){
-            currEventRole = event.getAttendees().get(i).getRole();
-         }
-      }
-      EventRegistration reg = eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, currEventRole).get();
-      reg.setRole(role);
-      eventRegistrationRepository.save(reg);
-
-      return new ResponseEntity<>(HttpStatus.OK);
+      return eventControllerService.changeRole(eventId, accountId, role);
    }
 
 
+   /**
+    * diabled at the moment
+    * @param eventId  the id of the event to create the account in
+    * @param eMail the email of the account to be created
+    * @return PesponseEntity with information of the process
+    */
    //@PostMapping("/{eventId}/create-account")
    public ResponseEntity createAndAddAccountToEvent(@PathVariable String eventId, @RequestBody String eMail){
-
-      //TODO: Implement
-      if(accountRepository.findByEmail(eMail).isPresent()){
-         return new ResponseEntity<>("Email exists already",HttpStatus.BAD_REQUEST);
-      }
-      FleventsAccount account = new FleventsAccount();
-      account.setEmail(eMail);
-      account = accountRepository.save(account);
-      Event event = eventRepository.findById(eventId).get();
-
-      eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.guest));
-      return new ResponseEntity<>(account,HttpStatus.OK);
-
+      return eventControllerService.createAndAddAccountToEvent(eventId, eMail);
    }
 
 
+   /**
+    * @param eventId the id of the event to add the anonymous account to
+    * @param account the anonymous account to be added
+    * @return HttpStatus with the information whether the process was successfull
+    */
    @PostMapping("/{eventId}/add-account/add-anonymous")
    public HttpStatus addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody FleventsAccount account){
-      try{
-         //TODO:
-         account.setUuid(null);
-         Event event = eventRepository.findById(eventId).get();
-         eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.guest));
-         return HttpStatus.OK;
-      }catch (Exception e){
-         return HttpStatus.INTERNAL_SERVER_ERROR;
-      }
+      return eventControllerService.addAnonymousAccountToEvent(eventId, account);
    }
+
+   /**
+    * @param eventId the id of the event to remove the account from
+    * @param accountId the id of the account to be removed from the event
+    * @param role the role of the account
+    * @return ResponseEntity with information of the process
+    */
    @PostMapping("/{eventId}/remove-account/{accountId}")
    public ResponseEntity removeAccountToEvent(@PathVariable String eventId, @PathVariable String accountId, @RequestParam EventRole role){
-      Optional<EventRegistration> registration= eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, role);
-      if(registration.isEmpty()){
-         return new ResponseEntity<>("Found no account with these specification on this event.",HttpStatus.BAD_REQUEST);
-      }
-      if(EventRole.organizer.equals(role)
-              && eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.organizer).size()<=1
-      ){
-         return new ResponseEntity<>("Can't delete last organizer",HttpStatus.BAD_REQUEST);
-      }
-      eventRegistrationRepository.delete(registration.get());
-      return new ResponseEntity<>("Deleted!",HttpStatus.OK);
+      return eventControllerService.removeAccountToEvent(eventId, accountId, role);
    }
+
+   /**
+    * not implemented yet
+    * @param eventId the id of the event to check in
+    * @param accountId the id of the account to be checked in
+    * @return HttpStatus whether the process was successfull or not
+    */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
    public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId){
       try{
@@ -237,6 +196,11 @@ public class EventController {
       }
    }
 
+   /**
+    * not implemented yet
+    * @param eventId the id of the event to add an attachment to
+    * @return HttpStatus whether the process was successfull or not
+    */
    @PostMapping("/{eventId}/attachments")
    public HttpStatus addAttachment(@PathVariable String eventId){
       try{
@@ -246,6 +210,12 @@ public class EventController {
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
+
+   /**
+    * not implemented yet
+    * @param eventId the id of the event to delete an attachment from
+    * @return HttpStatus whether the process was successfull or not
+    */
    @DeleteMapping("/{eventId}/attachments")
    public HttpStatus deleteAttachment(@PathVariable String eventId){
       try{

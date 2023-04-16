@@ -24,7 +24,7 @@ const organization = ref({
 
 onMounted(async () => {
   try {
-    let response = await axios.get(`http://h3005487.stratoserver.net:8082/api/organizations/${route.params?.uuid}`);
+    let response = await axios.get(`http://localhost:8082/api/organizations/${route.params?.uuid}`);
     organization.value = response.data;
   } catch (e) {
     console.error("Failed to load organization.");
@@ -54,7 +54,7 @@ async function submit() {
       const file = imageFile.value[0]
       organization.value.icon = await getBase64(file) as string;
     }
-    await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${organization.value.uuid}`, organization.value);
+    await axios.post(`http://localhost:8082/api/organizations/${organization.value.uuid}`, organization.value);
     await router.push(props.submitRoute);
   } catch (e) {
     tooltip.value = "Speichern fehlgeschlagen.";

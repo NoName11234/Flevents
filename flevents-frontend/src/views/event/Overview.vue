@@ -78,14 +78,14 @@ const questionnaires = ref([] as Questionnaire[]);
 async function setup() {
   try {
     address.value = route.params.uuid as string;
-    const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${address.value}`);
+    const response = await axios.get(`http://localhost:8082/api/events/${address.value}`);
     console.log(response);
     response.status == 200 ? event.value = response.data : event.value = {} as FleventsEvent;
-    attendees.value = (await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${address.value}/attendees`)).data
-    organizers.value = (await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${address.value}/organizers`)).data
+    attendees.value = (await axios.get(`http://localhost:8082/api/events/${address.value}/attendees`)).data
+    organizers.value = (await axios.get(`http://localhost:8082/api/events/${address.value}/organizers`)).data
     console.log(organizers.value);
     wholeAttendees.value = attendees.value.concat(organizers.value);
-    questionnaires.value = (await axios.get(`http://h3005487.stratoserver.net:8082/api/questionnaires`, { params: {eventId: event.value.uuid}})).data;
+    questionnaires.value = (await axios.get(`http://localhost:8082/api/questionnaires`, { params: {eventId: event.value.uuid}})).data;
     console.log(questionnaires);
   } catch (e) {
     console.error("Failed to fetch event data.");
@@ -114,7 +114,7 @@ async function enroll(){
   enrollLoading.value = true;
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    const response = await axios.post(`http://h3005487.stratoserver.net:8082/api/events/${route.params.uuid as string}/add-account/${account.uuid as string}`);
+    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.uuid as string}`);
     console.log(response);
   } catch (e) {
     // already enrolled
@@ -135,7 +135,7 @@ async function disenroll(){
   }
 
   try {
-    const response = await axios.post(`http://h3005487.stratoserver.net:8082/api/events/${route.params.uuid as string}/remove-account/${account.uuid as string}`, {}, {params: {role: "attendee"}});
+    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.uuid as string}`, {}, {params: {role: "attendee"}});
     console.log(response);
   } catch (e) {
     // not enrolled
@@ -173,7 +173,7 @@ function isSameDay(a: Date, b: Date) {
 }
 
 function removeOrganizer(uuid : string){
-  axios.post(`http://h3005487.stratoserver.net:8082/api/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
+  axios.post(`http://localhost:8082/api/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
   for(let i = 0; i < organizers.value.length; i++){
     if(organizers.value[i].uuid === uuid){
       organizers.value.splice(i,1);
@@ -182,7 +182,7 @@ function removeOrganizer(uuid : string){
 }
 
 function removeAccount(uuid : string, role : string){
-  axios.post(`http://h3005487.stratoserver.net:8082/api/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
+  axios.post(`http://localhost:8082/api/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
   for(let i = 0; i < attendees.value.length; i++){
     if(attendees.value[i].uuid === uuid){
       attendees.value.splice(i,1);
@@ -193,7 +193,7 @@ function removeAccount(uuid : string, role : string){
 async function updateRole(account: Account) {
   console.log("changing role to: ", account.role);
   try {
-    await axios.post(`http://h3005487.stratoserver.net:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
   } catch (e) {
     console.log("Failed to update role.", e);
   }
@@ -201,7 +201,7 @@ async function updateRole(account: Account) {
 
 async function deleteEvent() {
   try {
-    const response = await axios.delete(`http://h3005487.stratoserver.net:8082/api/events/${event.value.uuid}`)
+    const response = await axios.delete(`http://localhost:8082/api/events/${event.value.uuid}`)
     openContext.value = false;
     await router.push({ name: 'home.manage', force: true });
   } catch (e) {

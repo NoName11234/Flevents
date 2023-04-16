@@ -29,7 +29,7 @@ async function submit() {
   try {
     console.log(chips.value);
     for (let i in chips.value) {
-      await axios.post(`http://h3005487.stratoserver.net:8082/api/events/${address.value}/invite`, {}, {
+      await axios.post(`http://localhost:8082/api/events/${address.value}/invite`, {}, {
         params: {
           email: chips.value[i],
           role: role.value
@@ -46,7 +46,7 @@ async function submit() {
 onBeforeMount(async () => {
   address.value = route.params.uuid as string;
   try {
-    const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${address.value}`);
+    const response = await axios.get(`http://localhost:8082/api/events/${address.value}`);
     console.log(response);
     response.status == 200 ? event.value = response.data : event.value = {} as FleventsEvent;
   } catch (e) {

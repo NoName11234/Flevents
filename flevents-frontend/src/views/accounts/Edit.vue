@@ -36,8 +36,8 @@ async function submit(){
     account.value.secret = undefined;
   }
   tooltip.value = '';
-  await axios.post(`http://h3005487.stratoserver.net:8082/api/accounts/${account.value.uuid}`, account.value);
-  const response2 = await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${account.value.uuid}`);
+  await axios.post(`http://localhost:8082/api/accounts/${account.value.uuid}`, account.value);
+  const response2 = await axios.get(`http://localhost:8082/api/accounts/${account.value.uuid}`);
   document.cookie = `ACCOUNT=${JSON.stringify(response2.data)}`;
   security.setAccount(response2.data);
   tooltip.value = "Anfrage erfolgreich gesendet.";
