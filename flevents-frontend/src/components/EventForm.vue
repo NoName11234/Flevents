@@ -52,7 +52,7 @@ function remove(item: any){
 }
 
 onMounted(async () =>{
-  organizations.value = (await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${security.getAccount()!.uuid}/managed-organizations`)).data;
+  organizations.value = (await axios.get(`http://localhost:8082/api/accounts/${security.getAccount()!.uuid}/managed-organizations`)).data;
 })
 function getBase64(file : any) {
   return new Promise(function (resolve, reject) {
@@ -92,7 +92,7 @@ async function submit() {
     console.log(selectedOrga.value.uuid);
     const account = security.getAccount() as Account;
     // await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${selectedOrga.value.uuid}/create-event`, fleventsEvent.value, {params: {accountId: JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid}});
-    await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${selectedOrga.value.uuid}/create-event`, fleventsEvent.value, {params: {accountId: account.uuid}});
+    await axios.post(`http://localhost:8082/api/organizations/${selectedOrga.value.uuid}/create-event`, fleventsEvent.value, {params: {accountId: account.uuid}});
     await router.back();
   } catch (e) {
     tooltip.value = "Das Event konnte nicht erstellt werden.";

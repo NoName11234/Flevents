@@ -156,7 +156,7 @@ const organization = ref({
 
 onMounted(async () => {
   try {
-    let response = await axios.get(`http://h3005487.stratoserver.net:8082/api/organizations/${route.params?.uuid}`);
+    let response = await axios.get(`http://localhost:8082/api/organizations/${route.params?.uuid}`);
     organization.value = response.data;
   } catch (e) {
     console.error("Failed to load organization.");
@@ -181,7 +181,7 @@ async function updateRole(account: AccountPreview) {
   }
   console.log("changing role to: ", account.role);
   try {
-    await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${organization.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    await axios.post(`http://localhost:8082/api/organizations/${organization.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
   } catch (e) {
     console.log("Failed to update role.", e);
   }
@@ -189,7 +189,7 @@ async function updateRole(account: AccountPreview) {
 
 async function removeAccount(uuid : string, role : string){
   try {
-    await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${organization.value.uuid}/remove-account/${uuid}`)
+    await axios.post(`http://localhost:8082/api/organizations/${organization.value.uuid}/remove-account/${uuid}`)
     for (let i = 0; i < organization.value.accountPreviews.length; i++){
       if(organization.value.accountPreviews[i].uuid === uuid){
         organization.value.accountPreviews.splice(i,1);

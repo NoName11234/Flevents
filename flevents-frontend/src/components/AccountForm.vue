@@ -39,7 +39,7 @@ async function submit(){
     return;
   }
   try {
-    await axios.post("http://h3005487.stratoserver.net:8082/api/accounts", account.value);
+    await axios.post("http://localhost:8082/api/accounts", account.value);
   } catch (e) {
     tooltip.value = "Die angegebene E-Mail-Adresse ist bereits registriert.";
     return;

@@ -20,7 +20,7 @@ function remove(item: any){
 // submit
 async function submit() {
   try {
-    await axios.post("http://h3005487.stratoserver.net:8082/api/mail/sendMail", { to: chips.value, cc: {}, bcc: {}, subject: `Anmeldung zu ${event.value.name} - TEST`, msgBody: `Sie wurden zu ${event.value.name} angemeldet.`, attachment: ""});
+    await axios.post("http://localhost:8082/api/mail/sendMail", { to: chips.value, cc: {}, bcc: {}, subject: `Anmeldung zu ${event.value.name} - TEST`, msgBody: `Sie wurden zu ${event.value.name} angemeldet.`, attachment: ""});
     await router.push( {name: 'eventInfo', params: { uuid: event.value.uuid }} );
   } catch (e) {
     tooltip.value = "Das Event konnte nicht erstellt werden.";
@@ -29,7 +29,7 @@ async function submit() {
 
 onBeforeMount(async () => {
   adress.value = route.params.id as string;
-  const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${adress.value}`);
+  const response = await axios.get(`http://localhost:8082/api/events/${adress.value}`);
   console.log(response);
   response.status == 200 ? event.value = response.data : event.value = {} as FleventsEvent;
 })
