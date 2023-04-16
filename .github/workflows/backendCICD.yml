@@ -27,32 +27,82 @@ jobs:
         with:
           path: 'flevents-backend/src/main/resources/application.properties'
           property: |
-            'spring.datasource.url'
-            'spring.datasource.username'
-            'spring.datasource.password'
-            'spring.mail.host'
-            'spring.mail.port'
-            'spring.mail.username'
-            'spring.mail.password'
-            'application.baseurl'
+            spring.datasource.url
           value: |
-            'jdbc:postgresql://h3005487.stratoserver.net:5432/flevents'
-            'postgres'
-            '${{secrets.DBSECRETPRD}}'
-            'smtp.ionos.de'
-            '587'
-            'info@flyndre.de'
-            '${{secrets.MAILSECRETPRD}}'
-            'flevents.flyndre.de:8080'
-            
-      - name: Read file contents
-        id: read_file
-        uses: andstor/file-reader-action@v1
+            jdbc:postgresql://h3005487.stratoserver.net:5432/flevents
+      #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
         with:
-          path: "flevents-backend/src/main/resources/application.properties"
-
-      - name: File contents
-        run: echo "${ steps.read_file.outputs.contents }"
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            spring.datasource.username
+          value: |
+            postgres
+        #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            spring.datasource.password
+          value: |
+            ${{secrets.DBSECRETPRD}}
+        #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            spring.mail.host
+          value: |
+            smtp.ionos.de
+        #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            spring.mail.port
+          value: |
+            587
+        #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            spring.mail.username
+          value: |
+            info@flyndre.de
+        #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            spring.mail.password
+          value: |
+            ${{secrets.MAILSECRETPRD}}
+        #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application.properties'
+          property: |
+            application.baseurl
+          value: |
+            flevents.flyndre.de:8080
+            
+      - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          #Set artifact name
+          name: config
+          #From this path
+          path: flevents-backend/src/main/resources/application.properties
+            
         
       #Set up JDK 17
       - name: Set up JDK
