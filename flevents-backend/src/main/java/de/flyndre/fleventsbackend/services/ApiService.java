@@ -59,4 +59,8 @@ public class ApiService {
 
         return lukas;
     }
+
+    public boolean test(){
+        return true;
+    }
 }
