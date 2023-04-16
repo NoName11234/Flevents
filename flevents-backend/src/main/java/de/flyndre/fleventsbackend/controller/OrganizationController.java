@@ -29,6 +29,10 @@ public class OrganizationController {
    }
 
 
+   @PostMapping("/{organizationId}/create-event")
+   public ResponseEntity createEvent(@PathVariable String organizationId, @RequestBody Event event, @RequestParam String accountId) {
+      return organizationControllerService.createEvent(organizationId, event, accountId);
+   }
 
    @GetMapping
    public List<OrganizationInformation> getOrganizations(){

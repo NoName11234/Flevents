@@ -10,11 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,9 +32,13 @@ public class OrganizationService {
         return organizationRepository.findAll().stream().map(organization -> mapper.map(organization,OrganizationInformation.class)).collect(Collectors.toList());
     }
 
-    public OrganizationInformation getOrganization(String organizationId){
+    public OrganizationInformation getOrganizationInformation(String organizationId){
         //TODO: Implement
         return mapper.map(organizationRepository.findById(organizationId),OrganizationInformation.class);
+    }
+
+    public Organization getOrganization(String organizationId){
+        return organizationRepository.findById(organizationId).get();
     }
 
     public List<EventInformation> getEvents(String organizationId){

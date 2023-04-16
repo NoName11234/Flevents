@@ -1,22 +1,14 @@
 package de.flyndre.fleventsbackend.controller;
 
-import de.flyndre.fleventsbackend.Models.*;
-import de.flyndre.fleventsbackend.Models.Event;
-import de.flyndre.fleventsbackend.repositories.*;
 import de.flyndre.fleventsbackend.services.ApiService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+
 
 @RestController
 @CrossOrigin
@@ -29,11 +21,17 @@ public class ApiController {
         this.apiService = apiService;
     }
 
+    /**
+     * @return Hello World! for testing
+     */
     @GetMapping("/hello-world")
     public String helloWorld() {
         return "Hello world!";
     }
 
+    /**
+     * @return OK, when db is initialysed succesfully, else Internal_Server_Error
+     */
     @GetMapping("/initdb")
     public HttpStatus initDB() {
         try{
