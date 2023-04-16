@@ -32,7 +32,7 @@ const error = ref(false);
 const loading = ref(true);
 
 // TODO: API-call durch pinia store ersetzen
-axios.get(`http://localhost:8082/api/accounts/${Security.getAccount().uuid}/explore-events`)
+axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${Security.getAccount().uuid}/explore-events`)
   .then((response) => events.value = response.data)
   .catch((e) => {
     console.log(e);

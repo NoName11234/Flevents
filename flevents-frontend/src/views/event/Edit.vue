@@ -46,8 +46,8 @@ function convertTZ(date : any, tzString: any) {
 }
 
 onMounted(async () =>{
-  organizations.value = (await axios.get("http://localhost:8082/api/organizations")).data;
-  fleventsEvent.value = (await axios.get(`http://localhost:8082/api/events/${route.params.uuid }`)).data;
+  organizations.value = (await axios.get("http://h3005487.stratoserver.net:8082/api/organizations")).data;
+  fleventsEvent.value = (await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${route.params.uuid}`)).data;
   selectedOrga.value = fleventsEvent.value.organizationPreview;
   let start =   convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
   let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
@@ -105,7 +105,7 @@ async function submit() {
   try {
     console.log(selectedOrga.value.uuid);
     // await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${selectedOrga.value.uuid}/create-event`, fleventsEvent.value, {params: {accountId: JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid}});
-    await axios.post(`http://localhost:8082/api/events/${route.params.uuid}`, fleventsEvent.value);
+    await axios.post(`http://h3005487.stratoserver.net:8082/api/events/${route.params.uuid}`, fleventsEvent.value);
     console.log(fleventsEvent.value);
     await router.push(`/events/${route.params.uuid}`);
   } catch (e) {

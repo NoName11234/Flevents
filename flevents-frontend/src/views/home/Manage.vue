@@ -84,7 +84,7 @@ function validateManaged(){
 }
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8082/api/accounts/${account.uuid}/managed-events`, {params: {accountId: account.uuid}})
+    const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${account.uuid}/managed-events`, {params: {accountId: account.uuid}})
     response.status == 200 ? events.value = response.data : error.value = true;
     response.status == 200 ? loading.value = false : -1;
   } catch (e) {
@@ -93,7 +93,7 @@ onMounted(async () => {
     console.error("Failed to fetch managed events.");
   }
   try {
-    let resp = await axios.get(`http://localhost:8082/api/accounts/${account.uuid}/managed-organizations`);
+    let resp = await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${account.uuid}/managed-organizations`);
     managedOrganizations.value = resp.data;
   } catch (e) {
     console.error("Failed to fetch managed organizations.");

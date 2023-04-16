@@ -55,7 +55,7 @@ async function setup() {
   console.log(aq.value.answers);
   try {
     const response = await axios.get(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}/answers/${user.uuid}`
+      `http://h3005487.stratoserver.net:8082/api/questionnaires/${props.questionnaire.uuid}/answers/${user.uuid}`
     );
     console.log(response);
     aq.value = response.data as AnsweredQuestionnaire;
@@ -71,7 +71,7 @@ async function submit() {
   loading.value = true;
   try {
     const response = await axios.post(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}/answers`,
+      `http://h3005487.stratoserver.net:8082/api/questionnaires/${props.questionnaire.uuid}/answers`,
       aq.value
     );
     console.log(response);
@@ -87,7 +87,7 @@ async function remove(this: any) {
   loading.value = true;
   try {
     const response = await axios.delete(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}`
+      `http://h3005487.stratoserver.net:8082/api/questionnaires/${props.questionnaire.uuid}`
     );
     console.log(response);
   } catch (e) {

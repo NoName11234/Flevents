@@ -38,7 +38,7 @@ const account = security.getAccount() as Account;
 onMounted(async () => {
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   // const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid}/booked-events`)
-  const response = await axios.get(`http://localhost:8082/api/accounts/${account.uuid}/booked-events`)
+  const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${account.uuid}/booked-events`)
   console.log(response);
   response.status == 200 ? events.value = response.data : error.value = true;
   response.status == 200 ? loading.value = false : -1;

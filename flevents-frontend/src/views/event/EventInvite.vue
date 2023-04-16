@@ -86,7 +86,7 @@ async function fu(){
   document.cookie = "";
   security.resetAccount();
   let response;
-  await axios.get("http://localhost:8082/api/accounts/validate",{params: { email: account.value.email, secret: account.value.secret } }).then(
+  await axios.get("http://h3005487.stratoserver.net:8082/api/accounts/validate",{params: { email: account.value.email, secret: account.value.secret } }).then(
     resp => {
       console.log("r", resp);
       response = resp.data
@@ -108,7 +108,7 @@ async function fu(){
 async function enroll(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    const response = await axios.post(`http://localhost:8082/api/events/${address.value}/add-account/${security.getAccount()?.uuid as string}`, {}, {params: {token: route.query.token}})
+    const response = await axios.post(`http://h3005487.stratoserver.net:8082/api/events/${address.value}/add-account/${security.getAccount()?.uuid as string}`, {}, {params: {token: route.query.token}})
     console.log(response);
     await router.push({ name: 'events.event', params: { uuid: route.params.uuid } })
   } catch (e) {
@@ -119,7 +119,7 @@ async function enroll(){
 }
 onMounted(async () => {
   address.value = route.params.uuid as string;
-  event.value = (await axios.get(`http://localhost:8082/api/events/${address.value}`)).data
+  event.value = (await axios.get(`http://h3005487.stratoserver.net:8082/api/events/${address.value}`)).data
   console.log(event.value);
 })
 
