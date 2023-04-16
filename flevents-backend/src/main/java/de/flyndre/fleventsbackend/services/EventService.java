@@ -126,7 +126,7 @@ public class EventService {
     }
 
     /**
-     * creates an event
+     * not implemented yet
      * @param event the event to be created
      * @return ResponseEntity with information of the created event
      */
@@ -136,6 +136,12 @@ public class EventService {
         return new ResponseEntity<>(mapper.map(eventRepository.save(event),EventInformation.class),HttpStatus.CREATED);
     }
 
+    /**
+     * @param event the event to be created
+     * @param account the account which shall be used to create the event
+     * @param organization the organization in which to create the event
+     * @return ResponseEntity with information of the created event
+     */
     public ResponseEntity createEventInOrganization(Event event, Optional<FleventsAccount> account, Organization organization){
         event.setUuid(null);
         event.setOrganization(organization);
@@ -181,11 +187,12 @@ public class EventService {
     }
 
     /**
-     * @param eventId 
-     * @param accountId
-     * @param token
-     * @param account
-     * @return
+     * adds an account to an event
+     * @param eventId the id of the event to add the account to
+     * @param accountId the id of the account to be added to the event
+     * @param token a token to verify the invitation to the event
+     * @param account the account to be added to the event
+     * @return ResponseEntity with information about the process
      */
     public ResponseEntity addAccountToEvent(String eventId, String accountId, String token, FleventsAccount account){
 
@@ -219,6 +226,12 @@ public class EventService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * @param eventId the id of the event where the role of the account has to be changed
+     * @param accountId the id of the account where the role has to be changed
+     * @param role the role to change the role of the account to
+     * @return ResponseEntity with information of the process
+     */
     public ResponseEntity changeRole(String eventId, String accountId, EventRole role){
         EventRole currEventRole = EventRole.guest;
         Event event = eventRepository.findById(eventId).get();
@@ -234,6 +247,11 @@ public class EventService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * @param eventId  the id of the event to create the account in
+     * @param eMail the email of the account to be created
+     * @return PesponseEntity with information of the process
+     */
     public ResponseEntity createAndAddAccountToEvent(String eventId, String eMail, FleventsAccount account){
 
         //TODO: Implement
@@ -243,6 +261,11 @@ public class EventService {
         return new ResponseEntity<>(account,HttpStatus.OK);
     }
 
+    /**
+     * @param eventId the id of the event to add the anonymous account to
+     * @param account the anonymous account to be added
+     * @return HttpStatus with the information whether the process was successfull
+     */
     public HttpStatus addAnonymousAccountToEvent(String eventId, FleventsAccount account){
         try{
             //TODO:
@@ -255,6 +278,12 @@ public class EventService {
         }
     }
 
+    /**
+     * @param eventId the id of the event to remove the account from
+     * @param accountId the id of the account to be removed from the event
+     * @param role the role of the account
+     * @return ResponseEntity with information of the process
+     */
     public ResponseEntity removeAccountToEvent(String eventId, String accountId, EventRole role){
         Optional<EventRegistration> registration= eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, role);
         if(registration.isEmpty()){
