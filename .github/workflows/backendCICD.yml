@@ -27,23 +27,23 @@ jobs:
         with:
           path: 'flevents-backend/src/main/resources/application.properties'
           property: |
-            'spring.datasource.url'
-            'spring.datasource.username'
-            'spring.datasource.password'
-            'spring.mail.host'
-            'spring.mail.port'
-            'spring.mail.username'
-            'spring.mail.password'
-            'application.baseurl'
+            spring.datasource.url
+            spring.datasource.username
+            spring.datasource.password
+            spring.mail.host
+            spring.mail.port
+            spring.mail.username
+            spring.mail.password
+            application.baseurl
           value: |
-            'jdbc:postgresql://h3005487.stratoserver.net:5432/flevents'
-            'postgres'
-            '${{secrets.DBSECRETPRD}}'
-            'smtp.ionos.de'
-            '587'
-            'info@flyndre.de'
-            '${{secrets.MAILSECRETPRD}}'
-            'flevents.flyndre.de:8080'
+            jdbc:postgresql://h3005487.stratoserver.net:5432/flevents
+            postgres
+            ${{secrets.DBSECRETPRD}}
+            smtp.ionos.de
+            587
+            info@flyndre.de
+            ${{secrets.MAILSECRETPRD}}
+            flevents.flyndre.de:8080
             
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
