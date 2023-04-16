@@ -19,10 +19,9 @@ import java.util.Arrays;
 public class EMailServiceImpl implements EMailService{
     private JavaMailSender javaMailSender;
     private ModelMapper mapper;
-    @Value("${application.organizationjoinurl}")
-    private String organizationJoinPath;
-    @Value("${application.eventjoinurl}")
-    private String eventJoinPath;
+    @Value("${application.baseurl}")
+    private String baseurl;
+
 
     public EMailServiceImpl(JavaMailSender javaMailSender, ModelMapper modelMapper){
         this.javaMailSender=javaMailSender;
@@ -71,7 +70,7 @@ public class EMailServiceImpl implements EMailService{
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be a part of "+organization.getName());
-        details.setMsgBody("You are invited to join the organization "+organization.getName()+" at the flevents event manage platform. To join click the following link: "+ organizationJoinPath +organization.getUuid()+"?token="+token);
+        details.setMsgBody("You are invited to join the organization "+organization.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/join/" +organization.getUuid()+"?token="+token);
         sendSimpleEmail(details);
     }
 
@@ -80,7 +79,7 @@ public class EMailServiceImpl implements EMailService{
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be part of "+event.getName());
-        details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ eventJoinPath +event.getUuid()+"?token="+token);
+        details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/organizations/join/" +event.getUuid()+"?token="+token);
         sendSimpleEmail(details);
     }
 
