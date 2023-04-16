@@ -21,6 +21,29 @@ jobs:
     steps:
    #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
       - uses: actions/checkout@v1
+      #Set Configuration
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: './src/main/resources/application.properties'
+          property: |
+            'spring.datasource.url'
+            'spring.datasource.username'
+            'spring.datasource.password'
+            'spring.mail.host'
+            'spring.mail.port'
+            'spring.mail.username'
+            'spring.mail.password'
+            'application.baseurl'
+          value: |
+            'jdbc:postgresql://flevents.flyndre.de:5432/flevents'
+            'postgres'
+            '${{secrets.DBSECRETPRD}}'
+            'smtp.ionos.de'
+            '587'
+            'info@flyndre.de'
+            '${{secrets.MAILSECRETPRD}}'
+            'flevents.flyndre.de:8080'
       #Set up JDK 17
       - name: Set up JDK
         uses: actions/setup-java@v1
