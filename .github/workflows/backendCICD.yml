@@ -36,7 +36,7 @@ jobs:
             'spring.mail.password'
             'application.baseurl'
           value: |
-            'jdbc:postgresql://flevents.flyndre.de:5432/flevents'
+            'jdbc:postgresql://h3005487.stratoserver.net:5432/flevents'
             'postgres'
             '${{secrets.DBSECRETPRD}}'
             'smtp.ionos.de'
