@@ -93,17 +93,7 @@ jobs:
             application.baseurl
           value: |
             flevents.flyndre.de:8080
-            
-      - name: Upload JAR
-        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
-        uses: actions/upload-artifact@v2
-        with:
-          #Set artifact name
-          name: config
-          #From this path
-          path: flevents-backend/src/main/resources/application.properties
-            
-        
+               
       #Set up JDK 17
       - name: Set up JDK
         uses: actions/setup-java@v1
