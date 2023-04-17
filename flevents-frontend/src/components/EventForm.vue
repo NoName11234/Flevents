@@ -7,23 +7,6 @@ import axios from "axios"
 import {Organization} from "@/models/organization";
 import security from "@/service/security";
 import {Account} from "@/models/account";
-const router = useRouter()
-const selectedOrga = ref();
-const files = ref(new Array<any>());
-const chips =  ref(new Array<any>());
-const imgUrl = ref('');
-const tooltip = ref('');
-const fleventsEvent : Ref<Partial<FleventsEvent>> = ref({
-  name: "",
-  description: "",
-  location: "",
-  image: "",
-  startTime: "",
-  endTime: "",
-}) ;
-const organizations = ref([] as Organization[]);
-
-const imageFile: Ref<Array<File>> = ref([]);
 
 const props = defineProps({
   backRoute: {
@@ -34,7 +17,30 @@ const props = defineProps({
     required: true,
     type: String,
   },
-})
+  presetEvent: {
+    required: false,
+    type: Object as () => FleventsEvent,
+    default: null,
+  }
+});
+
+const router = useRouter()
+const selectedOrga = ref();
+const files = ref(new Array<any>());
+const chips =  ref(new Array<any>());
+const imgUrl = ref('');
+const tooltip = ref('');
+const fleventsEvent = ref({ ...props.presetEvent, uuid: '' } || {
+  name: "",
+  description: "",
+  location: "",
+  image: "",
+  startTime: "",
+  endTime: "",
+} as FleventsEvent);
+const organizations = ref([] as Organization[]);
+
+const imageFile: Ref<Array<File>> = ref([]);
 
 // image
 function previewImage(e: any) {
@@ -43,7 +49,7 @@ function previewImage(e: any) {
   imgUrl.value = URL.createObjectURL(file);
 }
 function resetImage() {
-  imgUrl.value = '';
+  imgUrl.value = props.presetEvent?.image || '';
 }
 
 // email-input
@@ -53,7 +59,11 @@ function remove(item: any){
 
 onMounted(async () =>{
   organizations.value = (await axios.get(`http://localhost:8082/api/accounts/${security.getAccount()!.uuid}/managed-organizations`)).data;
-})
+  if (props.presetEvent) {
+    imgUrl.value = props.presetEvent.image;
+    selectedOrga.value = organizations.value.find(o => o.uuid === props.presetEvent.organizationPreview.uuid);
+  }
+});
 function getBase64(file : any) {
   return new Promise(function (resolve, reject) {
     let reader = new FileReader();
@@ -116,12 +126,12 @@ async function submit() {
     >
       <v-container class="d-flex flex-column gap-3">
 
-        <v-select
-          label="Event als Vorlage verwenden"
-          messages="Hier kann später optional ein existierendes Event als Grundlage für das neue Event ausgewählt werden."
-          hide-details="auto"
-          disabled
-        />
+<!--        <v-select-->
+<!--          label="Event als Vorlage verwenden"-->
+<!--          messages="Hier kann später optional ein existierendes Event als Grundlage für das neue Event ausgewählt werden."-->
+<!--          hide-details="auto"-->
+<!--          disabled-->
+<!--        />-->
 
         <v-select
           label="Organisation"

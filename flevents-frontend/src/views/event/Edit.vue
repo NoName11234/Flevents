@@ -34,7 +34,7 @@ function previewImage(e: any) {
   imgUrl.value = URL.createObjectURL(file);
 }
 function resetImage() {
-  imgUrl.value = '';
+  imgUrl.value = fleventsEvent.value.image || '';
 }
 
 // email-input
