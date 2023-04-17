@@ -1,5 +1,4 @@
 .idea/encodings.xml
-flevents-backend/src/main/resources/application-local.properties
 .gitignore
 flevents-backend/.idea/compiler.xml
 flevents-backend/.idea/encodings.xml
@@ -9,3 +8,4 @@ flevents-backend/.idea/misc.xml
 flevents-backend/.idea/uiDesigner.xml
 flevents-backend/.idea/vcs.xml
 flevents-backend/src/main/resources/application-local.properties
+/flevents-backend/src/main/resources/application-local.properties
