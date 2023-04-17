@@ -29,6 +29,11 @@ public class EMailServiceImpl implements EMailService{
     }
 
     @Value("${spring.mail.username}") private String sender;
+
+    /**
+     * @param details all details necessary for sending a mail
+     * @throws MessagingException gets thrown if something goes wrong while sending the mail
+     */
     @Override
     public void sendSimpleEmail(EmailDetails details) throws MessagingException {
         // Try block to check for exceptions
@@ -60,11 +65,22 @@ public class EMailServiceImpl implements EMailService{
         javaMailSender.send(mimeMessage);
     }
 
+    /**
+     * not implemented yet
+     * @param details all details necessary for sending a mail
+     */
     @Override
     public void sendMailWithAttachment(EmailDetails details) {
 
     }
 
+    /**
+     * sends an email to the specified address containing an invitation link, combined out of the link to the event and a validation token, to the specified organization
+     * @param organization the organization where the owner of the email gets invited to
+     * @param emailAddress the email address to send the mail to
+     * @param token the token to validate the invitation link
+     * @throws MessagingException gets thrown if something goes wrong while sending the mail
+     */
     @Override
     public void sendOrganizationInvitation(Organization organization, String emailAddress, String token) throws MessagingException {
         EmailDetails details = new EmailDetails();
@@ -74,21 +90,82 @@ public class EMailServiceImpl implements EMailService{
         sendSimpleEmail(details);
     }
 
+    /**
+     * sends an email to the specified address containing an invitation link, combined out of the link to the event and a validation token, to the specified event
+     * @param event the event where the owner of the email gets invited to
+     * @param emailAddress the email address to send the mail to
+     * @param token the token to validate the invitation link
+     * @throws MessagingException gets thrown if something goes wrong while sending the mail
+     */
     @Override
     public void sendEventInvitaion(Event event, String emailAddress, String token) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be part of "+event.getName());
-        details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/organizations/join/" +event.getUuid()+"?token="+token);
+
+        if(event.getMailConfig().equals(null)){
+            details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/organizations/join/" +event.getUuid()+"?token="+token);
+        }else{
+            details.setMsgBody(event.getMailConfig().getRegisterMessage());
+        }
+
         sendSimpleEmail(details);
     }
 
+    /**
+     * sends an email to the specified address containing a new temporary password
+     * @param emailAddress the email address to send the mail to
+     * @param secret the temporary password
+     * @throws MessagingException gets thrown if something goes wrong while sending the mail
+     */
     @Override
     public void sendNewPassword(String emailAddress, String secret) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("New flevents password");
         details.setMsgBody("Here is your new password for you flevents account. Use this to login to your account. Please change your password in the account settings immediately. \n Password: "+secret);
+        sendSimpleEmail(details);
+    }
+
+    /**
+     * sends an email to the specified address containing a default or a custom reminder event text, which can be specified in the mailconfig object of the event
+     * @param event the event to send the reminder for
+     * @param emailAddress the email address to send the mail to
+     * @throws MessagingException gets thrown if something goes wrong while sending the mail
+     */
+    @Override
+    public void sendReminder(Event event, String emailAddress) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
+        details.setSubject("Reminder for event: "+event.getName());
+
+        if(event.getMailConfig().equals(null)){
+            details.setMsgBody("The event "+event.getName()+" starts tomorrow at "+event.getStartTime() + "! Dont miss it!");
+        }else{
+            details.setMsgBody(event.getMailConfig().getAlertMessage());
+        }
+
+        sendSimpleEmail(details);
+    }
+
+    /**
+     * sends an email to the specified address containing a default or a custom text with a thank-you-message for participating, which can be specified in the mailconfig object of the event
+     * @param event the event to send the mail for
+     * @param emailAddress the email address to send the mail to
+     * @throws MessagingException gets thrown if something goes wrong while sending the mail
+     */
+    @Override
+    public void sendFeedback(Event event, String emailAddress) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
+        details.setSubject("Thank you for your participation at "+event.getName());
+
+        if(event.getMailConfig().equals(null)){
+            details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
+        }else{
+            details.setMsgBody(event.getMailConfig().getThankMessage());
+        }
+
         sendSimpleEmail(details);
     }
 }

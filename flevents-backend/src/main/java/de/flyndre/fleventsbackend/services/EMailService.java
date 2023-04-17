@@ -16,4 +16,6 @@ public interface EMailService{
     void sendOrganizationInvitation(Organization organization,String emailAddress,String token) throws MessagingException;
     void sendEventInvitaion(Event event, String emailAddress, String token) throws MessagingException;
     void sendNewPassword(String emailAddress, String secret) throws MessagingException;
+    void sendReminder(Event event, String emailAddress) throws MessagingException;
+    void sendFeedback(Event event, String emailAddress) throws MessagingException;
 }
