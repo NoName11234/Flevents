@@ -46,7 +46,10 @@
     :text="'Lade Events...'"
   />
   <Suspense v-if="events.length !== 0">
-    <EventList :events="events" />
+    <EventList
+      :events="events"
+      :show-manage-tools="true"
+    />
   </Suspense>
 
 </template>

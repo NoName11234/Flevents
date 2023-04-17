@@ -8,6 +8,11 @@ const props = defineProps({
   events: {
     required: true,
     type: Array<FleventsEvent>
+  },
+  showManageTools: {
+    required: false,
+    type: Boolean,
+    default: false,
   }
 });
 
@@ -31,6 +36,7 @@ onMounted(() => {
       v-for="(e, i) in eventList"
       :key="i"
       :flevents-event="e"
+      :show-manage-tools="showManageTools"
     />
   </div>
 </template>

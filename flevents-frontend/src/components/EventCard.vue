@@ -49,31 +49,44 @@
         <v-spacer/>
 
         <v-card-actions>
-          <v-btn
-            class="flex-grow-1 flex-sm-grow-0"
-            color="primary"
-            :to="{ name: 'events.event', params: { uuid: fleventsEvent.uuid } }"
-          >
-            Mehr
-          </v-btn>
+          <div class="d-flex flex-column-reverse flex-sm-row align-stretch align-sm-center justify-start flex-fill gap">
+            <v-btn
+              color="primary"
+              :to="{ name: 'events.event', params: { uuid: fleventsEvent.uuid } }"
+            >
+              Mehr
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              v-if="showManageTools"
+              variant="text"
+              prepend-icon="mdi-plus-box-multiple"
+              :to="{ name: 'events.create', query: { preset: fleventsEvent.uuid }}"
+            >
+              Als Vorlage verwenden
+            </v-btn>
+          </div>
         </v-card-actions>
       </v-col>
     </v-row>
   </v-card>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { FleventsEvent } from '@/models/fleventsEvent';
+import {EventRole} from "@/models/eventRole";
 
-export default {
-  name: "EventCard",
-  props: {
-    fleventsEvent: {
-      required: true,
-      type: Object as () => FleventsEvent
-    }
+defineProps({
+  fleventsEvent: {
+    required: true,
+    type: Object as () => FleventsEvent
+  },
+  showManageTools: {
+    required: false,
+    type: Boolean,
+    default: false,
   }
-}
+});
 </script>
 
 <style scoped>
