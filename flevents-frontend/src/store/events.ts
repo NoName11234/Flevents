@@ -8,7 +8,7 @@ export const useEventStore = defineStore('events', {
   }),
   actions: {
     async fetchEvents() {
-      const api = 'http://h3005487.stratoserver.net:8082/api/events';
+      const api = 'http://localhost:8082/api/events';
       try {
         const response = await axios.get(api);
         this.events = response.data;

@@ -87,7 +87,7 @@ async function submit(){
 
   try {
     const response = await axios.post(
-      `http://h3005487.stratoserver.net:8082/api/questionnaires`,
+      `http://localhost:8082/api/questionnaires`,
       questionnaire.value,
       {
         params: {
