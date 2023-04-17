@@ -13,6 +13,7 @@ import {EventRole} from "@/models/eventRole";
 import {Questionnaire} from "@/models/questionnaire";
 import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
 import Security from "@/service/security";
+import MailConfigCard from "@/components/MailConfigCard.vue";
 const wholeAttendees = ref([] as Account[]);
 const organizers = ref([] as Account[])
 const openContext = ref(false);
@@ -232,7 +233,7 @@ async function deleteEvent() {
 
     <v-tabs
       v-model="tab"
-      class="bg-primary"
+      bg-color="primary"
     >
       <v-tab value="info">
         Informationen
@@ -243,13 +244,22 @@ async function deleteEvent() {
       <v-tab value="polls">
         Umfragen
       </v-tab>
+      <v-tab value="mails">
+        E-Mail-Vorlagen
+      </v-tab>
       <v-tab value="attendees">
         Teilnehmer
       </v-tab>
-      <v-tab v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer" value="attendance">
+      <v-tab
+        value="attendance"
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+      >
         Anwesenheit
       </v-tab>
-      <v-tab v-if="validateRole == EventRole.organizer" value="organizers">
+      <v-tab
+        value="organizers"
+        v-if="validateRole == EventRole.organizer"
+      >
         Verwalter
       </v-tab>
     </v-tabs>
@@ -387,6 +397,32 @@ async function deleteEvent() {
             :questionnaire="questionnaire"
             :event="event"
             @update="setup()"
+          />
+        </v-expansion-panels>
+      </v-window-item>
+
+      <v-window-item value="mails">
+        <v-expansion-panels
+          variant="accordion"
+          multiple
+        >
+          <MailConfigCard
+            v-for="(c, i) in [
+              {
+                name: 'Einladungs-E-Mails',
+                text: 'Herzlich willkommen\nHeude dies das',
+              },
+              {
+                name: 'Erinnerungs-E-Mail',
+                text: 'Morgen geht\'s los! ...',
+              },
+              {
+                name: 'Rückblick-E-Mails',
+                text: 'Herzlich willkommen\nHeude dies das',
+              }
+            ]"
+            :key="i"
+            :config="c"
           />
         </v-expansion-panels>
       </v-window-item>
