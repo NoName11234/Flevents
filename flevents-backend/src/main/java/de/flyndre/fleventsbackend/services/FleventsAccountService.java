@@ -2,21 +2,40 @@ package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.dtos.AccountInformation;
+import de.flyndre.fleventsbackend.dtos.EmailDetails;
+import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
+import jakarta.mail.MessagingException;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class FleventsAccountService {
     private FleventsAccountRepository fleventsAccountRepository;
+    private EMailService eMailService;
+    private ModelMapper mapper;
 
-    public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository){
+    @Autowired
+    PasswordEncoder encoder;
+
+    public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository, ModelMapper mapper, EMailService eMailService){
         this.fleventsAccountRepository = fleventsAccountRepository;
+        this.mapper = mapper;
+        this.eMailService = eMailService;
     }
     public FleventsAccount getAccountById(String accountId){
         Optional<FleventsAccount> optional = fleventsAccountRepository.findById(accountId);
@@ -66,6 +85,7 @@ public class FleventsAccountService {
             throw new IllegalArgumentException("The provided email is already in use");
         }
         account.setUuid(null);
+        account.setSecret(encoder.encode(account.getSecret()));
         return fleventsAccountRepository.save(account);
     }
     public FleventsAccount createAnonymousAccount(String email){

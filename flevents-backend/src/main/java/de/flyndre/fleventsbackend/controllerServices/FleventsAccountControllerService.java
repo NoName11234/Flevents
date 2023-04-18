@@ -52,6 +52,10 @@ public class FleventsAccountControllerService {
         return fleventsAccountService.createAccount(account);
     }
 
+    public FleventsAccount getByAccountMail(String mail){
+        return fleventsAccountService.getAccountByMail(mail);
+    }
+
     public void resetPassword(String email) throws MessagingException {
         FleventsAccount account = fleventsAccountService.getAccountByMail(email);
         account.setSecret(UUID.randomUUID().toString());

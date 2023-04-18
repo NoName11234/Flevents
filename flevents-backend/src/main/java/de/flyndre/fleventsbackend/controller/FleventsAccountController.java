@@ -1,13 +1,25 @@
 package de.flyndre.fleventsbackend.controller;
 
-import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.controllerServices.FleventsAccountControllerService;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.controllerServices.FleventsAccountControllerService;
+import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
+import de.flyndre.fleventsbackend.security.payload.request.LoginRequest;
+import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
+import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
+import de.flyndre.fleventsbackend.services.FleventsAccountService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +31,14 @@ import java.util.stream.Collectors;
 public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;
     private final ModelMapper mapper;
+    @Autowired
+    AuthenticationManager authenticationManager;
 
+    @Autowired
+    PasswordEncoder encoder;
+
+    @Autowired
+    JwtUtils jwtUtils;
     public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper){
         this.fleventsAccountControllerService = fleventsAccountControllerService;
         this.mapper = mapper;
@@ -30,9 +49,26 @@ public class FleventsAccountController {
      * @param secret the secret to access the account informatiosn
      * @return ResponseEntity with information of the process and the account preview
      */
-    @GetMapping("/validate")
-    public ResponseEntity getAccountPreview(@RequestParam String email, @RequestParam String secret){
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
+    @PostMapping("/validate")
+    public ResponseEntity getAccountPreview(@Valid @RequestBody LoginRequest loginRequest){
+
+         FleventsAccount acc = fleventsAccountControllerService.getByAccountMail(/*DAS IST DIE EMAIL!!!!!*/ loginRequest.getUsername());
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(acc.getUuid(), loginRequest.getPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
+        //return fleventsAccountControllerService.getAccountPreview(email, secret);
     }
 
     /**
