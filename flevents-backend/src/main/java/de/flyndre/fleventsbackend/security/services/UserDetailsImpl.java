@@ -7,15 +7,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.OrganizationAccount;
+import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-
 public class UserDetailsImpl implements UserDetails {
-
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -39,19 +40,16 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(FleventsAccount user) {
-
-
-
-
-
-
-
-
-
-
-
-
         List<GrantedAuthority> authorities = new ArrayList<>();
+
+        for(int i = 0; i < user.getEvents().size(); i++){
+            authorities.add(new SimpleGrantedAuthority(user.getEvents().get(i).getId().toLowerCase() + "." + user.getEvents().get(i).getRole().toString().toLowerCase()));
+        }
+        for(int i = 0; i < user.getOrganisations().size(); i++){
+            authorities.add(new SimpleGrantedAuthority(user.getOrganisations().get(i).getUuid().toLowerCase() + "." + user.getOrganisations().get(i).getRole().toString().toLowerCase()));
+        }
+
+
         return new UserDetailsImpl(
                 user.getUuid(),
                 user.getFirstname(),

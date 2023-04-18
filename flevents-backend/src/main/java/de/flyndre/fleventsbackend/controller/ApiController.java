@@ -27,6 +27,7 @@ public class ApiController {
      */
     @GetMapping("/hello-world")
     public String helloWorld(Authentication auth) {
+        System.out.println(auth.getAuthorities().toArray()[0]);
         return "Hello world!";
     }
 
