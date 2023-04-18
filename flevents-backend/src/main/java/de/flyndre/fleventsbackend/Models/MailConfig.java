@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.sql.Timestamp;
+
 @Entity
 @Getter
 @Setter
@@ -22,5 +24,7 @@ public class MailConfig {
     private String uuid;
     private String registerMessage;
     private String alertMessage;
+    private Timestamp alertMessageTimestamp;
     private String thankMessage;
+    private Timestamp thankMessageTimestamp;
 }
