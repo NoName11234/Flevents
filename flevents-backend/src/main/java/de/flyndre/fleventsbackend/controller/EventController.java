@@ -46,7 +46,7 @@ private final ModelMapper mapper;
 
    /**
     * @param eventId the id of the event to delete
-    * @return the status whether deleting was succesfull or not
+    * @return ResponseEntity with the http status code
     */
    @DeleteMapping("/{eventId}")
    public ResponseEntity deleteEvent(@PathVariable String eventId){
@@ -65,7 +65,7 @@ private final ModelMapper mapper;
 
    /**
     * @param eventId the id of the event to get the list of organizers from
-    * @return ResponseEntity with a list with the organizers of the event
+    * @return ResponseEntity with a list with the organizers of the event and the http status code
     */
    @GetMapping("/{eventId}/organizers")
    public ResponseEntity getOrganizers(@PathVariable String eventId){
@@ -85,10 +85,10 @@ private final ModelMapper mapper;
    }
 
    /**
-    * sets the event of a given id to the specified event
+    * overwrites the event specified with a given id with the specified event
     * @param eventId the id of the event to be set
     * @param event the event to be set to the given id
-    * @return ResponseEntity with information of the process
+    * @return ResponseEntity with the event object and the http status code
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event){
@@ -100,7 +100,7 @@ private final ModelMapper mapper;
     * @param eventId the id of the event to send an invitation to
     * @param email the email to send the invitation link to
     * @param role the role which gets assigend to the invited person
-    * @return ResponseEntity with information of the process
+    * @return ResponseEntity with the http status code and an optional error message
     */
    @PostMapping("/{eventId}/invite")
    public ResponseEntity inviteToEvent(@PathVariable String eventId, @RequestParam() String email,@RequestParam EventRole role){
@@ -116,7 +116,7 @@ private final ModelMapper mapper;
     * @param eventId the id of the event to add the account to
     * @param accountId the id of the account to be added
     * @param token the token in the invitation link to verify the invitation
-    * @return ResponseEntity with information of the process
+    * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/add-account/{accountId}")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam(required = false) String token){
@@ -125,12 +125,12 @@ private final ModelMapper mapper;
    }
 
    /**
-    *
-    * @param eventId
-    * @param accountId
-    * @param fromRole
-    * @param toRole
-    * @return
+    *changes the role of a specified account in an event
+    * @param eventId the id of the event with the account
+    * @param accountId the id of the account which role has to be changed
+    * @param fromRole the role of the account before the change
+    * @param toRole the role to change the account to
+    * @return ReponseEntity with the http status code
     */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole fromRole, @RequestParam EventRole toRole){
@@ -139,12 +139,6 @@ private final ModelMapper mapper;
    }
 
 
-   /**
-    * diabled at the moment
-    * @param eventId  the id of the event to create the account in
-    * @param eMail the email of the account to be created
-    * @return PesponseEntity with information of the process
-    */
    //@PostMapping("/{eventId}/create-account")
    /*public ResponseEntity createAndAddAccountToEvent(@PathVariable String eventId, @RequestBody String eMail){
       return eventControllerService.createAndAddAccountToEvent(eventId, eMail);
@@ -154,7 +148,7 @@ private final ModelMapper mapper;
    /**
     * @param eventId the id of the event to add the anonymous account to
     * @param account the anonymous account to be added
-    * @return HttpStatus with the information whether the process was successfull
+    * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/add-account/add-anonymous")
    public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody FleventsAccount account){
@@ -166,7 +160,7 @@ private final ModelMapper mapper;
     * @param eventId the id of the event to remove the account from
     * @param accountId the id of the account to be removed from the event
     * @param role the role of the account
-    * @return ResponseEntity with information of the process
+    * @return ResponseEntity with the http status code and an optional error message
     */
    @PostMapping("/{eventId}/remove-account/{accountId}")
    public ResponseEntity removeAccountToEvent(@PathVariable String eventId, @PathVariable String accountId, @RequestParam EventRole role){
@@ -182,7 +176,7 @@ private final ModelMapper mapper;
     * not implemented yet
     * @param eventId the id of the event to check in
     * @param accountId the id of the account to be checked in
-    * @return HttpStatus whether the process was successfull or not
+    * @return HttpStatus whether the process was successfully or not
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
    public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId){
@@ -197,7 +191,7 @@ private final ModelMapper mapper;
    /**
     * not implemented yet
     * @param eventId the id of the event to add an attachment to
-    * @return HttpStatus whether the process was successfull or not
+    * @return HttpStatus whether the process was successfully or not
     */
    @PostMapping("/{eventId}/attachments")
    public HttpStatus addAttachment(@PathVariable String eventId){
@@ -212,7 +206,7 @@ private final ModelMapper mapper;
    /**
     * not implemented yet
     * @param eventId the id of the event to delete an attachment from
-    * @return HttpStatus whether the process was successfull or not
+    * @return HttpStatus whether the process was successfully or not
     */
    @DeleteMapping("/{eventId}/attachments")
    public HttpStatus deleteAttachment(@PathVariable String eventId){
