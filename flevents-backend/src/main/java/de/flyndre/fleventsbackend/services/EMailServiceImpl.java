@@ -103,7 +103,7 @@ public class EMailServiceImpl implements EMailService{
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be part of "+event.getName());
 
-        if(event.getMailConfig().equals(null)){
+        if(event.getMailConfig()==null){
             details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/organizations/join/" +event.getUuid()+"?token="+token);
         }else{
             details.setMsgBody(event.getMailConfig().getRegisterMessage());

@@ -11,6 +11,7 @@ import org.hibernate.validator.constraints.UniqueElements;
 
 import java.net.URI;
 import java.sql.Blob;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,7 @@ public class FleventsAccount {
     private String uuid;
     private String firstname;
     private String lastname;
+    private Boolean isActive;
     @Column(unique = true)
     private String email;
     @Lob
@@ -33,9 +35,9 @@ public class FleventsAccount {
     private String secret;
 
     @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)
-    private List<EventRegistration> events;
+    private List<EventRegistration> events = new ArrayList<>();
     @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)
-    private List<OrganizationAccount> organisations;
+    private List<OrganizationAccount> organisations = new ArrayList<>();
 
     public FleventsAccount(String uuid){
         this.uuid=uuid;
@@ -56,6 +58,9 @@ public class FleventsAccount {
         }
         if(account.secret!=null){
             this.secret=account.getSecret();
+        }
+        if(account.getIsActive()!=null){
+            this.isActive=account.getIsActive();
         }
     }
 

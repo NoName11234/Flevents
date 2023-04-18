@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.Length;
 import java.net.URI;
 import java.sql.Blob;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,7 +45,7 @@ public class Event {
     private Organization organization;
 
     @OneToMany(mappedBy = "event", fetch = FetchType.EAGER)
-    private List<EventRegistration> attendees;
+    private List<EventRegistration> attendees =new ArrayList<>();
 
     public Event(String uuid){
         this.uuid=uuid;
