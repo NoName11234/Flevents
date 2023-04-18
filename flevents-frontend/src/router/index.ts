@@ -66,11 +66,20 @@ const routes = [
         name: 'events.invite',
         component: () => import(/* webpackChunkName: "events" */ '@/views/event/Invite.vue')
       },
-      // {
-      //   path: ':uuid/edit',
-      //   name: 'events.edit',
-      //   component: () => import(/* webpackChunkName: "events" */ '@/views/event/Overview.vue'),
-      // },
+
+      // POSTS
+      {
+        path: ':uuid/posts/create',
+        name: 'events.posts.create',
+        component: () => import(/* webpackChunkName: "posts" */ '@/views/event/posts/Create.vue'),
+      },
+      {
+        path: ':uuid/posts/:postUuid/edit',
+        name: 'events.posts.edit',
+        component: () => import(/* webpackChunkName: "posts" */ '@/views/event/posts/Edit.vue'),
+      },
+
+      // SURVEYS
       {
         path: ':uuid/questionnaires/create',
         name: 'events.questionnaires.create',
