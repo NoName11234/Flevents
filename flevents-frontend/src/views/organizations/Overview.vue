@@ -4,7 +4,7 @@
     :logo-src="organization.icon"
   />
 
-  <v-card>
+  <v-card class="mx-n4 mx-sm-0">
     <v-tabs
       v-model="tab"
       class="bg-primary"

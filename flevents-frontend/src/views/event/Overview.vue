@@ -241,7 +241,7 @@ async function deleteEvent() {
 <template>
   <Heading :text="event.name ?? 'Eventtitel'" />
 
-  <v-card>
+  <v-card class="mx-n4 mx-sm-0">
 
     <v-img
        height="250"
