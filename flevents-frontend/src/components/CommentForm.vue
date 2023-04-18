@@ -60,7 +60,7 @@ async function submit() {
         :disabled="loading"
       >
       </v-textarea>
-      <v-container class="d-flex flex-column flex-sm-row justify-end align-center gap pa-2">
+      <v-container class="d-flex flex-column flex-sm-row justify-end gap align-sm-center pa-2">
         <span
           v-if="tooltip"
           class="text-error"
