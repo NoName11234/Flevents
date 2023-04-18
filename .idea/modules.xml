@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FleventsPrototype.iml" filepath="$PROJECT_DIR$/.idea/FleventsPrototype.iml" />
-      <module fileurl="file://$PROJECT_DIR$/out/production/FleventsPrototype/flevents-backend (1).iml" filepath="$PROJECT_DIR$/out/production/FleventsPrototype/flevents-backend (1).iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Flevents.iml" filepath="$PROJECT_DIR$/.idea/Flevents.iml" />
     </modules>
   </component>
 </project>
