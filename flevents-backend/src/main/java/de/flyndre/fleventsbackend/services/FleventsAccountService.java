@@ -18,6 +18,11 @@ public class FleventsAccountService {
     public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository){
         this.fleventsAccountRepository = fleventsAccountRepository;
     }
+
+    /**
+     * @param accountId
+     * @return
+     */
     public FleventsAccount getAccountById(String accountId){
         Optional<FleventsAccount> optional = fleventsAccountRepository.findById(accountId);
         if(!optional.isPresent()){

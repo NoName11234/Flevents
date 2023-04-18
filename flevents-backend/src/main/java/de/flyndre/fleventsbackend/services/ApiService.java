@@ -23,6 +23,12 @@ public class ApiService {
         this.eventRegistrationRepository = eventRegistrationRepository;
         this.eventRepository = eventRepository;
     }
+
+    /**
+     * inits the database with some predefined values
+     * @return lukas
+     * @throws IOException
+     */
     public FleventsAccount initDB() throws IOException{
         Organization flyndre = new Organization(null,"Flyndre","the best organization of the world",null,null,null,null,null);
         flyndre = organizationRepository.save(flyndre);
