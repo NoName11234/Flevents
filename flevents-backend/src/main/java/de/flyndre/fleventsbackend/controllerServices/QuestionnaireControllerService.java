@@ -1,4 +1,4 @@
-package de.flyndre.fleventsbackend.services;
+package de.flyndre.fleventsbackend.controllerServices;
 
 import org.springframework.stereotype.Service;
 
