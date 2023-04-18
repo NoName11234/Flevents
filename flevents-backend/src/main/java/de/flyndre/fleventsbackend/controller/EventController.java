@@ -130,7 +130,7 @@ private final ModelMapper mapper;
     * @param accountId the id of the account which role has to be changed
     * @param fromRole the role of the account before the change
     * @param toRole the role to change the account to
-    * @return ReponseEntity with the http status code
+    * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole fromRole, @RequestParam EventRole toRole){
