@@ -32,13 +32,13 @@ public class OrganizationController {
    }
 
    @GetMapping
-   public List<OrganizationInformation> getOrganizations(){
-      return organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList());
+   public ResponseEntity getOrganizations(){
+      return new ResponseEntity(organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
    }
 
    @GetMapping("/{organizationId}")
-   public OrganizationInformation getOrganization(@PathVariable String organizationId){
-      return mapper.map(organizationControllerService.getOrganizationById(organizationId), OrganizationInformation.class);
+   public ResponseEntity getOrganization(@PathVariable String organizationId){
+      return new ResponseEntity(mapper.map(organizationControllerService.getOrganizationById(organizationId), OrganizationInformation.class),HttpStatus.OK);
    }
 
    @GetMapping("/{organizationId}/events")
@@ -52,8 +52,8 @@ public class OrganizationController {
    }
 
    @PostMapping
-   public Organization createOrganisation(@RequestBody Organization organisation){
-      return organizationControllerService.createOrganisation(organisation);
+   public ResponseEntity createOrganisation(@RequestBody Organization organisation){
+      return new ResponseEntity(mapper.map(organizationControllerService.createOrganisation(organisation),OrganizationInformation.class),HttpStatus.OK);
    }
 
    @PostMapping("/{organizationId}")

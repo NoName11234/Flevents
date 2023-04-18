@@ -23,6 +23,7 @@ public class OrganizationAccount {
     @ManyToOne(fetch = FetchType.EAGER)
     private FleventsAccount account;
 
+
     private OrganizationRole role;
 
 }
