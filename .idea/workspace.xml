@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1c6377ce-7b65-46bd-9418-b608171c6a13" name="Changes" comment="feat: fix time displayed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EMailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EMailService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EMailServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/services/EMailServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/Models/MailConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/flevents-backend/src/main/java/de/flyndre/fleventsbackend/Models/MailConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +90,8 @@
       <workItem from="1681498465071" duration="3537000" />
       <workItem from="1681544404390" duration="18659000" />
       <workItem from="1681648390910" duration="8033000" />
-      <workItem from="1681750115470" duration="5498000" />
+      <workItem from="1681750115470" duration="7250000" />
+      <workItem from="1681803680615" duration="992000" />
     </task>
     <task id="LOCAL-00001" summary="merge: manually merge new version in dev">
       <created>1680340351816</created>
