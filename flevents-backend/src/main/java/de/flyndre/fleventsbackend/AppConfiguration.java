@@ -76,6 +76,7 @@ public class AppConfiguration {
         };
         modelMapper.typeMap(Event.class, EventInformation.class).addMappings(mapper ->mapper.using(convertEventRegistrationToAccountPreview).map(Event::getAttendees,EventInformation::setAccountPreviews));
 
+        //modelMapper.typeMap(Post.class, PostInformation.class).addMapping(Post::getUuid,PostInformation::set)
 
         return modelMapper;
     }
