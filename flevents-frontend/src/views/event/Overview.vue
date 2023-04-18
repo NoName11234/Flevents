@@ -47,24 +47,50 @@ const attending = computed(() => {
 });
 const posts = ref([
   {
+    uuid: '0',
     title: "Ankündigung des Sprechers",
-    text: "Nach langem Warten können wir Ihnen endlich unseren Sprecher vorstellen! Peter Korstens hat begeistert zugesagt und wird Sie durch den Termin begleiten. Anbei finden Sie das Handout zum Vortrag. Wir freuen uns auf Ihr Kommen!",
-    date: new Date(),
+    content: "Nach langem Warten können wir Ihnen endlich unseren Sprecher vorstellen! Peter Korstens hat begeistert zugesagt und wird Sie durch den Termin begleiten. Anbei finden Sie das Handout zum Vortrag. Wir freuen uns auf Ihr Kommen!",
+    creationDate: new Date(),
     author: {
-      firstname: "Peter",
+      firstname: "Peter Maria",
       lastname: "Korstens",
+      email: 'pk@web.de',
     },
     attachments: [
       "Handout Vortrag.pdf"
     ],
+    comments: [
+      {
+        uuid: '0',
+        author: {
+          firstname: 'Anneliese',
+          lastname: 'Reutinger',
+          email: 'ar@ar.de',
+        },
+        content: 'Neiiiin, wie schön! Ich wollte schon so lange mal wieder was von Herr Korstens hören! Jetzt bin ich richtig aufgeregt!!',
+        creationDate: new Date(),
+      },
+      {
+        uuid: '0',
+        author: {
+          firstname: 'Peter',
+          lastname: 'Korstens',
+          email: 'pk@web.de',
+        },
+        content: 'Vielen Dank für das Lob! Ich hoffe, Sie werden zufrieden sein :)',
+        creationDate: new Date(),
+      }
+    ]
   },
   {
+    uuid: '0',
     title: "Vorabinfos",
-    text: "Voller Vorfreude planen wir unseren gemeinsamen Workshop. Damit auch Sie bestens vorbereitet sind, möchten wir Ihnen hiermit noch einmal den Flyer und für den Veranstaltungstag Lageplan und Parkplatzplan bereitstellen. Wir freuen uns auf Ihr Kommen!",
-    date: new Date(),
+    content: "Voller Vorfreude planen wir unseren gemeinsamen Workshop. Damit auch Sie bestens vorbereitet sind, möchten wir Ihnen hiermit noch einmal den Flyer und für den Veranstaltungstag Lageplan und Parkplatzplan bereitstellen. Wir freuen uns auf Ihr Kommen!",
+    creationDate: new Date(),
     author: {
       firstname: "Sabine",
       lastname: "Meier",
+      email: 'pk@web.de',
     },
     attachments: [
       "Flyer.pdf",
@@ -337,12 +363,15 @@ async function deleteEvent() {
       </v-window-item>
 
       <v-window-item value="posts">
-        <v-container class="d-flex flex-column flex-sm-row justify-start gap">
+        <v-container
+          v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+          class="d-flex flex-column flex-sm-row justify-start gap"
+        >
           <v-btn
             prepend-icon="mdi-chat-plus"
             color="primary"
             variant="tonal"
-            v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+            :to="{ name: 'events.posts.create', params: { uuid: event.uuid } }"
           >
             Update posten
           </v-btn>
@@ -355,9 +384,9 @@ async function deleteEvent() {
           multiple
         >
           <EventPost
-            v-for="(post, index) in posts"
+            v-for="(post, pIndex) in posts"
             :post="post"
-            :key="index"
+            :key="pIndex"
           />
         </v-expansion-panels>
       </v-window-item>
