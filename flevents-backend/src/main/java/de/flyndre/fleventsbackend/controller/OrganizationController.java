@@ -41,9 +41,12 @@ public class OrganizationController {
    @PostMapping("/{organizationId}/create-event")
    public ResponseEntity createEvent(@PathVariable String organizationId, @RequestBody Event event, Authentication auth) {
       boolean grantedAccess = false;
-      UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
 
+      //Hol die User-Informationen aus dem Token
+      UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
+      //Gehe die Authoriserungen durch: Authorisierungsaufbau: uuid.rolle
       for(GrantedAuthority authorization : auth.getAuthorities()){
+         //Wenn eine Authorisierung existiert, die die Organisationsuuid sowie die Rolle admin oder organizer hat, gewähre Zugriff
          if(authorization.getAuthority().equals(organizationId+".admin") || authorization.getAuthority().equals(organizationId+".organizer")){
             grantedAccess = true;
          }
