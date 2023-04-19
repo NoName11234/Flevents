@@ -106,6 +106,17 @@ public class OrganizationService {
         return new ResponseEntity<>("Deleted!",HttpStatus.OK);
     }
 
+    public ResponseEntity leaveOrganization(String organizationId, String accountId){
+        Optional<OrganizationAccount> acc = organizationAccountRepository.findByAccount_UuidAndOrganization_Uuid(accountId, organizationId);
+        if(OrganizationRole.admin.equals(acc.get().getRole())
+                && organizationAccountRepository.findByOrganization_UuidAndRole(organizationId,OrganizationRole.admin).size()<=1
+        ){
+            return new ResponseEntity<>("Can't leave as last administrator",HttpStatus.BAD_REQUEST);
+        }
+        organizationAccountRepository.delete(acc.get());
+        return new ResponseEntity<>("Deleted!",HttpStatus.OK);
+    }
+
     public ResponseEntity changeRole(String organizationId, String accountId, OrganizationRole role){
         OrganizationRole currRole = OrganizationRole.member;
         Organization org = organizationRepository.findById(organizationId).get();

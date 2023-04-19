@@ -79,6 +79,11 @@ public class OrganizationController {
       return organizationControllerService.removeAccount(organizationId, accountId);
    }
 
+   @PostMapping("/{organizationId}/leave-organisation/{acountId}")
+   public ResponseEntity leaveOrganization(@PathVariable String organizationId, @PathVariable String accountId){
+      return organizationControllerService.leaveOrganization(organizationId, accountId);
+   }
+
    @PostMapping("/{organizationId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String organizationId, @PathVariable String accountId,@RequestParam OrganizationRole role){
       return organizationControllerService.changeRole(organizationId, accountId, role);

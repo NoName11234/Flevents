@@ -60,6 +60,10 @@ public class OrganizationControllerService {
         return organizationService.removeAccount(organizationId, accountId);
     }
 
+    public ResponseEntity leaveOrganization(String organizationId, String accountId){
+        return organizationService.leaveOrganization(organizationId, accountId);
+    }
+
     public ResponseEntity changeRole(String organizationId, String accountId, OrganizationRole role){
         return organizationService.changeRole(organizationId, accountId, role);
     }
