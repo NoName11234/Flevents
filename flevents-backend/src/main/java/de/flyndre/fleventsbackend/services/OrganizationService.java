@@ -88,4 +88,8 @@ public class OrganizationService {
         }
         organizationAccountRepository.save(new OrganizationAccount(null,organization,account,role));
     }
+
+    public void deleteOrganization(Organization organization){
+        organizationRepository.delete(organization);
+    }
 }

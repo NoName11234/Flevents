@@ -60,9 +60,14 @@ public class OrganizationControllerService {
      * @param email the email address to send an invitation to become the first admin
      * @return Organization that has been created
      */
-    public Organization createOrganisation(Organization organisation, String email) throws MessagingException {
+    public Organization createOrganisation(Organization organisation, String email) {
         Organization organization = organizationService.createOrganisation(organisation);
-        sendInvitation(organization.getUuid(),email,OrganizationRole.admin);
+        try {
+            sendInvitation(organization.getUuid(), email, OrganizationRole.admin);
+        }catch (RuntimeException e){
+            organizationService.deleteOrganization(organization);
+            throw e;
+        }
         return organisation;
     }
 
@@ -82,9 +87,15 @@ public class OrganizationControllerService {
      * @param email the email to send the invitation to
      * @param role the role to set the account with the invitation to
      */
-    public void sendInvitation(String organizationId, String email,OrganizationRole role) throws MessagingException {
+    public void sendInvitation(String organizationId, String email,OrganizationRole role)
+    {
         InvitationToken token = invitationTokenService.saveToken(new InvitationToken(role.toString()));
-        eMailService.sendOrganizationInvitation(getOrganizationById(organizationId),email,token.getToken());
+        try {
+            eMailService.sendOrganizationInvitation(getOrganizationById(organizationId),email,token.toString());
+        } catch (Exception e) {
+            invitationTokenService.deleteToken(token);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -96,6 +107,7 @@ public class OrganizationControllerService {
     public void acceptInvitation(String organizationId,String accountId,String token){
         InvitationToken invitationToken = invitationTokenService.validate(token);
         organizationService.addAccountToOrganization(getOrganizationById(organizationId),fleventsAccountService.getAccountById(accountId),OrganizationRole.valueOf(invitationToken.getRole()));
+        invitationTokenService.deleteToken(invitationToken);
     }
 
     /**

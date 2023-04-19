@@ -169,6 +169,17 @@ public class EventService {
         registration.setRole(toRole);
         eventRegistrationRepository.save(registration);
     }
+    public void acceptInvitation(Event event, FleventsAccount account, EventRole role){
+        Optional<EventRegistration> optional = event.getAttendees().stream().filter(registration -> registration.getRole().equals(EventRole.invited)).findAny();
+        if(!optional.isPresent()){
+            throw new NoSuchElementException("No open invitations left for this event");
+        }
+        if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(role)).findAny().isPresent()){
+            throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
+        }
+        eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        eventRegistrationRepository.delete(optional.get());
+    }
 
     /**
      * @param event the event where to remove the account from

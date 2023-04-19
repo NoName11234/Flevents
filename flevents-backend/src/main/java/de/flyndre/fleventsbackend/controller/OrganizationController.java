@@ -5,6 +5,7 @@ import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
+import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,12 +87,12 @@ public class OrganizationController {
     * @return ResponseEntity with the organization object and the http status code
     */
    @PostMapping
-   public ResponseEntity createOrganisation(@RequestBody Organization organisation, @RequestParam String email){
-      if(email==null||email.matches(".\\..@\\..")){
-         return new ResponseEntity<>("Please provide a valid email adress.",HttpStatus.BAD_REQUEST);
+   public ResponseEntity createOrganisation(@RequestBody Organization organisation, @RequestParam @NotNull String email){
+      if(!email.matches(".*@.*\\..*")){
+         return new ResponseEntity<>("Please provide a valid email address.",HttpStatus.BAD_REQUEST);
       }
       if(organisation.getName()==null||organisation.getName().isBlank()){
-         return new ResponseEntity("Plese provide a name for the organization.",HttpStatus.BAD_REQUEST);
+         return new ResponseEntity("Please provide a name for the organization.",HttpStatus.BAD_REQUEST);
       }
       try {
          Organization organization = organizationControllerService.createOrganisation(organisation, email);

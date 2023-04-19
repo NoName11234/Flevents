@@ -120,7 +120,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account/{accountId}")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam(required = false) String token){
-      eventControllerService.addAccountToEvent(eventId, accountId, token);
+      eventControllerService.acceptInvitation(eventId, accountId, token);
       return new ResponseEntity(HttpStatus.OK);
    }
 
