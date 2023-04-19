@@ -43,10 +43,10 @@ public class UserDetailsImpl implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
 
         for(int i = 0; i < user.getEvents().size(); i++){
-            authorities.add(new SimpleGrantedAuthority(user.getEvents().get(i).getId().toLowerCase() + "." + user.getEvents().get(i).getRole().toString().toLowerCase()));
+            authorities.add(new SimpleGrantedAuthority(user.getEvents().get(i).getEvent().getUuid().toLowerCase() + "." + user.getEvents().get(i).getRole().toString().toLowerCase()));
         }
         for(int i = 0; i < user.getOrganisations().size(); i++){
-            authorities.add(new SimpleGrantedAuthority(user.getOrganisations().get(i).getUuid().toLowerCase() + "." + user.getOrganisations().get(i).getRole().toString().toLowerCase()));
+            authorities.add(new SimpleGrantedAuthority(user.getOrganisations().get(i).getOrganization().getUuid().toLowerCase() + "." + user.getOrganisations().get(i).getRole().toString().toLowerCase()));
         }
 
 
