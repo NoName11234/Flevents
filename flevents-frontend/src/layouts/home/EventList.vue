@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import {FleventsEvent} from "@/models/fleventsEvent";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import EventListFilters from "@/components/EventListFilters.vue";
 import EventCard from "@/components/EventCard.vue";
+import ContentLoadingIndicator from "@/components/ContentLoadingIndicator.vue";
+import CardBanner from "@/components/CardBanner.vue";
 
 const props = defineProps({
   events: {
     required: true,
     type: Array<FleventsEvent>
+  },
+  loading: {
+    required: true,
+    type: Boolean,
+    default: false,
+  },
+  error: {
+    required: true,
+    type: Boolean,
+    default: false,
   },
   showManageTools: {
     required: false,
@@ -42,7 +54,16 @@ onMounted(() => {
   <EventListFilters
     @update="updateList"
   />
-  <div class="d-flex flex-column gap">
+  <div
+    class="d-flex flex-column gap"
+  >
+    <ContentLoadingIndicator
+      :loading="loading"
+    />
+    <CardBanner
+      v-show="!loading && error"
+      message="Error: Es konnten keine Events abgerufen werden."
+    />
     <EventCard
       v-for="(e, i) in eventList"
       :key="i"
