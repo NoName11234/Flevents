@@ -44,7 +44,7 @@ public class OrganizationController {
       UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
 
       for(GrantedAuthority authorization : auth.getAuthorities()){
-         if(authorization.getAuthority().equals(organizationId+".admin")){
+         if(authorization.getAuthority().equals(organizationId+".admin") || authorization.getAuthority().equals(organizationId+".organizer")){
             grantedAccess = true;
          }
       }
