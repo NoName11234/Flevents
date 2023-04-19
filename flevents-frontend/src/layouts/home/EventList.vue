@@ -16,10 +16,22 @@ const props = defineProps({
   }
 });
 
-const eventList = ref(Array.from(props.events));
+//TODO: Filtermöglichkeiten (Organisation, Suche, Datumsauswahl, Sortierung), Liste aller verfügbaren Events (die ersten 20 oder so)
 
-function updateList(newList: Array<FleventsEvent>) {
-  eventList.value = newList;
+const term = ref('');
+const eventList = computed(() => {
+  return props.events?.filter((event) => (
+      event.description?.toLowerCase().includes(term.value)
+      || event.name?.toLowerCase().includes(term.value)
+      || event.location?.toLowerCase().includes(term.value)
+      || event.organizationPreview?.name.toLowerCase().includes(term.value)
+      || event.organizationPreview?.description.toLowerCase().includes(term.value)
+    )
+  );
+});
+
+function updateList(newTerm: string) {
+  term.value = newTerm;
 }
 onMounted(() => {
   console.log(eventList.value);
@@ -28,7 +40,6 @@ onMounted(() => {
 
 <template>
   <EventListFilters
-    :event-list="eventList"
     @update="updateList"
   />
   <div class="d-flex flex-column gap">
