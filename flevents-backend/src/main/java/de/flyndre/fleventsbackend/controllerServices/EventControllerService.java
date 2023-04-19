@@ -99,7 +99,7 @@ public class EventControllerService {
         }
         EventRegistration registration = eventService.addAccountToEvent(event,account,EventRole.invited);
         InvitationToken token = invitationTokenService.saveToken(new InvitationToken(role.toString()));
-        eMailService.sendEventInvitaion(event,email,token.getToken());
+        eMailService.sendEventInvitaion(event,email,token.toString());
     }
 
     /**
@@ -107,11 +107,12 @@ public class EventControllerService {
      * @param accountId the id of the account to be added
      * @param token the token in the invitation link to verify the invitation
      */
-    public void addAccountToEvent(String eventId, String accountId, String token){
+    public void acceptInvitation(String eventId, String accountId, String token){
         Event event = getEventById(eventId);
         FleventsAccount account = accountService.getAccountById(accountId);
         InvitationToken invitationToken = invitationTokenService.validate(token);
-        eventService.changeRole(event,account,EventRole.invited,EventRole.valueOf(invitationToken.getRole()));
+        eventService.acceptInvitation(event,account,EventRole.valueOf(invitationToken.getRole()));
+        invitationTokenService.deleteToken(invitationToken);
     }
 
     /**

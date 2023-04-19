@@ -71,6 +71,7 @@ public class FleventsAccountService {
             throw new IllegalArgumentException("The provided email is already in use");
         }
         account.setUuid(null);
+        account.setIsActive(true);
         return fleventsAccountRepository.save(account);
     }
     public FleventsAccount createAnonymousAccount(String email){

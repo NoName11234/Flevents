@@ -20,13 +20,18 @@ public class InvitationTokenService {
     }
 
     public InvitationToken validate(String token){
-        Optional<InvitationToken> optional = tokenRepository.findById(token.substring(0,32));
+        Optional<InvitationToken> optional = tokenRepository.findById(token);
         if(!optional.isPresent()){
             throw new NoSuchElementException("Token not found");
         }
-        if(!optional.get().getRole().equals(token.substring(32))){
-            throw new IllegalArgumentException("Token is not valid");
-        }
         return optional.get();
+    }
+
+    /**
+     * Delete the given token
+     * @param token
+     */
+    public void deleteToken(InvitationToken token){
+        tokenRepository.delete(token);
     }
 }
