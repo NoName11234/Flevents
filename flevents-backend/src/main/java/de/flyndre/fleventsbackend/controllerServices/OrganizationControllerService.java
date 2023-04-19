@@ -57,10 +57,13 @@ public class OrganizationControllerService {
 
     /**
      * @param organisation organization object to be created
+     * @param email the email address to send an invitation to become the first admin
      * @return Organization that has been created
      */
-    public Organization createOrganisation(Organization organisation){
-        return organizationService.createOrganisation(organisation);
+    public Organization createOrganisation(Organization organisation, String email) throws MessagingException {
+        Organization organization = organizationService.createOrganisation(organisation);
+        sendInvitation(organization.getUuid(),email,OrganizationRole.admin);
+        return organisation;
     }
 
     /**
