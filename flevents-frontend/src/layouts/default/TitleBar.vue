@@ -41,7 +41,7 @@
       indeterminate
       absolute
       color="secondary"
-      location="bottom"
+      location="top"
       :active="globallyLoading"
     />
   </v-app-bar>
