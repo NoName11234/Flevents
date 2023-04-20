@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import postsApi from "@/api/postsApi";
+// import postsApi from "@/api/postsApi";
 import {Post} from "@/models/post";
 
 export const usePostStore = defineStore('posts', {
@@ -20,9 +20,9 @@ export const usePostStore = defineStore('posts', {
       this.error = false;
       // TODO: create and use posts store
       try {
-        const { data } = await postsApi.getPosts(eventUuid);
-        this.posts.set(eventUuid, data as Post[]);
-        this.lastSuccessfulHydration.set(eventUuid, new Date());
+        // const { data } = await postsApi.getPosts(eventUuid);
+        // this.posts.set(eventUuid, data as Post[]);
+        // this.lastSuccessfulHydration.set(eventUuid, new Date());
       } catch (e) {
         console.warn(`Failed to fetch posts for event with id ${eventUuid}.`, e);
         this.error = true;

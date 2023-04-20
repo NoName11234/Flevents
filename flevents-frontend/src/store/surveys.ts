@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import surveyApi from "@/api/surveyApi";
+// import surveyApi from "@/api/surveyApi";
 import {Questionnaire} from "@/models/questionnaire";
 
 export const useSurveyStore = defineStore('surveys', {
@@ -20,9 +20,9 @@ export const useSurveyStore = defineStore('surveys', {
       this.error = false;
       // TODO: create and use posts store
       try {
-        const { data } = await surveyApi.get(eventUuid);
-        this.surveys.set(eventUuid, data as Questionnaire[]);
-        this.lastSuccessfulHydration.set(eventUuid, new Date());
+        // const { data } = await surveyApi.get(eventUuid);
+        // this.surveys.set(eventUuid, data as Questionnaire[]);
+        // this.lastSuccessfulHydration.set(eventUuid, new Date());
       } catch (e) {
         console.warn(`Failed to fetch surveys for event with id ${eventUuid}.`, e);
         this.error = true;

@@ -12,40 +12,67 @@ import security from "@/service/security";
 import {EventRole} from "@/models/eventRole";
 import {Questionnaire} from "@/models/questionnaire";
 import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
-import Security from "@/service/security";
-const wholeAttendees = ref([] as Account[]);
-const organizers = ref([] as Account[])
+import {useEventStore} from "@/store/events";
+import {useSurveyStore} from "@/store/surveys";
+import {usePostStore} from "@/store/posts";
+import {AccountPreview} from "@/models/accountPreview";
+import eventApi from "@/api/eventApi";
+
 const openContext = ref(false);
 const validateRole = computed(() => {
-  //TODO: Ändern in organizers.value.lenght!!!
-
-  for(let j = 0; j < organizers.value.length; j++){
+  //TODO: Ändern in JWT
+  for(let j = 0; j < organizers?.value?.length; j++){
     if(security.getAccount()?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer"){
       return  EventRole.organizer;
     }
   }
-  for(let i = 0; i < wholeAttendees.value.length; i++){
-    if(security.getAccount()?.uuid === wholeAttendees.value[i]!.uuid && wholeAttendees.value[i]!.role === "organizer"){
+  for(let i = 0; i < allAttendees?.value?.length; i++){
+    if(security.getAccount()?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "organizer"){
       return  EventRole.organizer;
-    }else if(security.getAccount()?.uuid === wholeAttendees.value[i]!.uuid && wholeAttendees.value[i]!.role === "tutor"){
+    }else if(security.getAccount()?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor"){
       return  EventRole.tutor;
     }
   }
   return EventRole.attendee
 })
+
 const tab = ref(null);
-const address = ref("")
+const address = ref("");
 const route = useRoute();
-const enrollLoading = ref(false);
 const account = security.getAccount() as Account;
-const event = ref({
-  uuid: route.params.uuid as string,
-} as FleventsEvent);
-const attendees = ref([] as Account[]);
-const attending = computed(() => {
-  return attendees.value.find(v => v!.uuid === account.uuid) != undefined;
+
+const eventStore = useEventStore();
+const event = computed(() => {
+  return eventStore.getEvent(route.params.uuid as string) as FleventsEvent
 });
-const posts = ref([
+eventStore.requestHydration();
+
+const surveyStore = useSurveyStore();
+const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid as string) as Questionnaire[]);
+
+const postStore = usePostStore();
+const posts = computed(() => postStore.getPosts(route.params.uuid as string) as Post[]);
+
+const enrollLoading = ref(false);
+const storesLoading = computed(() =>
+  eventStore.loading
+  || surveyStore.loading
+  || postStore.loading
+);
+
+const attendees = computed(() => {
+  return event?.value?.accountPreviews.filter(a => [EventRole.attendee||EventRole.tutor].includes(a.role as EventRole))
+});
+const organizers = computed(() => {
+  return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole))
+});
+const allAttendees = computed(() => attendees?.value?.concat(organizers.value));
+
+const isAttending = computed(() => {
+  return attendees?.value?.find(v => v!.uuid === account.uuid) != undefined;
+});
+
+const debugPosts = ref([
   {
     title: "Ankündigung des Sprechers",
     text: "Nach langem Warten können wir Ihnen endlich unseren Sprecher vorstellen! Peter Korstens hat begeistert zugesagt und wird Sie durch den Termin begleiten. Anbei finden Sie das Handout zum Vortrag. Wir freuen uns auf Ihr Kommen!",
@@ -72,31 +99,10 @@ const posts = ref([
     ],
   }
 ] as Post[]);
-const questionnaires = ref([] as Questionnaire[]);
-
-
-async function setup() {
-  try {
-    address.value = route.params.uuid as string;
-    const response = await axios.get(`http://localhost:8082/api/events/${address.value}`);
-    console.log(response);
-    response.status == 200 ? event.value = response.data : event.value = {} as FleventsEvent;
-    attendees.value = (await axios.get(`http://localhost:8082/api/events/${address.value}/attendees`)).data
-    organizers.value = (await axios.get(`http://localhost:8082/api/events/${address.value}/organizers`)).data
-    console.log(organizers.value);
-    wholeAttendees.value = attendees.value.concat(organizers.value);
-    questionnaires.value = (await axios.get(`http://localhost:8082/api/questionnaires`, { params: {eventId: event.value.uuid}})).data;
-    console.log(questionnaires);
-  } catch (e) {
-    console.error("Failed to fetch event data.");
-  }
-}
-
-onBeforeMount(setup);
 
 const eventStatus = computed(() => {
-  let start = new Date(event.value.startTime!);
-  let end = new Date(event.value.endTime!);
+  let start = new Date(event?.value?.startTime);
+  let end = new Date(event?.value?.endTime);
   let now = new Date();
   switch (true) {
     case start > now:
@@ -112,7 +118,6 @@ const eventStatus = computed(() => {
 
 async function enroll(){
   enrollLoading.value = true;
-  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
     const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.uuid as string}`);
     console.log(response);
@@ -120,12 +125,10 @@ async function enroll(){
     // already enrolled
     console.error("Enrollment failed, probably already enrolled.", e);
   }
-  await setup();
   enrollLoading.value = false;
 }
 async function disenroll(){
   enrollLoading.value = true;
-
   if (account.organizationPreviews.filter(o => o.uuid === event.value.organizationPreview.uuid).length === 0) {
     const accept = window.confirm("Das Event wird von einer Organisation veranstaltet, der Sie nicht angehören. Wenn Sie sich abmelden, können Sie nur über erneute Einladung wieder teilnehmen. Sind Sie sicher?");
     if (!accept) {
@@ -133,7 +136,6 @@ async function disenroll(){
       return;
     }
   }
-
   try {
     const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.uuid as string}`, {}, {params: {role: "attendee"}});
     console.log(response);
@@ -141,7 +143,6 @@ async function disenroll(){
     // not enrolled
     console.error("Disenrollment failed.", e);
   }
-  await setup();
   enrollLoading.value = false;
 }
 
@@ -190,10 +191,10 @@ function removeAccount(uuid : string, role : string){
   }
 }
 
-async function updateRole(account: Account) {
+async function updateRole(account: AccountPreview) {
   console.log("changing role to: ", account.role);
   try {
-    await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    //await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
   } catch (e) {
     console.log("Failed to update role.", e);
   }
@@ -213,15 +214,23 @@ async function deleteEvent() {
 </script>
 
 <template>
-  <Heading :text="event.name ?? 'Eventtitel'" />
+  <Heading :text="event?.name ?? 'Lade Event...'" />
 
   <v-card>
+
+    <v-progress-linear
+      indeterminate
+      absolute
+      location="top"
+      color="secondary"
+      :active="storesLoading"
+    />
 
     <v-img
        height="250"
        class="bg-gradient"
        cover
-       :src="event.image"
+       :src="event?.image ?? ''"
     >
       <v-badge
         :color="eventStatus.color"
@@ -234,22 +243,42 @@ async function deleteEvent() {
       v-model="tab"
       class="bg-primary"
     >
-      <v-tab value="info">
+      <v-tab
+        value="info"
+        :disabled="storesLoading"
+      >
         Informationen
       </v-tab>
-      <v-tab value="posts">
+      <v-tab
+        value="posts"
+        :disabled="storesLoading"
+      >
         Posts
       </v-tab>
-      <v-tab value="polls">
+      <v-tab
+        value="polls"
+        :disabled="storesLoading"
+        >
         Umfragen
       </v-tab>
-      <v-tab value="attendees">
+      <v-tab
+        value="attendees"
+        :disabled="storesLoading"
+      >
         Teilnehmer
       </v-tab>
-      <v-tab v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer" value="attendance">
+      <v-tab
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+        value="attendance"
+        :disabled="storesLoading"
+      >
         Anwesenheit
       </v-tab>
-      <v-tab v-if="validateRole == EventRole.organizer" value="organizers">
+      <v-tab
+        v-if="validateRole == EventRole.organizer"
+        value="organizers"
+        :disabled="storesLoading"
+      >
         Verwalter
       </v-tab>
     </v-tabs>
@@ -258,26 +287,27 @@ async function deleteEvent() {
 
       <v-window-item value="info">
         <v-container>
-          {{event.description}}
+          {{event?.description}}
         </v-container>
         <v-divider />
         <v-list>
           <v-list-item
+            v-if="event?.startTime && event?.endTime"
             prepend-icon="mdi-clock"
           >
-            {{parseDate(event.startTime, event.endTime)}}
+            {{parseDate(event?.startTime, event?.endTime)}}
           </v-list-item>
           <v-list-item
-            v-if="event.location"
+            v-if="event?.location"
             prepend-icon="mdi-map-marker"
           >
-            {{event.location}}
+            {{event?.location}}
           </v-list-item>
           <v-list-item
-            v-if="event.organizationPreview?.name"
+            v-if="event?.organizationPreview?.name"
             prepend-icon="mdi-account-group"
           >
-            {{event.organizationPreview.name}}
+            {{event?.organizationPreview?.name}}
           </v-list-item>
         </v-list>
         <v-divider/>
@@ -313,8 +343,8 @@ async function deleteEvent() {
           <v-spacer/>
           <v-btn
             :loading="enrollLoading"
-            :disabled="enrollLoading"
-            v-if="!attending"
+            :disabled="enrollLoading || eventStore.loading"
+            v-if="!isAttending"
             color="primary"
             variant="elevated"
             prepend-icon="mdi-check"
@@ -324,8 +354,8 @@ async function deleteEvent() {
           </v-btn>
           <v-btn
             :loading="enrollLoading"
-            :disabled="enrollLoading"
-            v-if="attending"
+            :disabled="enrollLoading || eventStore.loading"
+            v-if="isAttending"
             color="primary"
             variant="tonal"
             prepend-icon="mdi-close"
@@ -386,7 +416,6 @@ async function deleteEvent() {
             :key="index"
             :questionnaire="questionnaire"
             :event="event"
-            @update="setup()"
           />
         </v-expansion-panels>
       </v-window-item>
