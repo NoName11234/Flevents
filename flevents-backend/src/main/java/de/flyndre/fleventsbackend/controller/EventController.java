@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * Author: Lukas Burkhardt
  * Version:
  * This Class is the Controller for the REST-API path "/api/events".
- * It provides functionality regarding events.
+ * It provides an interface regarding events.
  */
 
 @RestController

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * Author: Lukas Burkhardt
  * Version:
  * This Class is the Controller for the REST-API path "/api/accounts".
- * It provides functionality regarding accounts.
+ * It an interface functionality regarding accounts.
  */
 
 @RestController

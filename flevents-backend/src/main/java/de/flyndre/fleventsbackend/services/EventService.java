@@ -10,6 +10,13 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Author: Paul Lehmann
+ * Version:
+ * This Class is the service for the event repository and the eventRegistrationRepository.
+ * It provides methods for manipulating the data of these repositories.
+ */
+
 @Service
 public class EventService {
     private EventRegistrationRepository eventRegistrationRepository;
@@ -21,7 +28,7 @@ public class EventService {
     }
 
     /**
-     * returns all events where the given account is registered as tutor, attendee or guest
+     * Returns all events where the given account is registered as tutor, attendee or guest.
      * @param account the account to get the events from
      * @return list of events
      */
@@ -34,7 +41,7 @@ public class EventService {
     }
 
     /**
-     * get all events where the specified account has the role organizer or tutor
+     * Get all events where the specified account has the role organizer or tutor.
      * @param account the account to get the managed events from
      * @return all events where the given account is registered as organizer or tutor.
      */
@@ -46,6 +53,7 @@ public class EventService {
     }
 
     /**
+     * Returns a list of all events in the database.
      * @return list of all events
      */
     public List<Event> getEvents() {
@@ -54,6 +62,7 @@ public class EventService {
     }
 
     /**
+     * Returns the specified event.
      * @param eventId the id of the event
      * @return the event if its existing
      * @throws NoSuchElementException if no event was found
@@ -67,7 +76,7 @@ public class EventService {
     }
 
     /**
-     * Deletes the given event in the database
+     * Deletes the given event in the database.
      * @param event the event to be deleted
      */
     public void deleteEvent(Event event){
@@ -75,6 +84,7 @@ public class EventService {
     }
 
     /**
+     * Returns a list of attendees of the specified event.
      * @param event the event to get the attendees from
      * @return list of accounts registered as tutor, attendee, guest or invited
      */
@@ -89,6 +99,7 @@ public class EventService {
     }
 
     /**
+     * Returns a list of organizers of the specified event.
      * @param event the event to get the organizers from
      * @return list of accounts registered at the event as an organizer
      */
@@ -102,6 +113,15 @@ public class EventService {
         }).collect(Collectors.toList());
         return accounts;
     }
+
+
+    /**
+     * Checks whether the specified account is registered in the specified event with the given role. Throws an Exception if there is no registration with the given values.
+     * @param eventId the id to check for the account in
+     * @param accountId the id of the account to check for
+     * @param role the role of the specified account
+     * @return EventRegistration of the specified account in the specified event
+     */
     public EventRegistration getEventRegistration(String eventId,String accountId, EventRole role){
         Optional<EventRegistration> optional = eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId,eventId,role);
         if(!optional.isPresent()){
@@ -111,7 +131,7 @@ public class EventService {
     }
 
     /**
-     * creates an event in the specified organization and adds the given account with the role organizer
+     * Creates an event in the specified organization and adds the given account with the role organizer.
      * @param event the event to be created
      * @param account the account which shall be used to create the event
      * @param organization the organization in which to create the event
@@ -126,7 +146,7 @@ public class EventService {
     }
 
     /**
-     * sets the event of a given id to the specified event
+     * Sets the event of a given id to the specified event.
      * @param eventId the id of the event to be set
      * @param event the event to be set to the given id
      * @return the overwritten event
@@ -138,6 +158,7 @@ public class EventService {
     }
 
     /**
+     * Adds the given account to the given event.
      * @param event the event to add the account to
      * @param account the account to be added to the event
      * @param role the role the account has in the event
@@ -151,7 +172,7 @@ public class EventService {
     }
 
     /**
-     * Changes if possible the role of a registration
+     * Changes if possible the role of a registration.
      * @param event the event where the role of the account has to be changed
      * @param account the account which ones role has to be changed
      * @param fromRole the previous role of the account
@@ -169,6 +190,13 @@ public class EventService {
         registration.setRole(toRole);
         eventRegistrationRepository.save(registration);
     }
+
+    /**
+     * Adds the given account to the specified event with the given role. Throws an Exception if there are now open invitations left for the event or if there is already a registration with the same parameters.
+     * @param event the event to add the account to
+     * @param account the account to be added to the event
+     * @param role the role for the account in the event
+     */
     public void acceptInvitation(Event event, FleventsAccount account, EventRole role){
         Optional<EventRegistration> optional = event.getAttendees().stream().filter(registration -> registration.getRole().equals(EventRole.invited)).findAny();
         if(!optional.isPresent()){
@@ -182,6 +210,7 @@ public class EventService {
     }
 
     /**
+     * Removes the given account with the given role from the specified event.
      * @param event the event where to remove the account from
      * @param account the account to be removed from
      * @param role the role of the account in the event

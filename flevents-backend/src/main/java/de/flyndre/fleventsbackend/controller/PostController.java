@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * Author: Lukas Burkhardt
  * Version:
  * This Class is the Controller for the REST-API path "/api/events".
- * It provides functionality regarding posts.
+ * It provides an interface regarding posts.
  */
 
 @RestController
@@ -70,7 +70,7 @@ public class PostController {
      * @param postId the id of the post in the event to create the comment under
      * @param accountId the id of the account which is the author of the comment
      * @param comment the comment to be created
-     * @return ReponseEntity with the created comment and the http status code
+     * @return ReponseEntity with the commented post and the http status code
      */
     @PostMapping("/{postId}/comments")
     public ResponseEntity createComment(@PathVariable String eventId, @PathVariable String postId, @RequestParam String accountId,@RequestBody PostComment comment){
