@@ -59,40 +59,12 @@ class OrganizationApi {
   }
 
   /**
-   * Adds the account with given accountUuid to the event with given uuid if the token is valid.
-   * @param uuid the uuid of the organization
-   * @param accountUuid the uuid of the account to be added
-   * @param token the token the account has been invited with
-   */
-  addMember(uuid: string, accountUuid: string, token: string) {
-    return api.post(`${base}/${uuid}/add-account/${accountUuid}`, {}, {
-      params: {
-        token,
-      }
-    });
-  }
-
-  /**
    * Removes a member from an organization.
    * @param uuid the uuid of the organization
    * @param accountUuid the uuid of the account
    */
   removeMember(uuid: string, accountUuid: string) {
     return api.post(`${base}/${uuid}/remove-account/${accountUuid}`);
-  }
-
-  /**
-   * Changes the role of an organization member.
-   * @param uuid the uuid of the organization
-   * @param accountUuid the uuid of the account
-   * @param newRole the new role
-   */
-  changeRole(uuid: string, accountUuid: string, newRole: OrganizationRole) {
-    return api.post(`${base}/${uuid}/change-role/${accountUuid}`, {}, {
-      params: {
-        role: newRole,
-      }
-    });
   }
 
   /**
@@ -106,6 +78,34 @@ class OrganizationApi {
       params: {
         email,
         role,
+      }
+    });
+  }
+
+  /**
+   * Adds the account with given accountUuid to the event with given uuid if the token is valid.
+   * @param uuid the uuid of the organization
+   * @param accountUuid the uuid of the account to be added
+   * @param token the token the account has been invited with
+   */
+  acceptInvitation(uuid: string, accountUuid: string, token: string) {
+    return api.post(`${base}/${uuid}/add-account/${accountUuid}`, {}, {
+      params: {
+        token,
+      }
+    });
+  }
+
+  /**
+   * Changes the role of an organization member.
+   * @param uuid the uuid of the organization
+   * @param accountUuid the uuid of the account
+   * @param newRole the new role
+   */
+  changeRole(uuid: string, accountUuid: string, newRole: OrganizationRole) {
+    return api.post(`${base}/${uuid}/change-role/${accountUuid}`, {}, {
+      params: {
+        role: newRole,
       }
     });
   }
