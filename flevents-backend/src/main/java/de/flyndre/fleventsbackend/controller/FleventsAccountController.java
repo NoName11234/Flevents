@@ -13,6 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Author: Lukas Burkhardt
+ * Version:
+ * This Class is the Controller for the REST-API path "/api/accounts".
+ * It provides functionality regarding accounts.
+ */
+
 @RestController
 @CrossOrigin
 @RequestMapping("/api/accounts")
@@ -26,9 +33,10 @@ public class FleventsAccountController {
     }
 
     /**
+     * not implemented yet
      * @param email the email of the account to get the preview from
      * @param secret the secret to access the account informatiosn
-     * @return ResponseEntity with information of the process and the account preview
+     * @return ResponseEntity with the http status code
      */
     @GetMapping("/validate")
     public ResponseEntity getAccountPreview(@RequestParam String email, @RequestParam String secret){
@@ -36,8 +44,9 @@ public class FleventsAccountController {
     }
 
     /**
+     * Returns the account with the specified id.
      * @param accountId the id of the account to get the account information from
-     * @return AccountInformation information of the specified account
+     * @return AccountInformation of the specified account
      */
     @GetMapping("/{accountId}")
     public AccountInformation getAccountInfo(@PathVariable String accountId){
@@ -45,6 +54,7 @@ public class FleventsAccountController {
     }
 
     /**
+     * Returns the booked events from a specified account.
      * @param accountId the id of the account to get the booked events from
      * @return List<EventInformation> list with the booked events of the given account
      */
@@ -54,6 +64,7 @@ public class FleventsAccountController {
     }
 
     /**
+     * Returns the managed events from the specified account.
      * @param accountId the id of the account to get the managed events from
      * @return List<EventInformation> list with the managed events of the given account
      */
@@ -63,6 +74,7 @@ public class FleventsAccountController {
     }
 
     /**
+     * Returns a list of events to explore for the specified account.
      * @param accountId the id of the account to get a list of events to explore for
      * @return List<EventInformation> list with events to explore for the specified account
      */
@@ -72,9 +84,9 @@ public class FleventsAccountController {
     }
 
     /**
-     * get organizations where the given account has the role "administrator"
+     * Get organizations where the given account has the role "administrator".
      * @param accountId the id of the account
-     * @return List<OrganizationInformation> list with information of the organizations where the account is administrator
+     * @return List<OrganizationInformation> list with the organizations where the account is administrator
      */
     @GetMapping("/{accountId}/managed-organizations")
     public List<OrganizationInformation> getManagedOrganization(@PathVariable String accountId){
@@ -82,9 +94,9 @@ public class FleventsAccountController {
     }
 
     /**
-     * create a new account
+     * Creates a new account.
      * @param account the account to be created
-     * @return ResponseEntity with information about the process
+     * @return ResponseEntity with the created account and the http status code
      */
     @PostMapping()
     public ResponseEntity createAccount(@RequestBody FleventsAccount account){
@@ -92,9 +104,9 @@ public class FleventsAccountController {
     }
 
     /**
-     * sends a mail with a link to reset the passwort for the account with the specified mail
+     * Sends a mail with a link to reset the password for the account with the specified mail.
      * @param email the email of the account where to reset the password
-     * @return ResponseEntity with information about the process
+     * @return ResponseEntity with the http status code and an optional error message.
      */
     @PostMapping("/reset-password")
     public ResponseEntity resetPassword(@RequestParam String email){
@@ -107,14 +119,21 @@ public class FleventsAccountController {
     }
 
     /**
+     * Overwrites a specified account with the given account object.
      * @param accountId the id of the account to be edited
      * @param account the account object with the new information of the account
-     * @return ResponseEntity with information about the process
+     * @return ResponseEntity with the overwritten account and the http status code
      */
     @PostMapping("/{accountId}")
     public ResponseEntity editAccount(@PathVariable String accountId, @RequestBody FleventsAccount account){
         return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(accountId, account), AccountInformation.class),HttpStatus.OK);
     }
+
+    /**
+     * Deletes the specified account.
+     * @param accountId the id of the account to be deleted
+     * @return ResponseEntity with the http status code and an optional error message
+     */
     @DeleteMapping("/{accountId}")
     public ResponseEntity deleteAccount(@PathVariable String accountId){
         try{
