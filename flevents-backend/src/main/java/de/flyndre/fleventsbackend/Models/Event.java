@@ -39,7 +39,7 @@ public class Event {
     private Timestamp endTime;
     private String location;
     @OneToOne
-    private MailConfig mailConfig;
+    private MailConfig mailConfig=new MailConfig();
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Organization organization;
@@ -77,7 +77,10 @@ public class Event {
             this.endTime=event.getEndTime();
         }
         if(event.getMailConfig()!=null){
-            this.mailConfig=event.getMailConfig();
+            if(this.mailConfig==null){
+                this.mailConfig=new MailConfig();
+            }
+            this.mailConfig.merge(event.getMailConfig());
         }
     }
 

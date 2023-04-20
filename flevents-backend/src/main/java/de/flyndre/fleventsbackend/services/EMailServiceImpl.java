@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Component
 public class EMailServiceImpl implements EMailService{
@@ -166,6 +167,24 @@ public class EMailServiceImpl implements EMailService{
             details.setMsgBody(event.getMailConfig().getThankMessage());
         }
 
+        sendSimpleEmail(details);
+    }
+
+    @Override
+    public void sendAlertMessage(Event event) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setSubject("Last information for "+event.getName());
+        details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
+        details.setMsgBody(event.getMailConfig().getAlertMessage());
+        sendSimpleEmail(details);
+    }
+
+    @Override
+    public void sendThankMessage(Event event) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setSubject("Thanks to be part of "+event.getName());
+        details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
+        details.setMsgBody(event.getMailConfig().getThankMessage());
         sendSimpleEmail(details);
     }
 }

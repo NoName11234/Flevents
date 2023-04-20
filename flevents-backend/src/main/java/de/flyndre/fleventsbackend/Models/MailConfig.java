@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -24,7 +25,25 @@ public class MailConfig {
     private String uuid;
     private String registerMessage;
     private String alertMessage;
-    private Timestamp alertMessageTimestamp;
+    private LocalDateTime alertMessageTimestamp;
     private String thankMessage;
-    private Timestamp thankMessageTimestamp;
+    private LocalDateTime thankMessageTimestamp;
+
+    public void merge(MailConfig mailConfig){
+        if(mailConfig.registerMessage!=null){
+            this.registerMessage=mailConfig.getRegisterMessage();
+        }
+        if(mailConfig.alertMessage!=null){
+            this.alertMessage=mailConfig.getAlertMessage();
+        }
+        if(mailConfig.alertMessageTimestamp!=null){
+            this.alertMessageTimestamp=mailConfig.getAlertMessageTimestamp();
+        }
+        if(mailConfig.thankMessageTimestamp!=null){
+            this.thankMessage=mailConfig.getThankMessage();
+        }
+        if(mailConfig.thankMessageTimestamp!=null){
+            this.thankMessageTimestamp=mailConfig.getThankMessageTimestamp();
+        }
+    }
 }

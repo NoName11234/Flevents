@@ -3,9 +3,18 @@ package de.flyndre.fleventsbackend.controllerServices;
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 @Service
@@ -147,5 +156,33 @@ public class EventControllerService {
      */
     public void removeAccountFromEvent(String eventId, String accountId, EventRole role){
         eventService.removeAccountFromEvent(getEventById(eventId),accountService.getAccountById(accountId),role);
+    }
+
+    /**
+     * Run every hour and checks if some scheduled mails have to be sent.
+     * Triggers the email sending for each event, if the time in the email config is at the same time as the system.
+     * Ignoring the values of minute, second and nanosecond.
+     * Makes not sure that the emails were sent when something happens while sending them.
+     */
+    @Scheduled(cron = "1 0 * * * *")
+    public void sendAutomaticEmails(){
+        List<Event> events = eventService.getEvents();
+        LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        for(Event event:events) {
+            if (now.equals(event.getMailConfig().getAlertMessageTimestamp().withMinute(0).withSecond(0).withNano(0))) {
+                try {
+                    eMailService.sendAlertMessage(event);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (now.equals(event.getMailConfig().getThankMessageTimestamp().withMinute(0).withSecond(0).withNano(0))) {
+                try {
+                    eMailService.sendThankMessage(event);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 }
