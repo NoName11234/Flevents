@@ -37,6 +37,13 @@
         </template>
       </v-tooltip>
     </v-container>
+    <v-progress-linear
+      indeterminate
+      absolute
+      color="secondary"
+      location="bottom"
+      :active="globallyLoading"
+    />
   </v-app-bar>
 </template>
 
@@ -44,8 +51,12 @@
 import {ref} from "vue";
 import router from "@/router";
 import security from "@/service/security";
+import {useAppStore} from "@/store/app";
+import {storeToRefs} from "pinia";
 
 const account : any = ref(security.getAccount());
+const appStore = useAppStore();
+const { globallyLoading } = storeToRefs(appStore);
 
 async function logout() {
   await router.push({ name: 'accounts.login' });
