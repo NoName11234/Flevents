@@ -9,7 +9,7 @@ const base = `/accounts`
  */
 class AccountApi {
   /**
-   * Creates an account
+   * Creates an account.
    * @param account the account to be created
    */
   create(account: Account) {
@@ -17,7 +17,7 @@ class AccountApi {
   }
 
   /**
-   * Retrieves an account
+   * Retrieves an account.
    * @param uuid the uuid of the account
    */
   get(uuid: string) {
@@ -25,7 +25,7 @@ class AccountApi {
   }
 
   /**
-   * Modifies the account with the given uuid
+   * Modifies the account with the given uuid.
    * @param uuid the uuid of the account
    * @param account the account object containing the information to be modified
    */
@@ -34,7 +34,7 @@ class AccountApi {
   }
 
   /**
-   * Deletes an account
+   * Deletes an account.
    * @param uuid the uuid of the account
    */
   delete(uuid: string) {
@@ -42,7 +42,7 @@ class AccountApi {
   }
 
   /**
-   * Sends a password-reset mail for the given account
+   * Sends a password-reset mail for the given account.
    * @param uuid the uuid of the account
    */
   resetPassword(uuid: string) {
@@ -50,7 +50,7 @@ class AccountApi {
   }
 
   /**
-   * Retrieves the booked events of the given account (i.e. all events where it is registered)
+   * Retrieves the booked events of the given account (i.e. all events where it is registered).
    * @param uuid the uuid of the account
    */
   getBookedEvents(uuid: string) {
@@ -58,7 +58,7 @@ class AccountApi {
   }
 
   /**
-   * Retrieves the managed events of the given account (i.e. all events it is permitted to edit)
+   * Retrieves the managed events of the given account (i.e. all events it is permitted to edit).
    * @param uuid the uuid of the account
    */
   getManagedEvents(uuid: string) {
@@ -66,7 +66,7 @@ class AccountApi {
   }
 
   /**
-   * Retrieves the explore-events of the given account (i.e. all events of organizations it is associated with)
+   * Retrieves the explore-events of the given account (i.e. all events of organizations it is associated with).
    * @param uuid the uuid of the account
    */
   getExploreEvents(uuid: string) {
@@ -74,7 +74,7 @@ class AccountApi {
   }
 
   /**
-   * Retrieves the managed organizations of the given account (i.e. all events where it is administrator)
+   * Retrieves the managed organizations of the given account (i.e. all events where it is administrator).
    * @param uuid the uuid of the account
    */
   getManagedOrganizations(uuid: string) {

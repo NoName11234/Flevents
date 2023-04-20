@@ -1,4 +1,3 @@
-// Utilities
 import { defineStore } from 'pinia'
 import AccountService from "@/service/accountService";
 import Security from "@/service/security";
