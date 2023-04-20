@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.stereotype.Service;
@@ -146,5 +147,23 @@ public class EventControllerService {
      */
     public void removeAccountFromEvent(String eventId, String accountId, EventRole role){
         eventService.removeAccountFromEvent(getEventById(eventId),accountService.getAccountById(accountId),role);
+    }
+
+    /**
+     * Sets the attendees status to checkedIn.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckIn(String eventId, String accountId){
+        eventService.attendeesCheckIn(eventId, accountId);
+    }
+
+    /**
+     * Gets all checked-In attendees
+     * @param eventId the if of the event to get the checked-In attendees from
+     * @return a list with all checked-In attendees
+     */
+    public List<AccountInformation> getCheckedIn(String eventId){
+        return eventService.getCheckedIn(eventId);
     }
 }

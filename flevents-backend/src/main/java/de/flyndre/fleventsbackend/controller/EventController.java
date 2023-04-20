@@ -173,19 +173,16 @@ private final ModelMapper mapper;
    }
 
    /**
-    * not implemented yet
+    * Sets the attendees status to checkedIn.
     * @param eventId the id of the event to check in
     * @param accountId the id of the account to be checked in
     * @return HttpStatus whether the process was successfully or not
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
-   public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId){
-      try{
-         //TODO: Implement
-         return HttpStatus.OK;
-      }catch (Exception e){
-         return HttpStatus.INTERNAL_SERVER_ERROR;
-      }
+   public ResponseEntity attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId){
+
+
+      return new ResponseEntity<>(HttpStatus.OK);
    }
 
    /**
@@ -216,6 +213,16 @@ private final ModelMapper mapper;
       }catch (Exception e){
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
+   }
+
+   /**
+    * Gets all checked-In attendees
+    * @param eventId the if of the event to get the checked-In attendees from
+    * @return a list with all checked-In attendees
+    */
+   @GetMapping
+   public List<AccountInformation> getCheckedIn(String eventId){
+      return eventControllerService.getCheckedIn(eventId);
    }
 
 
