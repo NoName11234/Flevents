@@ -19,6 +19,6 @@ import {storeToRefs} from "pinia";
 const eventStore = useEventStore();
 const { exploreEvents, loading, error } = storeToRefs(eventStore);
 
-eventStore.hydrate();
+eventStore.requestHydration();
 
 </script>
