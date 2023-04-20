@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {FleventsEvent} from "@/models/fleventsEvent";
-import {computed, onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 import EventListFilters from "@/components/EventListFilters.vue";
 import EventCard from "@/components/EventCard.vue";
 import ContentLoadingIndicator from "@/components/ContentLoadingIndicator.vue";
@@ -45,9 +45,6 @@ const eventList = computed(() => {
 function updateList(newTerm: string) {
   term.value = newTerm;
 }
-onMounted(() => {
-  console.log(eventList.value);
-})
 </script>
 
 <template>
