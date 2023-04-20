@@ -1,10 +1,10 @@
-import api from "@/api";
+import api from "@/api/api";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {EventRole} from "@/models/eventRole";
 
 const base = `/events`
 
-class EventService {
+class EventApi {
 
   // CRUD
   create(event: FleventsEvent) {
@@ -50,4 +50,4 @@ class EventService {
   }
 }
 
-export default new EventService();
+export default new EventApi();

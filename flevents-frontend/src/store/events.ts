@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import AccountService from "@/service/accountService";
+import AccountApi from "@/api/accountApi";
 import Security from "@/service/security";
 import {FleventsEvent} from "@/models/fleventsEvent";
 
@@ -24,9 +24,9 @@ export const useEventStore = defineStore('events', {
       }
       try {
         const responses = await Promise.all([
-          AccountService.getBookedEvents(account.uuid),
-          AccountService.getManagedEvents(account.uuid),
-          AccountService.getExploreEvents(account.uuid)
+          AccountApi.getBookedEvents(account.uuid),
+          AccountApi.getManagedEvents(account.uuid),
+          AccountApi.getExploreEvents(account.uuid)
         ]);
         console.log(responses);
         this.bookedEvents = responses[0].data as FleventsEvent[];

@@ -1,6 +1,6 @@
 // Utilities
 import { defineStore } from 'pinia'
-import api from "@/api";
+import api from "@/api/api";
 import {Account} from "@/models/account";
 
 /**

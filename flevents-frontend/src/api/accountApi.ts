@@ -1,4 +1,4 @@
-import api from "@/api";
+import api from "@/api/api";
 import {Account} from "@/models/account";
 
 const base = `/accounts`

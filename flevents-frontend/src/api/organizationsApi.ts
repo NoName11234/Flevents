@@ -1,10 +1,10 @@
-import api from "@/api";
+import api from "@/api/api";
 import {Organization} from "@/models/organization";
 import {OrganizationRole} from "@/models/organizationRole";
 
 const base = `/organizations`
 
-class OrganizationService {
+class OrganizationApi {
   create(organization: Organization) {
     return api.post(`${base}`, organization);
   }
@@ -51,4 +51,4 @@ class OrganizationService {
   }
 }
 
-export default new OrganizationService();
+export default new OrganizationApi();
