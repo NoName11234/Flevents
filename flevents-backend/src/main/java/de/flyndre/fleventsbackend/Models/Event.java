@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.Length;
 import java.net.URI;
 import java.sql.Blob;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +35,9 @@ public class Event {
     @Basic(fetch = FetchType.LAZY)
     private String image;
 
-    private Timestamp startTime;
+    private LocalDateTime startTime;
 
-    private Timestamp endTime;
+    private LocalDateTime endTime;
     private String location;
     @OneToOne
     private MailConfig mailConfig=new MailConfig();

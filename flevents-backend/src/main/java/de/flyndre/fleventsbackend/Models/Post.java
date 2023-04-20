@@ -10,6 +10,7 @@ import org.hibernate.SessionEventListener;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -32,7 +33,7 @@ public class Post {
     @ManyToOne
     private Event event;
 
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
     @OneToMany(mappedBy = "post")
     private List<PostComment> comments = new ArrayList<>();
 

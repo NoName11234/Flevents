@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,26 +23,26 @@ public class MailConfig {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private String registerMessage;
-    private String alertMessage;
-    private LocalDateTime alertMessageTimestamp;
-    private String thankMessage;
-    private LocalDateTime thankMessageTimestamp;
+    private String infoMessage;
+    private LocalDateTime infoMessageTime;
+    private String feedbackMessage;
+    private LocalDateTime feedbackMessageTime;
 
     public void merge(MailConfig mailConfig){
         if(mailConfig.registerMessage!=null){
             this.registerMessage=mailConfig.getRegisterMessage();
         }
-        if(mailConfig.alertMessage!=null){
-            this.alertMessage=mailConfig.getAlertMessage();
+        if(mailConfig.infoMessage !=null){
+            this.infoMessage =mailConfig.getInfoMessage();
         }
-        if(mailConfig.alertMessageTimestamp!=null){
-            this.alertMessageTimestamp=mailConfig.getAlertMessageTimestamp();
+        if(mailConfig.infoMessageTime !=null){
+            this.infoMessageTime =mailConfig.getInfoMessageTime();
         }
-        if(mailConfig.thankMessageTimestamp!=null){
-            this.thankMessage=mailConfig.getThankMessage();
+        if(mailConfig.feedbackMessageTime !=null){
+            this.feedbackMessage =mailConfig.getFeedbackMessage();
         }
-        if(mailConfig.thankMessageTimestamp!=null){
-            this.thankMessageTimestamp=mailConfig.getThankMessageTimestamp();
+        if(mailConfig.feedbackMessageTime !=null){
+            this.feedbackMessageTime =mailConfig.getFeedbackMessageTime();
         }
     }
 }

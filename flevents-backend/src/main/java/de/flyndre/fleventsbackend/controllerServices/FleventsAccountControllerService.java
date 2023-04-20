@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,7 +66,7 @@ public class FleventsAccountControllerService {
     public void deleteAccount(String accountId){
         FleventsAccount account = fleventsAccountService.getAccountById(accountId);
         account.getEvents().stream().map(eventRegistration -> {
-            if(eventRegistration.getEvent().getStartTime().after(Timestamp.from(Instant.now()))){
+            if(eventRegistration.getEvent().getStartTime().isAfter(LocalDateTime.now())){
                 eventService.removeAccountFromEvent(eventRegistration.getEvent(),eventRegistration.getAccount(),eventRegistration.getRole());
             }
             return null;

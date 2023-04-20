@@ -143,7 +143,7 @@ public class EMailServiceImpl implements EMailService{
         if(event.getMailConfig().equals(null)){
             details.setMsgBody("The event "+event.getName()+" starts tomorrow at "+event.getStartTime() + "! Dont miss it!");
         }else{
-            details.setMsgBody(event.getMailConfig().getAlertMessage());
+            details.setMsgBody(event.getMailConfig().getInfoMessage());
         }
 
         sendSimpleEmail(details);
@@ -164,7 +164,7 @@ public class EMailServiceImpl implements EMailService{
         if(event.getMailConfig().equals(null)){
             details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
         }else{
-            details.setMsgBody(event.getMailConfig().getThankMessage());
+            details.setMsgBody(event.getMailConfig().getFeedbackMessage());
         }
 
         sendSimpleEmail(details);
@@ -175,7 +175,7 @@ public class EMailServiceImpl implements EMailService{
         EmailDetails details = new EmailDetails();
         details.setSubject("Last information for "+event.getName());
         details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
-        details.setMsgBody(event.getMailConfig().getAlertMessage());
+        details.setMsgBody(event.getMailConfig().getInfoMessage());
         sendSimpleEmail(details);
     }
 
@@ -184,7 +184,7 @@ public class EMailServiceImpl implements EMailService{
         EmailDetails details = new EmailDetails();
         details.setSubject("Thanks to be part of "+event.getName());
         details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
-        details.setMsgBody(event.getMailConfig().getThankMessage());
+        details.setMsgBody(event.getMailConfig().getFeedbackMessage());
         sendSimpleEmail(details);
     }
 }

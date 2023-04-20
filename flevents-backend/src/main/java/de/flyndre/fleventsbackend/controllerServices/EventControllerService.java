@@ -6,15 +6,8 @@ import jakarta.mail.MessagingException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjuster;
-import java.time.temporal.TemporalAdjusters;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 
 @Service
@@ -164,19 +157,19 @@ public class EventControllerService {
      * Ignoring the values of minute, second and nanosecond.
      * Makes not sure that the emails were sent when something happens while sending them.
      */
-    @Scheduled(cron = "1 0 * * * *")
+    @Scheduled(cron = "1 39 * * * *")
     public void sendAutomaticEmails(){
         List<Event> events = eventService.getEvents();
         LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         for(Event event:events) {
-            if (now.equals(event.getMailConfig().getAlertMessageTimestamp().withMinute(0).withSecond(0).withNano(0))) {
+            if (now.equals(event.getMailConfig().getInfoMessageTime().withMinute(0).withSecond(0).withNano(0))) {
                 try {
                     eMailService.sendAlertMessage(event);
                 } catch (MessagingException e) {
                     throw new RuntimeException(e);
                 }
             }
-            if (now.equals(event.getMailConfig().getThankMessageTimestamp().withMinute(0).withSecond(0).withNano(0))) {
+            if (now.equals(event.getMailConfig().getFeedbackMessageTime().withMinute(0).withSecond(0).withNano(0))) {
                 try {
                     eMailService.sendThankMessage(event);
                 } catch (MessagingException e) {
