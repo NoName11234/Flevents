@@ -6,8 +6,12 @@ const base = `/accounts`
 /**
  * Api endpoints to access and modify accounts.
  * @author David Maier
+ * @since Weekly Build 2
  */
 class AccountApi {
+
+  // CRUD
+
   /**
    * Creates an account.
    * @param account the account to be created
@@ -27,7 +31,7 @@ class AccountApi {
   /**
    * Modifies the account with the given uuid.
    * @param uuid the uuid of the account
-   * @param account the account object containing the information to be modified
+   * @param account the account object containing only the attributes to be modified
    */
   edit(uuid: string, account: Account) {
     return api.put(`${base}/${uuid}`, account);
@@ -41,6 +45,10 @@ class AccountApi {
     return api.delete(`${base}/${uuid}`);
   }
 
+
+
+  // Miscellaneous
+
   /**
    * Sends a password-reset mail for the given account.
    * @param uuid the uuid of the account
@@ -48,6 +56,10 @@ class AccountApi {
   resetPassword(uuid: string) {
     return api.post(`${base}/${uuid}`);
   }
+
+
+
+  // Collections
 
   /**
    * Retrieves the booked events of the given account (i.e. all events where it is registered).
