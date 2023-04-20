@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Author: Lukas Burkhardt
  * Version:
  * This Class is the Controller for the REST-API path "/api/organizations".
- * It provides functionality regarding organizations.
+ * It provides an interface regarding organizations.
  */
 
 @RestController
