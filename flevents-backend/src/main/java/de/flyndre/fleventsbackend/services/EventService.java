@@ -1,21 +1,12 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
-import de.flyndre.fleventsbackend.dtos.AccountInformation;
-import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
 import de.flyndre.fleventsbackend.repositories.EventRepository;
-import jakarta.mail.MessagingException;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,278 +14,168 @@ import java.util.stream.Collectors;
 public class EventService {
     private EventRegistrationRepository eventRegistrationRepository;
     private EventRepository eventRepository;
-    private ModelMapper mapper;
-    private EMailService eMailService;
 
-    public EventService(EventRegistrationRepository eventRegistrationRepository, ModelMapper mapper, EventRepository eventRepository, EMailService eMailService){
+    public EventService(EventRegistrationRepository eventRegistrationRepository, EventRepository eventRepository){
         this.eventRegistrationRepository = eventRegistrationRepository;
-        this.mapper = mapper;
         this.eventRepository = eventRepository;
-        this.eMailService = eMailService;
     }
 
-    public List<EventInformation> getRegisteredEvents(String accountId){
-        //TODO: Implement
-        List<EventRegistration> registrations = eventRegistrationRepository.findByAccount_UuidAndRole(accountId, EventRole.attendee);
-        registrations.addAll(eventRegistrationRepository.findByAccount_UuidAndRole(accountId,EventRole.guest));
-        registrations.addAll(eventRegistrationRepository.findByAccount_UuidAndRole(accountId,EventRole.tutor));
-        List<EventInformation> informationList = registrations.stream().map(eventRegistration -> {
-            EventInformation eventInformation = mapper.map(eventRegistration.getEvent(),EventInformation.class);
-            eventInformation.setRole(eventRegistration.getRole());
-            return eventInformation;
-        }).collect(Collectors.toList());
-        return informationList;
+    /**
+     * returns all events where the given account is registered as tutor, attendee or guest
+     * @param account the account to get the events from
+     * @return list of events
+     */
+    public List<Event> getRegisteredEvents(FleventsAccount account){
+        List<EventRegistration> registrations = eventRegistrationRepository.findByAccount_UuidAndRole(account.getUuid(), EventRole.attendee);
+        registrations.addAll(eventRegistrationRepository.findByAccount_UuidAndRole(account.getUuid(),EventRole.guest));
+        registrations.addAll(eventRegistrationRepository.findByAccount_UuidAndRole(account.getUuid(),EventRole.tutor));
+        List<Event> events = registrations.stream().map(registration -> registration.getEvent()).collect(Collectors.toList());
+        return events;
     }
 
-    public List<EventInformation> getManagedEvents(String accountId){
-        //TODO: Implement
-        List<EventRegistration> registrations = eventRegistrationRepository.findByAccount_UuidAndRole(accountId, EventRole.organizer);
-        registrations.addAll(eventRegistrationRepository.findByAccount_UuidAndRole(accountId,EventRole.tutor));
-        List<EventInformation> informationList = registrations.stream().map(eventRegistration -> {
-            EventInformation eventInformation = mapper.map(eventRegistration.getEvent(),EventInformation.class);
-            eventInformation.setRole(eventRegistration.getRole());
-            return eventInformation;
-        }).collect(Collectors.toList());
-        return informationList;
+    /**
+     * get all events where the specified account has the role organizer or tutor
+     * @param account the account to get the managed events from
+     * @return all events where the given account is registered as organizer or tutor.
+     */
+    public List<Event> getManagedEvents(FleventsAccount account){
+        List<EventRegistration> registrations = eventRegistrationRepository.findByAccount_UuidAndRole(account.getUuid(), EventRole.organizer);
+        registrations.addAll(eventRegistrationRepository.findByAccount_UuidAndRole(account.getUuid(),EventRole.tutor));
+        List<Event> events = registrations.stream().map(registration -> registration.getEvent()).collect(Collectors.toList());
+        return events;
     }
 
     /**
      * @return list of all events
      */
-    public List<EventInformation> getEvents() {
+    public List<Event> getEvents() {
         List<Event> events = eventRepository.findAll();
-        return events.stream().map((event) -> mapper.map(event, EventInformation.class)).collect(Collectors.toList());
-    }
-
-    /**
-     * @param eventId the id of the event
-     * @return information of the event with the given id
-     */
-    public EventInformation getEventInformationById(String eventId){
-        Event event = eventRepository.findById(eventId).get();
-        return mapper.map(event, EventInformation.class);
+        return events;
     }
 
     /**
      * @param eventId the id of the event
      * @return the event if its existing
+     * @throws NoSuchElementException if no event was found
      */
-    public Optional<Event> getEventById(String eventId){
-        return eventRepository.findById(eventId);
+    public Event getEventById(String eventId){
+        Optional<Event> optional = eventRepository.findById(eventId);
+        if(!optional.isPresent()){
+            throw new NoSuchElementException("Could not found any event with the given eventId");
+        }
+        return optional.get();
     }
 
     /**
-     * @param eventId the id of the event to delete
-     * @return the status whether deleting was succesfull or not
+     * Deletes the given event in the database
+     * @param event the event to be deleted
      */
-    public HttpStatus deleteEvent(String eventId){
-        Event ev = eventRepository.findById(eventId).get();
-        eventRegistrationRepository.deleteAll(ev.getAttendees());
-        eventRepository.delete(eventRepository.findById(eventId).get());
-        return HttpStatus.OK;
+    public void deleteEvent(Event event){
+        eventRepository.delete(event);
     }
 
     /**
-     * @param eventId the id of the event to get the list of attendees from
-     * @return ResponseEntity with a list with the attendees of the event
+     * @param event the event to get the attendees from
+     * @return list of accounts registered as tutor, attendee, guest or invited
      */
-    public ResponseEntity getAttendees(String eventId){
+    public List<FleventsAccount> getAttendees(Event event){
+        List<FleventsAccount> accounts = event.getAttendees().stream().map(registration -> {
+            if(!registration.getRole().equals(EventRole.organizer)){
+                return registration.getAccount();
+            }
+            return null;
+        }).collect(Collectors.toList());
+        return accounts;
+    }
+
+    /**
+     * @param event the event to get the organizers from
+     * @return list of accounts registered at the event as an organizer
+     */
+    public List<FleventsAccount> getOrganizers(Event event){
         //TODO: Implement
-        List<EventRegistration> registrations = eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.guest);
-        registrations.addAll(eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.invited));
-        registrations.addAll(eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.attendee));
-        registrations.addAll(eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.tutor));
-        return new ResponseEntity(registrations.stream().map(registration ->{
-            AccountInformation information = mapper.map(registration.getAccount(),AccountInformation.class);
-            information.setRole(registration.getRole());
-            return information;
-        }).collect(Collectors.toList()),HttpStatus.OK);
+        List<FleventsAccount> accounts = event.getAttendees().stream().map(registration -> {
+            if(!registration.getRole().equals(EventRole.organizer)){
+                return registration.getAccount();
+            }
+            return null;
+        }).collect(Collectors.toList());
+        return accounts;
+    }
+    public EventRegistration getEventRegistration(String eventId,String accountId, EventRole role){
+        Optional<EventRegistration> optional = eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId,eventId,role);
+        if(!optional.isPresent()){
+            throw new NoSuchElementException(String.format("Found no registration related to the given parameter accountId:%s, eventId:%s,role:%s",accountId,eventId,role.toString()));
+        }
+        return optional.get();
     }
 
     /**
-     * @param eventId the id of the event to get the list of organizers from
-     * @return ResponseEntity with a list with the organizers of the event
-     */
-    public ResponseEntity getOrganizers(String eventId){
-        //TODO: Implement
-        List<EventRegistration> registrations = eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.organizer);
-        return new ResponseEntity(registrations.stream().map(registration ->{
-            AccountInformation information = mapper.map(registration.getAccount(),AccountInformation.class);
-            information.setRole(registration.getRole());
-            return information;
-        }).collect(Collectors.toList()),HttpStatus.OK);
-    }
-
-    /**
-     * not implemented yet
-     * @param event the event to be created
-     * @return ResponseEntity with information of the created event
-     */
-    public ResponseEntity createEvent(Event event){
-        //TODO: Implement
-        event.setUuid(null);
-        return new ResponseEntity<>(mapper.map(eventRepository.save(event),EventInformation.class),HttpStatus.CREATED);
-    }
-
-    /**
+     * creates an event in the specified organization and adds the given account with the role organizer
      * @param event the event to be created
      * @param account the account which shall be used to create the event
      * @param organization the organization in which to create the event
-     * @return ResponseEntity with information of the created event
+     * @return event which has been created
      */
-    public ResponseEntity createEventInOrganization(Event event, Optional<FleventsAccount> account, Organization organization){
+    public Event createEventInOrganization(Event event, FleventsAccount account, Organization organization){
         event.setUuid(null);
         event.setOrganization(organization);
-        event =  eventRepository.saveAndFlush(event);
-        EventRegistration registration = eventRegistrationRepository.save(new EventRegistration(null,event,account.get(),EventRole.organizer));
-        event.setAttendees(Arrays.asList(registration));
-        return new ResponseEntity(mapper.map(event, EventInformation.class),HttpStatus.CREATED);
+        event = eventRepository.saveAndFlush(event);
+        addAccountToEvent(event,account,EventRole.organizer);
+        return event;
     }
 
     /**
      * sets the event of a given id to the specified event
      * @param eventId the id of the event to be set
      * @param event the event to be set to the given id
-     * @return ResponseEntity with information of the process
+     * @return the overwritten event
      */
-    public ResponseEntity setEventById(String eventId, Event event){
-        try{
-            Event srcEvent = eventRepository.findById(eventId).get();
-            srcEvent.merge(event);
-            return new ResponseEntity<>(mapper.map(eventRepository.save(srcEvent),EventInformation.class),HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public Event setEventById(String eventId, Event event){
+        Event srcEvent = eventRepository.findById(eventId).get();
+        srcEvent.merge(event);
+        return srcEvent;
     }
 
     /**
-     * sends an invitation email to the given email with a link to register with the specified role to the specified event
-     * @param email the email to send the invitation link to
-     * @param role the role which gets assigned to the invited person
-     * @param account the account to be invited
-     * @param event the event to be invited to
-     * @return ResponseEntity with information of the process
-     */
-    public ResponseEntity inviteToEvent(String email, EventRole role, FleventsAccount account, Optional<Event> event){
-        //TODO: Implement
-        EventRegistration registration = eventRegistrationRepository.save(new EventRegistration(null,event.get(),account,EventRole.invited));
-        try {
-            eMailService.sendEventInvitaion(event.get(),email, registration.getId() +role.toString());
-        } catch (MessagingException e) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
-     * adds an account to an event
-     * @param eventId the id of the event to add the account to
-     * @param accountId the id of the account to be added to the event
-     * @param token a token to verify the invitation to the event
+     * @param event the event to add the account to
      * @param account the account to be added to the event
-     * @return ResponseEntity with information about the process
+     * @param role the role the account has in the event
+     * @return the eventregistration object
      */
-    public ResponseEntity addAccountToEvent(String eventId, String accountId, String token, FleventsAccount account){
-
-        //TODO:
-        if(token==null){
-            Event event = eventRepository.findById(eventId).get();
-            List<FleventsAccount> accounts = event.getOrganization().getAccounts().stream().map(organizationAccount -> organizationAccount.getAccount()).collect(Collectors.toList());
-            if(accounts.contains(account)){
-                eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.attendee));
-                return new ResponseEntity(HttpStatus.OK);
-            }
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    public EventRegistration addAccountToEvent(Event event, FleventsAccount account, EventRole role){
+        if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
+            throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
+        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+    }
 
-        Optional<EventRegistration> optionalEventRegistration = eventRegistrationRepository.findById(token.substring(0,32));
-
-        if(!optionalEventRegistration.isPresent()){
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    /**
+     * Changes if possible the role of a registration
+     * @param event the event where the role of the account has to be changed
+     * @param account the account which ones role has to be changed
+     * @param fromRole the previous role of the account
+     * @param toRole the new role of the account
+     */
+    public void changeRole(Event event, FleventsAccount account, EventRole fromRole, EventRole toRole){
+        Optional<EventRegistration> optional = event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(fromRole)).findAny();
+        if(!optional.isPresent()){
+            throw new NoSuchElementException("Cannot find a registration according to the given values");
         }
-
-        EventRole role = EventRole.valueOf(token.substring(32));
-
-        if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId,eventId,role).isPresent()) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(toRole)).findAny().isPresent()){
+            throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
         }
-
-        EventRegistration registration = optionalEventRegistration.get();
-        registration.setAccount(account);
-        registration.setRole(role);
+        EventRegistration registration = optional.get();
+        registration.setRole(toRole);
         eventRegistrationRepository.save(registration);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
-     * @param eventId the id of the event where the role of the account has to be changed
-     * @param accountId the id of the account where the role has to be changed
-     * @param role the role to change the role of the account to
-     * @return ResponseEntity with information of the process
+     * @param event the event where to remove the account from
+     * @param account the account to be removed from
+     * @param role the role of the account in the event
      */
-    public ResponseEntity changeRole(String eventId, String accountId, EventRole role){
-        EventRole currEventRole = EventRole.guest;
-        Event event = eventRepository.findById(eventId).get();
-        for(int i = 0; i < event.getAttendees().size(); i++){
-            if(event.getAttendees().get(i).getAccount().getUuid().equals(accountId) && event.getAttendees().get(i).getRole() != EventRole.organizer){
-                currEventRole = event.getAttendees().get(i).getRole();
-            }
-        }
-        EventRegistration reg = eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, currEventRole).get();
-        reg.setRole(role);
-        eventRegistrationRepository.save(reg);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    /**
-     * @param eventId  the id of the event to create the account in
-     * @param eMail the email of the account to be created
-     * @return PesponseEntity with information of the process
-     */
-    public ResponseEntity createAndAddAccountToEvent(String eventId, String eMail, FleventsAccount account){
-
-        //TODO: Implement
-        Event event = eventRepository.findById(eventId).get();
-
-        eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.guest));
-        return new ResponseEntity<>(account,HttpStatus.OK);
-    }
-
-    /**
-     * @param eventId the id of the event to add the anonymous account to
-     * @param account the anonymous account to be added
-     * @return HttpStatus with the information whether the process was successfull
-     */
-    public HttpStatus addAnonymousAccountToEvent(String eventId, FleventsAccount account){
-        try{
-            //TODO:
-            account.setUuid(null);
-            Event event = eventRepository.findById(eventId).get();
-            eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.guest));
-            return HttpStatus.OK;
-        }catch (Exception e){
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-    }
-
-    /**
-     * @param eventId the id of the event to remove the account from
-     * @param accountId the id of the account to be removed from the event
-     * @param role the role of the account
-     * @return ResponseEntity with information of the process
-     */
-    public ResponseEntity removeAccountToEvent(String eventId, String accountId, EventRole role){
-        Optional<EventRegistration> registration= eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, role);
-        if(registration.isEmpty()){
-            return new ResponseEntity<>("Found no account with these specification on this event.",HttpStatus.BAD_REQUEST);
-        }
-        if(EventRole.organizer.equals(role)
-                && eventRegistrationRepository.findByEvent_UuidAndRole(eventId,EventRole.organizer).size()<=1
-        ){
-            return new ResponseEntity<>("Can't delete last organizer",HttpStatus.BAD_REQUEST);
-        }
-        eventRegistrationRepository.delete(registration.get());
-        return new ResponseEntity<>("Deleted!",HttpStatus.OK);
+    public void removeAccountFromEvent(Event event, FleventsAccount account, EventRole role){
+        eventRegistrationRepository.delete(getEventRegistration(event.getUuid(), account.getUuid(), role));
     }
 }

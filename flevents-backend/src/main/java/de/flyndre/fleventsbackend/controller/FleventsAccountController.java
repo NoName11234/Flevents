@@ -4,21 +4,13 @@ import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
-import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
-import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
-import de.flyndre.fleventsbackend.services.EMailService;
-import de.flyndre.fleventsbackend.services.EMailServiceImpl;
-import de.flyndre.fleventsbackend.services.FleventsAccountControllerService;
-import jakarta.mail.MessagingException;
+import de.flyndre.fleventsbackend.controllerServices.FleventsAccountControllerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,9 +18,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/accounts")
 public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;
+    private final ModelMapper mapper;
 
-    public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService){
+    public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper){
         this.fleventsAccountControllerService = fleventsAccountControllerService;
+        this.mapper = mapper;
     }
 
     /**
@@ -38,7 +32,7 @@ public class FleventsAccountController {
      */
     @GetMapping("/validate")
     public ResponseEntity getAccountPreview(@RequestParam String email, @RequestParam String secret){
-        return fleventsAccountControllerService.getAccountPreview(email, secret);
+        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
     }
 
     /**
@@ -47,7 +41,7 @@ public class FleventsAccountController {
      */
     @GetMapping("/{accountId}")
     public AccountInformation getAccountInfo(@PathVariable String accountId){
-        return fleventsAccountControllerService.getAccountInfo(accountId);
+        return mapper.map(fleventsAccountControllerService.getAccountById(accountId), AccountInformation.class);
     }
 
     /**
@@ -56,7 +50,7 @@ public class FleventsAccountController {
      */
     @GetMapping("/{accountId}/booked-events")
     public List<EventInformation> getBookedEvents(@PathVariable String accountId){
-        return fleventsAccountControllerService.getBookedEvents(accountId);
+        return fleventsAccountControllerService.getBookedEvents(accountId).stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
     }
 
     /**
@@ -65,7 +59,7 @@ public class FleventsAccountController {
      */
     @GetMapping("/{accountId}/managed-events")
     public List<EventInformation> getManagedEvents(@PathVariable String accountId){
-        return fleventsAccountControllerService.getManagedEvents(accountId);
+        return fleventsAccountControllerService.getManagedEvents(accountId).stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
     }
 
     /**
@@ -74,7 +68,7 @@ public class FleventsAccountController {
      */
     @GetMapping("/{accountId}/explore-events")
     public List<EventInformation> getExploreEvents(@PathVariable String accountId){
-        return fleventsAccountControllerService.getExploreEvents(accountId);
+        return fleventsAccountControllerService.getExploreEvents(accountId).stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
     }
 
     /**
@@ -84,7 +78,7 @@ public class FleventsAccountController {
      */
     @GetMapping("/{accountId}/managed-organizations")
     public List<OrganizationInformation> getManagedOrganization(@PathVariable String accountId){
-        return fleventsAccountControllerService.getManagedOrganization(accountId);
+        return fleventsAccountControllerService.getManagedOrganization(accountId).stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList());
     }
 
     /**
@@ -94,7 +88,7 @@ public class FleventsAccountController {
      */
     @PostMapping()
     public ResponseEntity createAccount(@RequestBody FleventsAccount account){
-        return fleventsAccountControllerService.createAccount(account);
+        return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAccount(account), AccountInformation.class),HttpStatus.OK);
     }
 
     /**
@@ -104,7 +98,12 @@ public class FleventsAccountController {
      */
     @PostMapping("/reset-password")
     public ResponseEntity resetPassword(@RequestParam String email){
-        return fleventsAccountControllerService.resetPassword(email);
+        try{
+            fleventsAccountControllerService.resetPassword(email);
+            return new ResponseEntity(HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -114,8 +113,16 @@ public class FleventsAccountController {
      */
     @PostMapping("/{accountId}")
     public ResponseEntity editAccount(@PathVariable String accountId, @RequestBody FleventsAccount account){
-        return fleventsAccountControllerService.editAccount(accountId, account);
+        return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(accountId, account), AccountInformation.class),HttpStatus.OK);
     }
-
+    @DeleteMapping("/{accountId}")
+    public ResponseEntity deleteAccount(@PathVariable String accountId){
+        try{
+            fleventsAccountControllerService.deleteAccount(accountId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+    }
 
 }

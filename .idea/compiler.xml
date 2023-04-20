@@ -8,7 +8,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="flevents-backend" />
-        <module name="flevents-backend (1)" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
