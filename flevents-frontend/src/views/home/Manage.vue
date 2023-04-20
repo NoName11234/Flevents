@@ -46,26 +46,30 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import EventList from "@/layouts/home/EventList.vue";
-import {computed, onMounted, ref} from "vue";
+import {computed} from "vue";
 import Heading from "@/components/Heading.vue";
-import {Organization} from "@/models/organization";
 import security from "@/service/security";
 import {Account} from "@/models/account";
 import {OrganizationRole} from "@/models/organizationRole";
 import {useEventStore} from "@/store/events";
 import {storeToRefs} from "pinia";
-
-const managedOrganizations = ref([] as Organization[]);
+import {useOrganizationStore} from "@/store/organizations";
+import {useAppStore} from "@/store/app";
 
 const eventStore = useEventStore();
 const { managedEvents, loading, error } = storeToRefs(eventStore);
+eventStore.requestHydration();
 
-eventStore.hydrate();
+const organizationStore = useOrganizationStore();
+const { managedOrganizations } = storeToRefs(organizationStore);
+organizationStore.requestHydration();
 
 const account = security.getAccount() as Account;
 const showCreateButton = computed( () => {return validateManaged()});
+
+useAppStore().addToast('test');
+setTimeout(() => useAppStore().addToast('test2'), 1000);
 
 function validateManaged(){
   for(let i = 0; i < account.organizationPreviews.length; i++){
@@ -75,16 +79,6 @@ function validateManaged(){
   }
   return false;
 }
-
-// TODO: Replace with pinia store
-onMounted(async () => {
-  try {
-    let resp = await axios.get(`http://localhost:8082/api/accounts/${account.uuid}/managed-organizations`);
-    managedOrganizations.value = resp.data;
-  } catch (e) {
-    console.error("Failed to fetch managed organizations.");
-  }
-})
 
 </script>
 
