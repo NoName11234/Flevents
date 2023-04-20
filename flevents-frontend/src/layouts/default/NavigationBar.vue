@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref} from "vue";
+import {computed} from "vue";
 import {getAccount} from "@/service/security";
 import {OrganizationRole} from "@/models/organizationRole";
 import {EventRole} from "@/models/eventRole";
@@ -58,7 +58,6 @@ const showExplore = computed( () => {return validateExplore()});
 
 function validateManaged(){
   let user = getAccount();
-  console.log(user);
   if(user != null){
   for(let i = 0; i < getAccount().organizationPreviews.length; i++){
     if(getAccount().organizationPreviews[i].role == OrganizationRole.admin || getAccount().organizationPreviews[i].role == OrganizationRole.organizer){
@@ -76,7 +75,6 @@ function validateManaged(){
 
 function validateExplore(){
   let user = getAccount();
-  console.log(user);
   if(user != null){
     if (user.organizationPreviews && user.organizationPreviews.length > 0) {
       return true;
