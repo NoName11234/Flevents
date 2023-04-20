@@ -1,13 +1,10 @@
 package de.flyndre.fleventsbackend.controller;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.repositories.*;
-import de.flyndre.fleventsbackend.services.EMailService;
-import de.flyndre.fleventsbackend.services.EMailServiceImpl;
-import de.flyndre.fleventsbackend.services.OrganizationControllerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -157,8 +154,15 @@ public class OrganizationController {
       return new ResponseEntity<>(HttpStatus.OK);
    }
 
+   /**
+    * A specified account leaves a specified organization.
+    * @param organizationId the id of the organization to remove the account from
+    * @param accountId the id of the account to be removed
+    * @return ReponseEntity with the http status code
+    */
    @PostMapping("/{organizationId}/leave-organisation/{acountId}")
    public ResponseEntity leaveOrganization(@PathVariable String organizationId, @PathVariable String accountId){
-      return organizationControllerService.leaveOrganization(organizationId, accountId);
+      organizationControllerService.leaveOrganization(organizationId, accountId);
+      return new ResponseEntity<>(HttpStatus.OK);
    }
 }

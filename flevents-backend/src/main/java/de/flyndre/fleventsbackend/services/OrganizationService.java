@@ -88,4 +88,12 @@ public class OrganizationService {
         }
         organizationAccountRepository.save(new OrganizationAccount(null,organization,account,role));
     }
+
+    public void leaveOrganization(Organization organization, FleventsAccount account){
+        Optional<OrganizationAccount> optional = organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)).findAny();
+        if(!optional.isPresent()){
+            throw new IllegalArgumentException("The given account is no part of the given organization");
+        }
+        organizationAccountRepository.delete(optional.get());
+    }
 }
