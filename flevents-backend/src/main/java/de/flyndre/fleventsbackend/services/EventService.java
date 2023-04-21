@@ -149,7 +149,7 @@ public class EventService {
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
             throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
-        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
     }
 
     /**
@@ -189,16 +189,24 @@ public class EventService {
     public void attendeesCheckIn(String eventId, String accountId){
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, EventRole.attendee).isPresent()){
             //throw new IllegalArgumentException("this account is already checked in");
+
         }
     }
 
     /**
      * Gets all checked-In attendees
      * @param eventId the if of the event to get the checked-In attendees from
-     * @return a list with all checked-In attendees
+     * @return a list with the Uuid of all checked-In attendees
      */
-    public List<AccountInformation> getCheckedIn(String eventId){
-        List<AccountInformation> accounts = null;
-        return accounts;
+    public List<String> getCheckedIn(String eventId){
+        List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
+        List<String> checkedIns = null;
+        for (EventRegistration er :eventRegistrations
+        ) {
+            if(er.isCheckedIn()){
+                checkedIns.add(er.getAccount().getUuid());
+            }
+        }
+        return checkedIns;
     }
 }

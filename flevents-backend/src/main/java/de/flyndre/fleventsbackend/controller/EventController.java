@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.controller;
 
+import de.flyndre.fleventsbackend.Models.EventRegistration;
 import de.flyndre.fleventsbackend.Models.EventRole;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
@@ -218,10 +219,10 @@ private final ModelMapper mapper;
    /**
     * Gets all checked-In attendees
     * @param eventId the if of the event to get the checked-In attendees from
-    * @return a list with all checked-In attendees
+    * @return a list with the Uuid of all checked-In attendees
     */
    @GetMapping
-   public List<AccountInformation> getCheckedIn(String eventId){
+   public List<String> getCheckedIn(String eventId){
       return eventControllerService.getCheckedIn(eventId);
    }
 

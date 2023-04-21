@@ -161,9 +161,9 @@ public class EventControllerService {
     /**
      * Gets all checked-In attendees
      * @param eventId the if of the event to get the checked-In attendees from
-     * @return a list with all checked-In attendees
+     * @return a list with all the Uuid of checked-In attendees
      */
-    public List<AccountInformation> getCheckedIn(String eventId){
+    public List<String> getCheckedIn(String eventId){
         return eventService.getCheckedIn(eventId);
     }
 }
