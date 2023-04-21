@@ -5,12 +5,20 @@ import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
+import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
+import org.apache.tomcat.util.http.parser.Authorization;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,12 +46,20 @@ public class OrganizationController {
     * Creates an event in the specified organization with the specified account with the role organizer.
     * @param organizationId the id of the organization to create the event in
     * @param event the event to be created
-    * @param accountId the account to be the default organizer of the created event
     * @return ResponseEntity with the event as an object and the http status code
     */
    @PostMapping("/{organizationId}/create-event")
-   public ResponseEntity createEvent(@PathVariable String organizationId, @RequestBody Event event, @RequestParam String accountId) {
-      return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, accountId),EventInformation.class), HttpStatus.CREATED);
+   public ResponseEntity createEvent(@PathVariable String organizationId, @RequestBody Event event, Authentication auth) {
+
+      boolean grantedAccess = organizationControllerService.getGranted(auth, organizationId, new ArrayList<>(Arrays.asList("organizer", "admin")));
+      UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
+
+      if(grantedAccess){
+      return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
+      }
+
+      return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+
    }
 
    /**

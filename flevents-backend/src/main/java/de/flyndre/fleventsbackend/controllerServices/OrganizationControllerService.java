@@ -2,8 +2,12 @@ package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
+import jakarta.mail.MessagingException;
+import org.springframework.security.core.Authentication;
+
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,12 +25,15 @@ public class OrganizationControllerService {
     private final InvitationTokenService invitationTokenService;
     private final EMailServiceImpl eMailService;
 
-    public OrganizationControllerService(OrganizationService organizationService, FleventsAccountService fleventsAccountService, EventService eventService, InvitationTokenService invitationTokenService, EMailServiceImpl eMailService){
+    private final AuthService authService;
+
+    public OrganizationControllerService(OrganizationService organizationService, FleventsAccountService fleventsAccountService, EventService eventService, InvitationTokenService invitationTokenService, EMailServiceImpl eMailService, AuthService authService){
         this.organizationService = organizationService;
         this.fleventsAccountService = fleventsAccountService;
         this.eventService = eventService;
         this.invitationTokenService = invitationTokenService;
         this.eMailService = eMailService;
+        this.authService = authService;
     }
 
     /**
@@ -118,6 +125,10 @@ public class OrganizationControllerService {
         InvitationToken invitationToken = invitationTokenService.validate(token);
         organizationService.addAccountToOrganization(getOrganizationById(organizationId),fleventsAccountService.getAccountById(accountId),OrganizationRole.valueOf(invitationToken.getRole()));
         invitationTokenService.deleteToken(invitationToken);
+    }
+
+    public boolean getGranted(Authentication auth, String uuid, ArrayList<String> roles){
+       return authService.validateRights(auth, roles, uuid);
     }
 
     /**

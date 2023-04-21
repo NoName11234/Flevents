@@ -1,13 +1,25 @@
 package de.flyndre.fleventsbackend.controller;
 
-import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.controllerServices.FleventsAccountControllerService;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.controllerServices.FleventsAccountControllerService;
+import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
+import de.flyndre.fleventsbackend.security.payload.request.LoginRequest;
+import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
+import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
+import de.flyndre.fleventsbackend.services.FleventsAccountService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,14 +45,19 @@ public class FleventsAccountController {
     }
 
     /**
-     * not implemented yet
-     * @param email the email of the account to get the preview from
-     * @param secret the secret to access the account informatiosn
+     * @param loginRequest the email and password of the account to get the preview from
      * @return ResponseEntity with the http status code
      */
-    @GetMapping("/validate")
-    public ResponseEntity getAccountPreview(@RequestParam String email, @RequestParam String secret){
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
+    @PostMapping("/validate")
+    public ResponseEntity getAccountPreview(@Valid @RequestBody LoginRequest loginRequest){
+        JwtResponse token = fleventsAccountControllerService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/revalidate")
+    public ResponseEntity getnewToken(Authentication auth){
+        JwtResponse token = fleventsAccountControllerService.reevaluate(auth);
+        return ResponseEntity.ok(token);
     }
 
     /**
