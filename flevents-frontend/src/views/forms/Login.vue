@@ -53,6 +53,7 @@ import axios from "axios";
 import Heading from "@/components/Heading.vue";
 import security from "@/service/security";
 import {useRoute, useRouter} from "vue-router";
+import useJwt from '../../../node_modules/jwt-decode'
 const route = useRoute();
 const showPass = ref(false);
 const tooltip = ref("");
@@ -65,29 +66,27 @@ const account : Ref<Partial<Account>> = ref({
 async function fu(){
   document.cookie = "";
   security.resetAccount();
-  let response;
-  await axios.get("http://localhost:8082/api/accounts/validate",{params: { email: account.value.email, secret: account.value.secret } }).then(
-    resp => {
-      console.log(resp);
-      response = resp.data
-      if(resp.data === ""){
-        document.cookie = "";
-        security.resetAccount();
-        tooltip.value = "Passwort oder Email ist falsch."
-      }else{
-        document.cookie = `ACCOUNT=${JSON.stringify(resp.data)}`;
-        security.setAccount(resp.data as Account);
-        let url = "/";
-        if(route.query.location != null && route.query.location !== "/accounts/login"){
-          url = route.query.location as string
-        }
-        router.push({path: url});
-        setTimeout(() => router.go(0), 100);
-      }
+  let response = await axios.post("http://localhost:8082/api/accounts/validate",{ username: account.value.email, password: account.value.secret }); 
+  console.log(response); 
+  if(response.data === ""){
+    document.cookie = "";
+    security.resetAccount();
+    tooltip.value = "Passwort oder Email ist falsch."
+  }else{
+    document.cookie = `TOKEN=${JSON.stringify(response.data.accessToken)}`;
+    let account = (await axios.get(`http://localhost:8082/api/accounts/${response.data.id}`, {headers: {'Authorization': `Bearer ${response.data.accessToken}` }})).data as Account
+    security.setAccount(account);
+    console.log(account); 
+    const decodedJwt = useJwt(response.data.accessToken); 
+    console.log(decodedJwt); 
+   /* let url = "/";
+    if(route.query.location != null && route.query.location !== "/accounts/login"){
+      url = route.query.location as string
     }
-  ).catch((e) => {
-    tooltip.value = "E-Mail oder Passwort ungültig!";
-  });
+    router.push({path: url});
+    setTimeout(() => router.go(0), 100);*/
+  }
+  
 }
 
 onMounted(() => {
