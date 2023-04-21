@@ -47,6 +47,9 @@ public class Event {
     @OneToMany(mappedBy = "event", fetch = FetchType.EAGER)
     private List<EventRegistration> attendees =new ArrayList<>();
 
+    @OneToMany(mappedBy = "event")
+    private List<Post> posts =new ArrayList<>();
+
     public Event(String uuid){
         this.uuid=uuid;
     }

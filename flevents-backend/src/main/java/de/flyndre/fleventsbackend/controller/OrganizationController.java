@@ -7,6 +7,7 @@ import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.apache.tomcat.util.http.parser.Authorization;
+import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +71,9 @@ public class OrganizationController {
     */
    @GetMapping("/{organizationId}")
    public ResponseEntity getOrganization(@PathVariable String organizationId){
-      return new ResponseEntity(mapper.map(organizationControllerService.getOrganizationById(organizationId), OrganizationInformation.class),HttpStatus.OK);
+      Organization organization= organizationControllerService.getOrganizationById(organizationId);
+      OrganizationInformation information = mapper.map(organization, OrganizationInformation.class);
+      return new ResponseEntity(information,HttpStatus.OK);
    }
 
    /**
@@ -96,11 +99,23 @@ public class OrganizationController {
    /**
     * creates a new organization out of the given organization object, not all values have to be set
     * @param organisation the organization to be created
+    * @param email an email address to which an invitation to become the first admin is sent
     * @return ResponseEntity with the organization object and the http status code
     */
    @PostMapping
-   public ResponseEntity createOrganisation(@RequestBody Organization organisation){
-      return new ResponseEntity(mapper.map(organizationControllerService.createOrganisation(organisation),OrganizationInformation.class),HttpStatus.OK);
+   public ResponseEntity createOrganisation(@RequestBody Organization organisation, @RequestParam @NotNull String email){
+      if(!email.matches(".*@.*\\..*")){
+         return new ResponseEntity<>("Please provide a valid email address.",HttpStatus.BAD_REQUEST);
+      }
+      if(organisation.getName()==null||organisation.getName().isBlank()){
+         return new ResponseEntity("Please provide a name for the organization.",HttpStatus.BAD_REQUEST);
+      }
+      try {
+         Organization organization = organizationControllerService.createOrganisation(organisation, email);
+         return new ResponseEntity(mapper.map(organization, OrganizationInformation.class), HttpStatus.OK);
+      }catch (Exception ex){
+         return new ResponseEntity<>(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**

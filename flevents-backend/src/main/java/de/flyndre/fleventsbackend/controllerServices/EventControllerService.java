@@ -34,7 +34,7 @@ public class EventControllerService {
 
     /**
      * @param eventId the id of the event
-     * @return information of the event with the given id
+     * @return the event object
      */
     public Event getEventById(String eventId){
         return eventService.getEventById(eventId);
@@ -42,7 +42,6 @@ public class EventControllerService {
 
     /**
      * @param eventId the id of the event to delete
-     * @return the status whether deleting was succesfull or not
      */
     public void deleteEvent(String eventId){
         eventService.deleteEvent(getEventById(eventId));
@@ -50,7 +49,7 @@ public class EventControllerService {
 
     /**
      * @param eventId the id of the event to get the list of attendees from
-     * @return ResponseEntity with a list with the attendees of the event
+     * @return list with the accounts of the attendees of the event
      */
     public List<FleventsAccount> getAttendees(String eventId){
         return eventService.getAttendees(getEventById(eventId));
@@ -58,16 +57,17 @@ public class EventControllerService {
 
     /**
      * @param eventId the id of the event to get the list of organizers from
-     * @return ResponseEntity with a list with the organizers of the event
+     * @return list of accounts with the organizers of the event
      */
     public List<FleventsAccount> getOrganizers(String eventId){
         return eventService.getOrganizers(getEventById(eventId));
     }
 
     /**
-     * creates an event
      * @param event the event to be created
-     * @return ResponseEntity with information of the created event
+     * @param accountId the id of the account which is registered as organizer
+     * @param organizationId the id of the organization in which to create the event
+     * @return the created event object
      */
     public Event createEvent(Event event,String accountId, String organizationId){
         return eventService.createEventInOrganization(event,accountService.getAccountById(accountId),organizationService.getOrganizationById(organizationId));
@@ -77,7 +77,7 @@ public class EventControllerService {
      * sets the event of a given id to the specified event
      * @param eventId the id of the event to be set
      * @param event the event to be set to the given id
-     * @return ResponseEntity with information of the process
+     * @return updated event
      */
     public Event setEventById(String eventId, Event event){
         return eventService.setEventById(eventId,event);
@@ -88,7 +88,6 @@ public class EventControllerService {
      * @param eventId the id of the event to send an invitation to
      * @param email the email to send the invitation link to
      * @param role the role which gets assigned to the invited person
-     * @return ResponseEntity with information of the process
      */
     public void inviteToEvent(String eventId, String email, EventRole role) throws MessagingException {
         Event event = getEventById(eventId);
@@ -100,39 +99,33 @@ public class EventControllerService {
         }
         EventRegistration registration = eventService.addAccountToEvent(event,account,EventRole.invited);
         InvitationToken token = invitationTokenService.saveToken(new InvitationToken(role.toString()));
-        eMailService.sendEventInvitaion(event,email,token.getToken());
+        eMailService.sendEventInvitaion(event,email,token.toString());
     }
 
     /**
      * @param eventId the id of the event to add the account to
      * @param accountId the id of the account to be added
      * @param token the token in the invitation link to verify the invitation
-     * @return ResponseEntity with information of the process
      */
-    public void addAccountToEvent(String eventId, String accountId, String token){
+    public void acceptInvitation(String eventId, String accountId, String token){
         Event event = getEventById(eventId);
         FleventsAccount account = accountService.getAccountById(accountId);
         InvitationToken invitationToken = invitationTokenService.validate(token);
-        eventService.changeRole(event,account,EventRole.invited,EventRole.valueOf(invitationToken.getRole()));
+        eventService.acceptInvitation(event,account,EventRole.valueOf(invitationToken.getRole()));
+        invitationTokenService.deleteToken(invitationToken);
     }
 
     /**
-     *
-     * @param eventId
-     * @param accountId
-     * @param fromRole
-     * @param toRole
+     *changes the role of a specified account in an event
+     * @param eventId the id of the event with the account
+     * @param accountId the id of the account which role has to be changed
+     * @param fromRole the role of the account before the change
+     * @param toRole the role to change the account to
      */
     public void changeRole(String eventId, String accountId, EventRole fromRole, EventRole toRole){
         eventService.changeRole(getEventById(eventId), accountService.getAccountById(accountId), fromRole,toRole);
     }
 
-    /**
-     * diabled at the moment
-     * @param eventId  the id of the event to create the account in
-     * @param eMail the email of the account to be created
-     * @return PesponseEntity with information of the process
-     */
     /*
     public ResponseEntity createAndAddAccountToEvent(String eventId, String eMail){
 
@@ -141,7 +134,6 @@ public class EventControllerService {
     /**
      * @param eventId the id of the event to add the anonymous account to
      * @param account the anonymous account to be added
-     * @return HttpStatus with the information whether the process was successfull
      */
     public void addAnonymousAccountToEvent(String eventId, FleventsAccount account){
         account = accountService.createAccount(account);
@@ -152,7 +144,6 @@ public class EventControllerService {
      * @param eventId the id of the event to remove the account from
      * @param accountId the id of the account to be removed from the event
      * @param role the role of the account
-     * @return ResponseEntity with information of the process
      */
     public void removeAccountFromEvent(String eventId, String accountId, EventRole role){
         eventService.removeAccountFromEvent(getEventById(eventId),accountService.getAccountById(accountId),role);

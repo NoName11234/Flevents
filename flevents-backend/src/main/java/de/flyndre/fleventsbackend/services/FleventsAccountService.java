@@ -37,6 +37,11 @@ public class FleventsAccountService {
         this.mapper = mapper;
         this.eMailService = eMailService;
     }
+
+    /**
+     * @param accountId
+     * @return
+     */
     public FleventsAccount getAccountById(String accountId){
         Optional<FleventsAccount> optional = fleventsAccountRepository.findById(accountId);
         if(!optional.isPresent()){
@@ -85,6 +90,7 @@ public class FleventsAccountService {
             throw new IllegalArgumentException("The provided email is already in use");
         }
         account.setUuid(null);
+        account.setIsActive(true);
         account.setSecret(encoder.encode(account.getSecret()));
         return fleventsAccountRepository.save(account);
     }

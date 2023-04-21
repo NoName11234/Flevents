@@ -1,31 +1,31 @@
 package de.flyndre.fleventsbackend.Models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.sql.Timestamp;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class InvitationToken {
+public class PostComment {
     @Id
     @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
-    private String id;
-    private String role;
+    private String uuid;
+    @ManyToOne
+    private FleventsAccount author;
+    @ManyToOne
+    private Post post;
+    private Timestamp creationDate;
+    @Lob
+    private String content;
 
-    public InvitationToken(String role){
-        this.role=role;
-    }
-    @Override
-    public String toString(){
-        return id;
-    }
+
 }
