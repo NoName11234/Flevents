@@ -10,6 +10,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableAutoConfiguration
+@EnableScheduling
 public class AppConfiguration {
     @Bean
     public ModelMapper modelMapper(){
@@ -76,6 +78,7 @@ public class AppConfiguration {
         };
         modelMapper.typeMap(Event.class, EventInformation.class).addMappings(mapper ->mapper.using(convertEventRegistrationToAccountPreview).map(Event::getAttendees,EventInformation::setAccountPreviews));
 
+        //modelMapper.typeMap(Post.class, PostInformation.class).addMapping(Post::getUuid,PostInformation::set)
 
         return modelMapper;
     }

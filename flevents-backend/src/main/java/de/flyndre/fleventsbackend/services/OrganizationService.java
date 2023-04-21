@@ -1,139 +1,147 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
-import de.flyndre.fleventsbackend.dtos.AccountInformation;
-import de.flyndre.fleventsbackend.dtos.EventInformation;
-import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
 import de.flyndre.fleventsbackend.repositories.OrganizationRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+/**
+ * Author: Paul Lehmann
+ * Version:
+ * This Class is the service for the Organization repository and the OrganizationAccount repository.
+ * It provides methods for manipulating the data of these repositories.
+ */
 
 @Service
 public class OrganizationService {
     private OrganizationRepository organizationRepository;
     private OrganizationAccountRepository organizationAccountRepository;
-    private EMailService eMailService;
-    private ModelMapper mapper;
-
-    public OrganizationService(OrganizationRepository organizationRepository, OrganizationAccountRepository organizationAccountRepository, ModelMapper mapper){
+    public OrganizationService(OrganizationRepository organizationRepository, OrganizationAccountRepository organizationAccountRepository){
         this.organizationRepository = organizationRepository;
         this.organizationAccountRepository = organizationAccountRepository;
-        this.mapper = mapper;
     }
 
-    public List<OrganizationInformation> getOrganizations(){
-        return organizationRepository.findAll().stream().map(organization -> mapper.map(organization,OrganizationInformation.class)).collect(Collectors.toList());
+    /**
+     * Returns a list of all organizations.
+     * @return List<Organization> list of all organizations
+     */
+    public List<Organization> getOrganizations(){
+        return organizationRepository.findAll();
     }
 
-    public OrganizationInformation getOrganizationInformation(String organizationId){
-        //TODO: Implement
-        return mapper.map(organizationRepository.findById(organizationId),OrganizationInformation.class);
+    /**
+     * Returns the organization specified by its id. Throws an Exception if there is no organization with the given id.
+     * @param organizationId the id of the organization
+     * @return Organization with the given id
+     */
+    public Organization getOrganizationById(String organizationId){
+        Optional<Organization> optional = organizationRepository.findById(organizationId);
+        if(!optional.isPresent()){
+            throw new NoSuchElementException("Could not found an organization with this id");
+        }
+        return optional.get();
     }
 
-    public Organization getOrganization(String organizationId){
-        return organizationRepository.findById(organizationId).get();
+
+    /**
+     * Returns all accounts of the given organization.
+     * @param organization the organization to get the accounts from
+     * @return List<FleventsAccoount> list of all accounts
+     */
+    public List<FleventsAccount> getAccounts(Organization organization){
+        return organization.getAccounts().stream().map(organizationAccount -> organizationAccount.getAccount()).collect(Collectors.toList());
     }
 
-    public List<EventInformation> getEvents(String organizationId){
-        //TODO: Implement
-        return organizationRepository.findById(organizationId).get().getEvents().stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList());
-    }
-
-    public List<AccountInformation> getAccounts(String organizationId){
-        //TODO: Implement
-        return organizationRepository.findById(organizationId).get().getAccounts().stream().map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList());
-    }
-
+    /**
+     * Creates the given organization in the database.
+     * @param organisation the organization to be created
+     * @return the created organization object
+     */
     public Organization createOrganisation(Organization organisation){
-        //TODO: Implement
         organisation.setUuid(null);
         return organizationRepository.save(organisation);
     }
 
-    public ResponseEntity editOrganisation(String organizationId, Organization organisation){
-        //TODO: Implement
+    /**
+     * Overwrites the specified organization with the given organization object.
+     * @param organizationId the id of the organization to be overwritten
+     * @param organisation the new organization object
+     * @return the overwritten organization
+     */
+    public Organization editOrganisation(String organizationId, Organization organisation){
         Organization srcOrganization = organizationRepository.findById(organizationId).get();
         srcOrganization.merge(organisation);
-        return new ResponseEntity(mapper.map(organizationRepository.save(srcOrganization), OrganizationInformation.class), HttpStatus.OK);
+        return organizationRepository.save(srcOrganization);
     }
 
-    public ResponseEntity<String> sendInvitation(String organizationId, String email,OrganizationRole role){
+    /**
+     * Removes the given account from the specified organization.
+     * @param organization the organization with the account to be removed
+     * @param account the account to be removed
+     */
+    public void removeAccount(Organization organization, FleventsAccount account){
+        Optional<OrganizationAccount> optional = organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)).findAny();
+        if(!optional.isPresent()){
+            throw new IllegalArgumentException("The given account is no part of the given organization");
+        }
+        organizationAccountRepository.delete(optional.get());
+    }
+
+    /**
+     * Changes the role of the given account in the specified organization to the new given role. Throws an Exception if the given account is not in the organization or if the given account already has the role to change to.
+     * @param organization the organization with the account
+     * @param account the account which role has to be changed
+     * @param fromRole the previous role of the account
+     * @param toRole the new role of the account
+     */
+    public void changeRole(Organization organization, FleventsAccount account, OrganizationRole fromRole, OrganizationRole toRole){
+        Optional<OrganizationAccount> optional = organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)&&organizationAccount.getRole().equals(fromRole)).findAny();
+        if(!optional.isPresent()){
+            throw new IllegalArgumentException("The given account is no part of the given organization");
+        }
+        if(organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)&&organizationAccount.getRole().equals(toRole)).findAny().isPresent()){
+            throw new IllegalArgumentException("The given account has already the given role");
+        }
+        OrganizationAccount organizationAccount = optional.get();
+        organizationAccount.setRole(toRole);
+        organizationAccountRepository.save(organizationAccount);
+    }
+
+    /**
+     * Returns all organizations where the given account has the role "admin".
+     * @param account the account to get the managed organizations from
+     * @return list of all managed organizations
+     */
+    public List<Organization> getManagedOrganization(FleventsAccount account){
         //TODO: Implement
-        Optional<Organization> organizationOptional = organizationRepository.findById(organizationId);
-        if(!organizationOptional.isPresent()){
-            return new ResponseEntity<>("No Organization with such a id.",HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        try{
-            eMailService.sendOrganizationInvitation(organizationOptional.get(),email,"0efd2537-e7c6-458c-8d18-f09258b30562" +role.toString());
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        List<OrganizationAccount> organizationAccounts = organizationAccountRepository.findByAccount_UuidAndRole(account.getUuid(), OrganizationRole.admin);
+        List<Organization> organisations = organizationAccounts.stream().map(organizationAccount -> organizationAccount.getOrganization()).collect(Collectors.toList());
+        return organisations;
     }
 
-    public ResponseEntity acceptInvitation(String organizationId,String userId,String token, FleventsAccount account){
-        //TODO: Implement
-        if(!token.substring(0,36).equals("0efd2537-e7c6-458c-8d18-f09258b30562")){
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    /**
+     * Adds the given account to the specified organization with the specified role. Throws an exception if the account is already part of the organization.
+     * @param organization the organization to add the account to
+     * @param account the account to be added
+     * @param role the role for the account in the organization
+     */
+    public void addAccountToOrganization(Organization organization, FleventsAccount account, OrganizationRole role){
+        if(organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)&&organizationAccount.getRole().equals(role)).findAny().isPresent()){
+            throw new IllegalArgumentException("This account is already part of this organization in the specified role");
         }
-        OrganizationRole role = OrganizationRole.valueOf(token.substring(36));
-        if(organizationAccountRepository.findByAccount_UuidAndOrganization_Uuid(userId,organizationId).isPresent()){
-            return new ResponseEntity("Accout already in organization",HttpStatus.BAD_REQUEST);
-        }
-        Organization organization = organizationRepository.findById(organizationId).get();
-        organizationAccountRepository.save(new OrganizationAccount(null,organization,account, role));
-        return new ResponseEntity<>(HttpStatus.OK);
+        organizationAccountRepository.save(new OrganizationAccount(null,organization,account,role));
     }
 
-    public ResponseEntity removeAccount(String organizationId, String accountId){
-        Optional<OrganizationAccount> acc = organizationAccountRepository.findByAccount_UuidAndOrganization_Uuid(accountId, organizationId);
-        if(acc.isEmpty()){
-            return new ResponseEntity<>("Found no account with these specification in this organization.",HttpStatus.BAD_REQUEST);
-        }
-        if(OrganizationRole.admin.equals(acc.get().getRole())
-                && organizationAccountRepository.findByOrganization_UuidAndRole(organizationId,OrganizationRole.admin).size()<=1
-        ){
-            return new ResponseEntity<>("Can't delete last administrator",HttpStatus.BAD_REQUEST);
-        }
-        organizationAccountRepository.delete(acc.get());
-        return new ResponseEntity<>("Deleted!",HttpStatus.OK);
-    }
-
-    public ResponseEntity changeRole(String organizationId, String accountId, OrganizationRole role){
-        OrganizationRole currRole = OrganizationRole.member;
-        Organization org = organizationRepository.findById(organizationId).get();
-        for(int i = 0; i < org.getAccounts().size(); i++){
-            if(org.getAccounts().get(i).getAccount().getUuid().equals(accountId)){
-                currRole = org.getAccounts().get(i).getRole();
-            }
-        }
-        if(OrganizationRole.admin.equals(currRole) && !role.equals(OrganizationRole.admin)
-                && organizationAccountRepository.findByOrganization_UuidAndRole(organizationId,OrganizationRole.admin).size()<=1
-        ){
-            return new ResponseEntity<>("Can't degrade last administrator",HttpStatus.BAD_REQUEST);
-        }
-        OrganizationAccount acc = organizationAccountRepository.findByAccount_UuidAndOrganization_Uuid(accountId, organizationId).get();
-        acc.setRole(role);
-        organizationAccountRepository.save(acc);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    public List<OrganizationInformation> getManagedOrganization(String accountId){
-        //TODO: Implement
-        List<OrganizationAccount> organizations = organizationAccountRepository.findByAccount_UuidAndRole(accountId, OrganizationRole.admin);
-        List<OrganizationInformation> informationList = organizations.stream().map(organizationAccount -> {
-            OrganizationInformation organizationInformation = mapper.map(organizationAccount.getOrganization(),OrganizationInformation.class);
-            organizationInformation.setRole(organizationAccount.getRole());
-            return organizationInformation;
-        }).collect(Collectors.toList());
-        return informationList;
+    /**
+     * Deletes the specified organization.
+     * @param organization the organization object to be deleted
+     */
+    public void deleteOrganization(Organization organization){
+        organizationRepository.delete(organization);
     }
 }

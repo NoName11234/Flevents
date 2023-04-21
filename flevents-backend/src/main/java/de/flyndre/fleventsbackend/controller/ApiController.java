@@ -2,6 +2,7 @@ package de.flyndre.fleventsbackend.controller;
 
 import de.flyndre.fleventsbackend.services.ApiService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,8 @@ public class ApiController {
      * @return Hello World! for testing
      */
     @GetMapping("/hello-world")
-    public String helloWorld() {
+    public String helloWorld(Authentication auth) {
+        System.out.println(auth.getAuthorities().toArray()[0]);
         return "Hello world!";
     }
 

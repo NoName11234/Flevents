@@ -12,6 +12,8 @@ import org.hibernate.validator.constraints.Length;
 import java.net.URI;
 import java.sql.Blob;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,18 +35,21 @@ public class Event {
     @Basic(fetch = FetchType.LAZY)
     private String image;
 
-    private Timestamp startTime;
+    private LocalDateTime startTime;
 
-    private Timestamp endTime;
+    private LocalDateTime endTime;
     private String location;
     @OneToOne
-    private MailConfig mailConfig;
+    private MailConfig mailConfig=new MailConfig();
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Organization organization;
 
     @OneToMany(mappedBy = "event", fetch = FetchType.EAGER)
-    private List<EventRegistration> attendees;
+    private List<EventRegistration> attendees =new ArrayList<>();
+
+    @OneToMany(mappedBy = "event")
+    private List<Post> posts =new ArrayList<>();
 
     public Event(String uuid){
         this.uuid=uuid;
@@ -73,7 +78,10 @@ public class Event {
             this.endTime=event.getEndTime();
         }
         if(event.getMailConfig()!=null){
-            this.mailConfig=event.getMailConfig();
+            if(this.mailConfig==null){
+                this.mailConfig=new MailConfig();
+            }
+            this.mailConfig.merge(event.getMailConfig());
         }
     }
 
