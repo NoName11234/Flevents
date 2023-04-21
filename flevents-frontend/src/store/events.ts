@@ -61,7 +61,7 @@ export const useEventStore = defineStore('events', {
 
     /**
      * Retrieves an event.
-     * @param uuid
+     * @param uuid the uuid of the event
      */
     getEvent(uuid: string) {
       return this.managedEvents
