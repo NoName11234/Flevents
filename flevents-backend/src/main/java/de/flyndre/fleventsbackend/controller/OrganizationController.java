@@ -22,8 +22,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Author: Lukas Burkhardt
+ * Version:
+ * This Class is the Controller for the REST-API path "/api/organizations".
+ * It provides an interface regarding organizations.
+ */
+
 @RestController
-@CrossOrigin
+@CrossOrigin   //TODO: Brauchts das wirklich?
 @RequestMapping("/api/organizations")
 public class OrganizationController {
    private OrganizationControllerService organizationControllerService;
@@ -36,8 +43,8 @@ public class OrganizationController {
 
 
    /**
-    * creates an event in the specified organization with the specified account with the role organizer
-    * @param organizationId the id of the organizaion to create the event in
+    * Creates an event in the specified organization with the specified account with the role organizer.
+    * @param organizationId the id of the organization to create the event in
     * @param event the event to be created
     * @return ResponseEntity with the event as an object and the http status code
     */
@@ -56,7 +63,7 @@ public class OrganizationController {
    }
 
    /**
-    * returns a list of the organizations existing in the database
+    * Returns a list of the organizations existing in the database.
     * @return ResponseEntity with a list of organizations and the http status code
     */
    @GetMapping
@@ -65,7 +72,7 @@ public class OrganizationController {
    }
 
    /**
-    * returns a single organization with the given id
+    * Returns a single organization with the given id.
     * @param organizationId the id of the organization to be returned
     * @return ResponseEntity with the organization object and the http status code
     */
@@ -77,7 +84,7 @@ public class OrganizationController {
    }
 
    /**
-    * returns a list of events from a single organization specified by an id
+    * Returns a list of events from a single organization specified by an id.
     * @param organizationId the id of the organization to get the events from
     * @return List<EventInformation> list of events
     */
@@ -87,7 +94,7 @@ public class OrganizationController {
    }
 
    /**
-    * returns a list of account information objects from the accounts of an organization specified by its id
+    * Returns a list of account information objects from the accounts of an organization specified by its id.
     * @param organizationId the id of the organization to get the account information from
     * @return List<AccountInformation> list of account information
     */
@@ -97,7 +104,7 @@ public class OrganizationController {
    }
 
    /**
-    * creates a new organization out of the given organization object, not all values have to be set
+    * Creates a new organization out of the given organization object, not all values have to be set.
     * @param organisation the organization to be created
     * @param email an email address to which an invitation to become the first admin is sent
     * @return ResponseEntity with the organization object and the http status code
@@ -119,7 +126,7 @@ public class OrganizationController {
    }
 
    /**
-    * overwrites an existing organization object with the given organization object
+    * Overwrites an existing organization object with the given organization object.
     * @param organizationId the id of the organization to be overwritten
     * @param organisation the organization object with the new organization information
     * @return ResponseEntity with the new organization object and the http status code
@@ -130,7 +137,7 @@ public class OrganizationController {
    }
 
    /**
-    * sends an invitation link in a mail to a specified organization
+    * Sends an invitation link in a mail to a specified organization.
     * @param organizationId the id of the organization to send a invitation link to
     * @param email the email to send the invitation to
     * @param role the role to set the account with the invitation to
@@ -147,7 +154,7 @@ public class OrganizationController {
    }
 
    /**
-    * adds an account to an organization after the account owner accepted an invitation
+    * Adds an account to an organization after the account owner accepted an invitation.
     * @param organizationId the id of the organization to add the account to
     * @param userId the id of the account to be added to the organization
     * @param token the token to verify the invitation
@@ -160,7 +167,7 @@ public class OrganizationController {
    }
 
    /**
-    * removes a specified account from a specified organization
+    * Removes a specified account from a specified organization.
     * @param organizationId the id of the organization to remove the account from
     * @param accountId the id of the account to be removed
     * @return ReponseEntity with the http status code
@@ -172,7 +179,7 @@ public class OrganizationController {
    }
 
    /**
-    * changes the role of a specified account in a specified organization
+    * Changes the role of a specified account in a specified organization.
     * @param organizationId the id of the organization where to change the accounts role
     * @param accountId the id of the account which role has to be changed
     * @param fromRole the role of the account before the change

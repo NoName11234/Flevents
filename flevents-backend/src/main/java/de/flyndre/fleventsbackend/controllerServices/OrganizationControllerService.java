@@ -4,10 +4,18 @@ import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.security.core.Authentication;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Author: Lukas Burkhardt
+ * Version:
+ * This Class is the service for the OrganizationController class.
+ * It provides methods regarding organizations. The methods of the OrganizationController are mapped on them.
+ */
 
 @Service
 public class OrganizationControllerService {
@@ -29,6 +37,7 @@ public class OrganizationControllerService {
     }
 
     /**
+     * Returns a list of the organizations existing in the database.
      * @return List of all organizations
      */
     public List<Organization> getOrganizations(){
@@ -36,6 +45,7 @@ public class OrganizationControllerService {
     }
 
     /**
+     * Returns a single organization with the given id.
      * @param organizationId the id of the organization to be returned
      * @return the organization object
      */
@@ -44,6 +54,7 @@ public class OrganizationControllerService {
     }
 
     /**
+     * Returns a list of events from a single organization specified by an id.
      * @param organizationId the id of the organization to get the events from
      * @return list of all events from the organization
      */
@@ -52,7 +63,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * get all accounts of an organizations
+     * Get all accounts of an organizations.
      * @param organizationId the id of the organization to get all accounts from
      * @return list of accounts
      */
@@ -61,6 +72,7 @@ public class OrganizationControllerService {
     }
 
     /**
+     * Creates a new organization out of the given organization object, not all values have to be set.
      * @param organisation organization object to be created
      * @param email the email address to send an invitation to become the first admin
      * @return Organization that has been created
@@ -77,7 +89,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * overwrites an existing organization object with the given organization object
+     * Overwrites an existing organization object with the given organization object.
      * @param organizationId the id of the organization to be overwritten
      * @param organisation the organization object with the new organization information
      * @return the updated organization object
@@ -87,7 +99,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * sends an invitation link in a mail to a specified organization
+     * Sends an invitation link in a mail to a specified organization.
      * @param organizationId the id of the organization to send an invitation link to
      * @param email the email to send the invitation to
      * @param role the role to set the account with the invitation to
@@ -104,7 +116,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * adds an account to an organization after the account owner accepted an invitation
+     * Adds an account to an organization after the account owner accepted an invitation.
      * @param organizationId the id of the organization to add the account to
      * @param accountId the id of the account to be added to the organization
      * @param token the token to verify the invitation
@@ -120,7 +132,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * removes a specified account from a specified organization
+     * Removes a specified account from a specified organization.
      * @param organizationId the id of the organization to remove the account from
      * @param accountId the id of the account to be removed
      */
@@ -129,7 +141,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * changes the role of a specified account in a specified organization
+     * Changes the role of a specified account in a specified organization.
      * @param organizationId the id of the organization where to change the accounts role
      * @param accountId the id of the account which role has to be changed
      * @param fromRole the role of the account before the change
@@ -140,7 +152,7 @@ public class OrganizationControllerService {
     }
 
     /**
-     * creates an event in the specified organization and adds the given account with the role organizer
+     * Creates an event in the specified organization and adds the given account with the role organizer.
      * @param event the event to be created
      * @param accountId the id of the account which shall be used to create the event
      * @param organizationId the id of the organization in which to create the event

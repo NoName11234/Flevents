@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,7 +24,7 @@ public class PostComment {
     private FleventsAccount author;
     @ManyToOne
     private Post post;
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
     @Lob
     private String content;
 

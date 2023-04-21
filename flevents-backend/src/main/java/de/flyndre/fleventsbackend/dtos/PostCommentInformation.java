@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,6 +18,6 @@ public class PostCommentInformation {
     private String uuid;
     private FleventsAccount author;
     private Post post;
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
     private String content;
 }

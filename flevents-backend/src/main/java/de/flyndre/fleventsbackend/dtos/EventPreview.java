@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.net.URI;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -14,8 +15,8 @@ public class EventPreview {
     private String name;
     private String description;
     private String image;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private Role role;
     private String location;
 }

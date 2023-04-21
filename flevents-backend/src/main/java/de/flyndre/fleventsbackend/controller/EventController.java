@@ -15,6 +15,13 @@ import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Author: Lukas Burkhardt
+ * Version:
+ * This Class is the Controller for the REST-API path "/api/events".
+ * It provides an interface regarding events.
+ */
+
 @RestController
 @CrossOrigin
 @RequestMapping("/api/events")
@@ -28,6 +35,7 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Returns a list of all existing events.
     * @return list of all events
     */
    @GetMapping
@@ -36,8 +44,9 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Returns the event with the given id.
     * @param eventId the id of the event
-    * @return information of the event with the given id
+    * @return event with the given id
     */
    @GetMapping("/{eventId}")
    public EventInformation getEventById(@PathVariable String eventId){
@@ -45,6 +54,7 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Delets the event with the given id.
     * @param eventId the id of the event to delete
     * @return ResponseEntity with the http status code
     */
@@ -55,8 +65,9 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Returns a list of all attendees from the specified event.
     * @param eventId the id of the event to get the list of attendees from
-    * @return ResponseEntity with a list with the attendees of the event
+    * @return ResponseEntity with a list with the attendees of the event and the http status
     */
    @GetMapping("/{eventId}/attendees")
    public ResponseEntity getAttendees(@PathVariable String eventId){
@@ -64,6 +75,7 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Returns a list of all organizers from the specified event.
     * @param eventId the id of the event to get the list of organizers from
     * @return ResponseEntity with a list with the organizers of the event and the http status code
     */
@@ -85,7 +97,7 @@ private final ModelMapper mapper;
    }
 
    /**
-    * overwrites the event specified with a given id with the specified event
+    * Overwrites the event specified with a given id with the specified event.
     * @param eventId the id of the event to be set
     * @param event the event to be set to the given id
     * @return ResponseEntity with the event object and the http status code
@@ -96,7 +108,7 @@ private final ModelMapper mapper;
    }
 
    /**
-    * sends an invitation email to the given email with a link to register with the specified role to the specified event
+    * Sends an invitation email to the given email with a link to register with the specified role to the specified event.
     * @param eventId the id of the event to send an invitation to
     * @param email the email to send the invitation link to
     * @param role the role which gets assigend to the invited person
@@ -113,6 +125,7 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Adds the specified account to the specified event. The account will have the specified role.
     * @param eventId the id of the event to add the account to
     * @param accountId the id of the account to be added
     * @param token the token in the invitation link to verify the invitation
@@ -125,7 +138,7 @@ private final ModelMapper mapper;
    }
 
    /**
-    *changes the role of a specified account in an event
+    *Changes the role of a specified account in an event.
     * @param eventId the id of the event with the account
     * @param accountId the id of the account which role has to be changed
     * @param fromRole the role of the account before the change
@@ -146,6 +159,7 @@ private final ModelMapper mapper;
 
 
    /**
+    * Adds an anonymous account to an event.
     * @param eventId the id of the event to add the anonymous account to
     * @param account the anonymous account to be added
     * @return ResponseEntity with the http status code
@@ -157,6 +171,7 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Removes a specified account from the specified event. The account needs to have the specified role.
     * @param eventId the id of the event to remove the account from
     * @param accountId the id of the account to be removed from the event
     * @param role the role of the account
@@ -217,7 +232,4 @@ private final ModelMapper mapper;
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
-
-
-
 }
