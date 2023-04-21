@@ -1,5 +1,6 @@
 import api from "@/api/api";
 import {Account} from "@/models/account";
+import axios, {AxiosResponse} from "axios/index";
 
 const base = `/accounts`
 
@@ -43,6 +44,30 @@ class AccountApi {
    */
   delete(uuid: string) {
     return api.delete(`${base}/${uuid}`);
+  }
+
+
+
+  // Security
+
+  /**
+   * Tries to authenticate using given details.
+   * @param email a valid email-address
+   * @param secret a the corresponding encoded password
+   */
+  validate(email: string, secret: string) {
+    return api.post(`${base}/validate`, {
+      username: email,
+      password: secret
+    });
+  }
+
+  /**
+   * Renews the current authentication.
+   */
+  revalidate() {
+    // TODO: implement
+    return new Promise<AxiosResponse>(r => {});
   }
 
 
