@@ -3,6 +3,7 @@ package de.flyndre.fleventsbackend.services;
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
 import de.flyndre.fleventsbackend.repositories.EventRepository;
+import de.flyndre.fleventsbackend.repositories.MailConfigRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,10 +22,12 @@ import java.util.stream.Collectors;
 public class EventService {
     private EventRegistrationRepository eventRegistrationRepository;
     private EventRepository eventRepository;
+    private final MailConfigRepository mailConfigRepository;
 
-    public EventService(EventRegistrationRepository eventRegistrationRepository, EventRepository eventRepository){
+    public EventService(EventRegistrationRepository eventRegistrationRepository, EventRepository eventRepository, MailConfigRepository mailConfigRepository){
         this.eventRegistrationRepository = eventRegistrationRepository;
         this.eventRepository = eventRepository;
+        this.mailConfigRepository = mailConfigRepository;
     }
 
     /**
@@ -140,7 +143,8 @@ public class EventService {
     public Event createEventInOrganization(Event event, FleventsAccount account, Organization organization){
         event.setUuid(null);
         event.setOrganization(organization);
-        event = eventRepository.saveAndFlush(event);
+        mailConfigRepository.save(event.getMailConfig());
+        event = eventRepository.save(event);
         addAccountToEvent(event,account,EventRole.organizer);
         return event;
     }
@@ -154,6 +158,7 @@ public class EventService {
     public Event setEventById(String eventId, Event event){
         Event srcEvent = eventRepository.findById(eventId).get();
         srcEvent.merge(event);
+        srcEvent = eventRepository.save(srcEvent);
         return srcEvent;
     }
 
@@ -218,4 +223,6 @@ public class EventService {
     public void removeAccountFromEvent(Event event, FleventsAccount account, EventRole role){
         eventRegistrationRepository.delete(getEventRegistration(event.getUuid(), account.getUuid(), role));
     }
+
+
 }

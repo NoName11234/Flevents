@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -60,7 +61,7 @@ public class PostControllerService {
     public Post createPost(String eventId, String accountId, Post post){
         post.setEvent(eventService.getEventById(eventId));
         post.setAuthor(accountService.getAccountById(accountId));
-        post.setCreationDate(Timestamp.from(Instant.now()));
+        post.setCreationDate(LocalDateTime.now());
         post.setUuid(null);
         return postService.createPost(post);
 
@@ -87,7 +88,7 @@ public class PostControllerService {
     public Post createComment(String postId,String eventId, String accountId, PostComment comment){
         comment.setPost(postService.getPostById(postId));
         comment.setAuthor(accountService.getAccountById(accountId));
-        comment.setCreationDate(Timestamp.from(Instant.now()));
+        comment.setCreationDate(LocalDateTime.now());
         comment.setUuid(null);
         return postService.createComment(postService.getPostById(postId),comment);
     }

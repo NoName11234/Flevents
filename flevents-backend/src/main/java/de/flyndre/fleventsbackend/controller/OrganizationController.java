@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 
 @RestController
-@CrossOrigin
+@CrossOrigin   //TODO: Brauchts das wirklich?
 @RequestMapping("/api/organizations")
 public class OrganizationController {
    private OrganizationControllerService organizationControllerService;
@@ -36,7 +36,7 @@ public class OrganizationController {
 
    /**
     * Creates an event in the specified organization with the specified account with the role organizer.
-    * @param organizationId the id of the organizaion to create the event in
+    * @param organizationId the id of the organization to create the event in
     * @param event the event to be created
     * @param accountId the account to be the default organizer of the created event
     * @return ResponseEntity with the event as an object and the http status code

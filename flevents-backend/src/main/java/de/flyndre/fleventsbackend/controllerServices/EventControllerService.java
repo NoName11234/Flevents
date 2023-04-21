@@ -3,8 +3,10 @@ package de.flyndre.fleventsbackend.controllerServices;
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -162,5 +164,33 @@ public class EventControllerService {
      */
     public void removeAccountFromEvent(String eventId, String accountId, EventRole role){
         eventService.removeAccountFromEvent(getEventById(eventId),accountService.getAccountById(accountId),role);
+    }
+
+    /**
+     * Run every hour and checks if some scheduled mails have to be sent.
+     * Triggers the email sending for each event, if the time in the email config is at the same time as the system.
+     * Ignoring the values of minute, second and nanosecond.
+     * Makes not sure that the emails were sent when something happens while sending them.
+     */
+    @Scheduled(cron = "1 39 * * * *")
+    public void sendAutomaticEmails(){
+        List<Event> events = eventService.getEvents();
+        LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        for(Event event:events) {
+            if (now.equals(event.getMailConfig().getInfoMessageTime().withMinute(0).withSecond(0).withNano(0))) {
+                try {
+                    eMailService.sendAlertMessage(event);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (now.equals(event.getMailConfig().getFeedbackMessageTime().withMinute(0).withSecond(0).withNano(0))) {
+                try {
+                    eMailService.sendThankMessage(event);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 }
