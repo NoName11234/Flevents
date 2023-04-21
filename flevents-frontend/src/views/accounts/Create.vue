@@ -1,6 +1,6 @@
 <template>
   <Heading text="Account anlegen" />
-  <CardBanner message="Achtung! Hierbei handelt es sich um einen Prototyp. Geben Sie keine sensiblen Daten (Passwörter, E-Mail) ein, wenn sie diese geheimhalten wollen." />
+  <CardBanner message="Achtung! Hierbei handelt es sich um eine Entwicklungsversion. Eingegebene Daten werden noch nicht verschlüsselt. Geben Sie deshalb keine sensiblen Daten (Passwörter, E-Mail) ein, wenn sie diese geheimhalten wollen." />
   <AccountForm  back-route="/home" submit-route="/home"/>
 </template>
 
