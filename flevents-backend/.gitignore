@@ -33,7 +33,6 @@ build/
 .vscode/
 !/flevents-backend.iml
 !/.idea/
-!/.idea/
-!/flevents-backend.iml
 !/src/main/resources/application-local.properties
 !/src/main/resources/application-integration.properties
+/src/main/resources/application-local.properties
