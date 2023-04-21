@@ -31,44 +31,26 @@ import java.util.stream.Collectors;
 public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;
     private final ModelMapper mapper;
-    @Autowired
-    AuthenticationManager authenticationManager;
 
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
     public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper){
         this.fleventsAccountControllerService = fleventsAccountControllerService;
         this.mapper = mapper;
     }
 
     /**
-     * @param email the email of the account to get the preview from
-     * @param secret the secret to access the account informatiosn
+     * @param loginRequest the email and password of the account to get the preview from
      * @return ResponseEntity with information of the process and the account preview
      */
     @PostMapping("/validate")
     public ResponseEntity getAccountPreview(@Valid @RequestBody LoginRequest loginRequest){
+        JwtResponse token = fleventsAccountControllerService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        return ResponseEntity.ok(token);
+    }
 
-         FleventsAccount acc = fleventsAccountControllerService.getByAccountMail(/*DAS IST DIE EMAIL!!!!!*/ loginRequest.getUsername());
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(acc.getUuid(), loginRequest.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
-        //return fleventsAccountControllerService.getAccountPreview(email, secret);
+    @PostMapping("/revalidate")
+    public ResponseEntity getnewToken(Authentication auth){
+        JwtResponse token = fleventsAccountControllerService.reevaluate(auth);
+        return ResponseEntity.ok(token);
     }
 
     /**

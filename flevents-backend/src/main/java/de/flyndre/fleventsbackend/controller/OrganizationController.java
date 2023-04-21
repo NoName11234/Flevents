@@ -16,6 +16,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,17 +42,10 @@ public class OrganizationController {
     */
    @PostMapping("/{organizationId}/create-event")
    public ResponseEntity createEvent(@PathVariable String organizationId, @RequestBody Event event, Authentication auth) {
-      boolean grantedAccess = false;
 
-      //Hol die User-Informationen aus dem Token
+      boolean grantedAccess = organizationControllerService.getGranted(auth, organizationId, new ArrayList<>(Arrays.asList("organizer", "admin")));
       UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
-      //Gehe die Authoriserungen durch: Authorisierungsaufbau: uuid.rolle
-      for(GrantedAuthority authorization : auth.getAuthorities()){
-         //Wenn eine Authorisierung existiert, die die Organisationsuuid sowie die Rolle admin oder organizer hat, gewähre Zugriff
-         if(authorization.getAuthority().equals(organizationId+".admin") || authorization.getAuthority().equals(organizationId+".organizer")){
-            grantedAccess = true;
-         }
-      }
+
       if(grantedAccess){
       return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
       }

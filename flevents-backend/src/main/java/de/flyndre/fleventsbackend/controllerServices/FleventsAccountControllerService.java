@@ -1,18 +1,25 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
-import de.flyndre.fleventsbackend.services.EMailServiceImpl;
-import de.flyndre.fleventsbackend.services.EventService;
-import de.flyndre.fleventsbackend.services.FleventsAccountService;
-import de.flyndre.fleventsbackend.services.OrganizationService;
+import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
+import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
+import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
+import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class FleventsAccountControllerService {
@@ -22,12 +29,27 @@ public class FleventsAccountControllerService {
     private OrganizationService organizationService;
     private final EMailServiceImpl eMailService;
 
-    public FleventsAccountControllerService(FleventsAccountService fleventsAccountService, EventService eventService, OrganizationService organizationService, EMailServiceImpl eMailService){
+    private final AuthService authService;
+
+
+    public FleventsAccountControllerService(FleventsAccountService fleventsAccountService, EventService eventService, OrganizationService organizationService, EMailServiceImpl eMailService, AuthService authService){
         this.fleventsAccountService = fleventsAccountService;
         this.eventService = eventService;
         this.organizationService = organizationService;
         this.eMailService = eMailService;
+        this.authService = authService;
     }
+
+    public JwtResponse login(String mail, String password){
+        FleventsAccount acc = getByAccountMail(mail);
+        return authService.authorize(acc, password);
+    }
+
+    public JwtResponse reevaluate(Authentication auth){
+        UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal();
+        return authService.authorize(getAccountById(user.getId()), user.getPassword());
+    }
+
     public FleventsAccount getAccountById(String accountId){
         return fleventsAccountService.getAccountById(accountId);
     }
