@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -23,8 +23,26 @@ public class MailConfig {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private String registerMessage;
-    private String alertMessage;
-    private Timestamp alertMessageTimestamp;
-    private String thankMessage;
-    private Timestamp thankMessageTimestamp;
+    private String infoMessage;
+    private LocalDateTime infoMessageTime;
+    private String feedbackMessage;
+    private LocalDateTime feedbackMessageTime;
+
+    public void merge(MailConfig mailConfig){
+        if(mailConfig.registerMessage!=null){
+            this.registerMessage=mailConfig.getRegisterMessage();
+        }
+        if(mailConfig.infoMessage !=null){
+            this.infoMessage =mailConfig.getInfoMessage();
+        }
+        if(mailConfig.infoMessageTime !=null){
+            this.infoMessageTime =mailConfig.getInfoMessageTime();
+        }
+        if(mailConfig.feedbackMessageTime !=null){
+            this.feedbackMessage =mailConfig.getFeedbackMessage();
+        }
+        if(mailConfig.feedbackMessageTime !=null){
+            this.feedbackMessageTime =mailConfig.getFeedbackMessageTime();
+        }
+    }
 }

@@ -18,4 +18,8 @@ public interface EMailService{
     void sendNewPassword(String emailAddress, String secret) throws MessagingException;
     void sendReminder(Event event, String emailAddress) throws MessagingException;
     void sendFeedback(Event event, String emailAddress) throws MessagingException;
+
+    void sendAlertMessage(Event event) throws MessagingException;
+
+    void sendThankMessage(Event event) throws MessagingException;
 }

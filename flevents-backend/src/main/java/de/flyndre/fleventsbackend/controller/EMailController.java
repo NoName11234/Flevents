@@ -3,9 +3,7 @@ package de.flyndre.fleventsbackend.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import de.flyndre.fleventsbackend.services.*;
@@ -13,9 +11,13 @@ import de.flyndre.fleventsbackend.dtos.EmailDetails;
 
 import java.util.ArrayList;
 
-@RestController
-@CrossOrigin
-@RequestMapping("/api/mail")
+/*
+This Controller is deprecated!
+ */
+
+//@RestController
+//@CrossOrigin
+//@RequestMapping("/api/mail")
 public class EMailController {
     private final EMailService eMailService;
 
@@ -23,7 +25,7 @@ public class EMailController {
         this.eMailService = eMailService;
     }
 
-    @PostMapping("/sendMail")
+    //@PostMapping("/sendMail")
     public ResponseEntity sendMail(@RequestBody JsonNode details) {
         ArrayNode node = (ArrayNode) details.get("to");
         ArrayList to = new ArrayList();
