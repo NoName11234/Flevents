@@ -24,6 +24,7 @@ const stores = [
 
 type GenericStore = {
   hydrate?: () => Promise<void>,
+  requestHydration?: () => Promise<void>,
   dehydrate?: () => Promise<void>,
 
   [key: string]: any;
@@ -36,5 +37,27 @@ export async function dehydrateAll() {
   for (let useStore of stores) {
     const store = useStore() as GenericStore;
     await store.dehydrate?.();
+  }
+}
+
+/**
+ * Forces all stores that have hydration-function to hydrate.
+ * **Note**: Preferably call `requestHydrationAll()` to use cache advantages.
+ */
+export async function hydrateAll() {
+  for (let useStore of stores) {
+    const store = useStore() as GenericStore;
+    await store.hydrate?.();
+  }
+}
+
+/**
+ * Requests all stores that have requestHydration-function to hydrate if necessary.
+ * Uses advantages of caching instead of forcing all stores to update at once.
+ */
+export async function requestHydrateAll() {
+  for (let useStore of stores) {
+    const store = useStore() as GenericStore;
+    await store.requestHydration?.();
   }
 }
