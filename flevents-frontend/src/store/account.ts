@@ -40,6 +40,19 @@ export const useAccountStore = defineStore({
       this.currentAccount = null;
       this.loading = false;
       this.lastSuccessfulHydration = undefined;
-    }
+    },
+
+    /**
+     * Signals the store that recent contents of it's state are being used.
+     * The store then decides whether the last successful hydration is long enough ago to update the state.
+     */
+    async requestHydration() {
+      if (
+        this.lastSuccessfulHydration === undefined
+        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > 60000
+      ) {
+        await this.hydrate();
+      }
+    },
   },
 })
