@@ -156,14 +156,5 @@ public class FleventsAccountControllerService {
         });
         fleventsAccountService.deleteAccount(account);
     }
-    /**
-     * Validate if the given Authentication matches to the given roles for the given event id.
-     * @param auth the Authentication to validate.
-     * @param uuid the id of the event in which context the validation should be done.
-     * @param roles the event roles that should match.
-     * @return true if the given parameters match, false if not.
-     */
-    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
-        return authService.validateRights(auth, roles, uuid);
-    }
+
 }
