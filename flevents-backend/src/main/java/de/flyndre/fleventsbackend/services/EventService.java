@@ -228,22 +228,17 @@ public class EventService {
 
     /**
      * Sets the attendees status to checkedIn.
-     * @param eventId the id of the event to check in
-     * @param accountId the id of the account to be checked in
+     * @param event the event to check in
+     * @param account the account to be checked in
      */
-    public void attendeesCheckIn(String eventId, String accountId){
-        if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, EventRole.attendee).isPresent()){
-            List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
-            if(eventRegistrations.isEmpty()){
-                throw new NoSuchElementException("This Event doesnt have any registrations");
-            }
-            for (EventRegistration er :eventRegistrations
-            ) {
-                if(er.getAccount().getUuid().equals(accountId)){
-                    er.setCheckedIn(true);
+    public void attendeesCheckIn(Event event, FleventsAccount account){
+        event.getAttendees().stream().map(eventRegistration ->{
+                if(account.getUuid().equals(eventRegistration.getAccount().getUuid())){
+                    eventRegistration.setCheckedIn(true);
                 }
-            }
-        }
+                return null;
+            });
+        eventRepository.save(event);
     }
 
     /**
