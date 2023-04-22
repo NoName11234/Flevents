@@ -27,4 +27,5 @@ public class EventRegistration {
     @ManyToOne(fetch = FetchType.EAGER)
     private FleventsAccount account;
     private EventRole role;
+    private boolean checkedIn;
 }

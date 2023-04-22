@@ -208,4 +208,22 @@ public class EventControllerService {
     public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
         return authService.validateRights(auth, roles, uuid);
     }
+
+    /**
+     * Sets the attendees status to checkedIn.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckIn(String eventId, String accountId){
+        eventService.attendeesCheckIn(eventId, accountId);
+    }
+
+    /**
+     * Gets all checked-In attendees
+     * @param eventId the if of the event to get the checked-In attendees from
+     * @return a list with all the Uuid of checked-In attendees
+     */
+    public List<String> getCheckedIn(String eventId){
+        return eventService.getCheckedIn(eventId);
+    }
 }

@@ -1,6 +1,8 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.AccountInformation;
+import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
 import de.flyndre.fleventsbackend.repositories.EventRepository;
 import de.flyndre.fleventsbackend.repositories.MailConfigRepository;
@@ -173,7 +175,7 @@ public class EventService {
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
             throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
-        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
     }
 
     /**
@@ -210,7 +212,7 @@ public class EventService {
         if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(role)).findAny().isPresent()){
             throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
         }
-        eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
         eventRegistrationRepository.delete(optional.get());
     }
 
@@ -224,5 +226,43 @@ public class EventService {
         eventRegistrationRepository.delete(getEventRegistration(event.getUuid(), account.getUuid(), role));
     }
 
+    /**
+     * Sets the attendees status to checkedIn.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckIn(String eventId, String accountId){
+        if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, EventRole.attendee).isPresent()){
+            List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
+            if(eventRegistrations.isEmpty()){
+                throw new NoSuchElementException("This Event doesnt have any registrations");
+            }
+            for (EventRegistration er :eventRegistrations
+            ) {
+                if(er.getAccount().getUuid().equals(accountId)){
+                    er.setCheckedIn(true);
+                }
+            }
+        }
+    }
 
+    /**
+     * Gets all checked-In attendees
+     * @param eventId the if of the event to get the checked-In attendees from
+     * @return a list with the Uuid of all checked-In attendees
+     */
+    public List<String> getCheckedIn(String eventId){
+        List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
+        List<String> checkedIns = null;
+        if(eventRegistrations.isEmpty()){
+            throw new NoSuchElementException("This Event doesnt have any registrations");
+        }
+        for (EventRegistration er :eventRegistrations
+        ) {
+            if(er.isCheckedIn()){
+                checkedIns.add(er.getAccount().getUuid());
+            }
+        }
+        return checkedIns;
+    }
 }

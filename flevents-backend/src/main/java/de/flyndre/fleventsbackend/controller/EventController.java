@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.controller;
 
+import de.flyndre.fleventsbackend.Models.EventRegistration;
 import de.flyndre.fleventsbackend.Models.EventRole;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
@@ -255,7 +256,7 @@ private final ModelMapper mapper;
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try{
-         //TODO: Implement
+         eventControllerService.attendeesCheckIn(eventId,accountId);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
          return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -291,4 +292,22 @@ private final ModelMapper mapper;
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
+
+   /**
+    * Gets all checked-In attendees
+    * @param eventId the if of the event to get the checked-In attendees from
+    * @return a list with the Uuid of all checked-In attendees
+    */
+   @GetMapping
+   public ResponseEntity getCheckedIn(String eventId){
+      try{
+         List checkedIns = eventControllerService.getCheckedIn(eventId);
+         return new ResponseEntity( checkedIns, HttpStatus.OK);
+      }catch (Exception ex){
+         return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+      }
+   }
+
+
+
 }
