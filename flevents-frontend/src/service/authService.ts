@@ -14,7 +14,7 @@ import api from "@/api/api";
 import router from "@/router";
 import {useJwt} from "@vueuse/integrations/useJwt";
 import security from "@/service/security";
-import {dehydrateAll} from "@/service/storesService";
+import {dehydrateAll, hydrateAll, requestHydrateAll} from "@/service/storesService";
 
 // How many milliseconds to refresh the token before its expiry
 const refreshBuffer = 60000;
@@ -30,7 +30,7 @@ let isRefreshing = false;
  * Schedules a refreshment of the token.
  * @param accessToken the access-token
  */
-function processResponse(accessToken: string) {
+async function processResponse(accessToken: string) {
   const appStore = useAppStore();
 
   // Configure API to include token in all requests
@@ -51,6 +51,12 @@ function processResponse(accessToken: string) {
   appStore.currentAccountId = accountId;
 
   localStorage.setItem(tokenCookieKey, accessToken);
+
+  appStore.globallyLoading = true;
+  // Start loading stuff asynchronously to not slow down login
+  // Therefore: Keep following statement in .then() syntax!
+  await requestHydrateAll();
+  appStore.globallyLoading = false
 }
 
 /**
@@ -66,7 +72,7 @@ export async function login(email: string, plainSecret: string) {
 
   const response = await accountApi.validate(email, encodedSecret);
 
-  processResponse(response.data.accessToken);
+  await processResponse(response.data.accessToken);
 }
 
 /**
@@ -92,7 +98,7 @@ export async function refresh() {
 
   try {
     const response = await accountApi.revalidate();
-    processResponse(response.data.accessToken);
+    await processResponse(response.data.accessToken);
   } catch (e) {
     await logout();
   } finally {
@@ -130,6 +136,6 @@ export async function logout() {
 export async function tryRestoreSession() {
   const encodedToken = localStorage.getItem(tokenCookieKey);
   if (encodedToken === null) return false;
-  processResponse(encodedToken);
+  await processResponse(encodedToken);
   return true;
 }
