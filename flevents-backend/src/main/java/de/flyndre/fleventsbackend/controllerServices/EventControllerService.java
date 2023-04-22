@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the service for the EventController class.
  * It provides methods regarding accounts. The methods of the EventController are mapped on them.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service

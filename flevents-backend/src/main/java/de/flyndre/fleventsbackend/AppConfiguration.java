@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * This Class contains the App-Configuration.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Configuration
 @EnableAutoConfiguration
 @EnableScheduling

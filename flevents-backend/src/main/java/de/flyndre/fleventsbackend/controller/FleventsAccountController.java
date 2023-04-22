@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the Controller for the REST-API path "/api/accounts".
  * It an interface functionality regarding accounts.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @RestController
@@ -53,7 +53,10 @@ public class FleventsAccountController {
         JwtResponse token = fleventsAccountControllerService.login(loginRequest.getUsername(), loginRequest.getPassword());
         return ResponseEntity.ok(token);
     }
-
+    /**
+     * @param auth The AuthenticationToken of the current logged-in User
+     * @return ResponseEntity with the http status code
+     */
     @PostMapping("/refresh")
     public ResponseEntity getnewToken(Authentication auth){
         JwtResponse token = fleventsAccountControllerService.reevaluate(auth);

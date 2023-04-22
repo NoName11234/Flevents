@@ -1,13 +1,15 @@
-// Java Program to Illustrate EmailDetails Class
-
 package de.flyndre.fleventsbackend.dtos;
 
-// Importing required classes
 import lombok.*;
-
 import java.util.List;
 
-// Annotations
+/**
+ * This Class is the Data Transfer Object for Details of Mail.
+ * It provides getter as well as setter.
+ * @implNote This DTO should only be returned in the Controller
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -16,6 +16,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This ist the Authentication-Entrypoint. The Login will be handled here.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 

@@ -24,10 +24,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the service for the FleventsAccountController class.
  * It provides methods regarding accounts. The methods of the FleventsAccountController are mapped on them.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service

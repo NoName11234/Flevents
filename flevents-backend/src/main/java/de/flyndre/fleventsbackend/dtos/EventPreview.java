@@ -3,11 +3,15 @@ package de.flyndre.fleventsbackend.dtos;
 import de.flyndre.fleventsbackend.Models.Role;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.net.URI;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+/**
+ * This Class is the Data Transfer Object for the Preview of Events.
+ * It provides getter as well as setter.
+ * @implNote This DTO should only be returned in the Controller
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Setter
 @Getter
 public class EventPreview {

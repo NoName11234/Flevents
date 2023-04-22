@@ -20,6 +20,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * This ist the Filter for validating and giving Authorization.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
   @Autowired

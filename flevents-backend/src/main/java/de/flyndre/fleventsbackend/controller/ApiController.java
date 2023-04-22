@@ -10,7 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
-
+/**
+ * This Class is the Controller for the REST-API path "/api".
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/api")

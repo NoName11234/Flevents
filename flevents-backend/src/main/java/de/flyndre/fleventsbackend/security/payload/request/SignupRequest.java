@@ -6,7 +6,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.Set;
- 
+/**
+ * This is the DTO of the Creation of an Account which the Frontend sends to the Backend.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 public class SignupRequest {
     @NotBlank
     @Size(min = 3, max = 20)

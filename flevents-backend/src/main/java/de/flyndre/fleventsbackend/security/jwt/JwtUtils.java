@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+/**
+ * This Class handles the creation and decoding of the JWT-Token.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Component
 public class JwtUtils {
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
@@ -21,6 +26,11 @@ public class JwtUtils {
   @Value("${application.jwtExpirationMs}")
   private int jwtExpirationMs;
 
+  /**
+   * generates JWT-Token.
+   * @param authentication The Authentication of the User
+   * @return a String containing the Token
+   */
   public String generateJwtToken(Authentication authentication) {
 
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
@@ -30,11 +40,21 @@ public class JwtUtils {
         .compact();
   }
 
+  /**
+   * get Uuid of JWT-Token.
+   * @param token The JWT-Token
+   * @return a String containing the Uuid
+   */
   public String getUserNameFromJwtToken(String token) {
     String as = String.valueOf(Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody());
     return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
   }
 
+  /**
+   * get Uuid of JWT-Token.
+   * @param authToken The JWT-Token
+   * @return a boolean if the JWT-Token is valid oder not
+   */
   public boolean validateJwtToken(String authToken) {
     try {
       Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
