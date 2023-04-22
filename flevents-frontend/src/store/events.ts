@@ -149,6 +149,8 @@ export const useEventStore = defineStore('events', {
       this.managedEventsIds = [];
       this.exploreEventsIds = [];
       this.cachedEvents = new Map();
+      this.lastCaching = new Map();
+      this.specificLoading = new Map();
       this.lastSuccessfulHydration = undefined;
     }
   },

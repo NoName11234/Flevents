@@ -2,6 +2,10 @@ import { defineStore } from 'pinia'
 import AccountApi from "@/api/accountApi";
 import {Organization} from "@/models/organization";
 import {useAccountStore} from "@/store/account";
+import {FleventsEvent} from "@/models/fleventsEvent";
+import eventApi from "@/api/eventApi";
+import organizationsApi from "@/api/organizationsApi";
+import {computed} from "vue";
 
 export const useOrganizationStore = defineStore('organizations', {
   state: () => ({
@@ -58,6 +62,21 @@ export const useOrganizationStore = defineStore('organizations', {
       }
     },
 
+    async hydrateSpecific(uuid: string) {
+      this.error = false;
+      this.specificLoading.set(uuid, true);
+      try {
+        const response = await organizationsApi.get(uuid);
+        this.cachedOrganizations.set(uuid, response.data as Organization);
+        this.lastCaching.set(uuid, new Date());
+      } catch (e) {
+        console.warn(`Failed to fetch organization with id ${uuid}.`, e);
+        this.error = true;
+      } finally {
+        this.specificLoading.set(uuid, false);
+      }
+    },
+
     /**
      * Signals the store that recent contents of it's state are being used.
      * The store then decides whether the last successful hydration is long enough ago to update the state.
@@ -76,7 +95,15 @@ export const useOrganizationStore = defineStore('organizations', {
      * @param uuid the uuid of the organization
      */
     getOrganization(uuid: string) {
-      return this.managedOrganizations.find(e => e.uuid === uuid);
+      const requestedOrganization = this.cachedOrganizations.get(uuid);
+      const lastUpdate = this.lastCaching.get(uuid);
+      if (
+        requestedOrganization === undefined
+        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > 60000
+      ) {
+        this.hydrateSpecific(uuid);
+      }
+      return requestedOrganization || {} as Organization;
     },
 
     /**
@@ -85,15 +112,24 @@ export const useOrganizationStore = defineStore('organizations', {
      * @param organization the organization
      */
     setOrganization(organization: Organization) {
-      this.managedOrganizations[
-        this.managedOrganizations.findIndex(o => o.uuid === organization.uuid)
-      ] = organization;
+      if (organization === undefined || organization.uuid === undefined) return;
+      this.cachedOrganizations.set(organization.uuid, organization);
+    },
+
+    getOrganizationGetter(uuid: string) {
+      return computed({
+        get: () => this.getOrganization(uuid),
+        set: (e) => this.setOrganization(e),
+      });
     },
 
     async dehydrate() {
       this.loading = false;
       this.error = false;
       this.managedOrganizationsIds = [];
+      this.cachedOrganizations = new Map();
+      this.lastCaching = new Map();
+      this.specificLoading = new Map();
       this.lastSuccessfulHydration = undefined;
     }
   },
