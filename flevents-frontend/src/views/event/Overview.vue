@@ -216,15 +216,10 @@ async function deleteEvent() {
 <template>
   <Heading :text="event?.name ?? 'Lade Event...'" />
 
-  <v-card>
-
-    <v-progress-linear
-      indeterminate
-      absolute
-      location="top"
-      color="secondary"
-      :active="storesLoading"
-    />
+  <v-card
+    :loading="storesLoading"
+    :disabled="storesLoading"
+  >
 
     <v-img
        height="250"
