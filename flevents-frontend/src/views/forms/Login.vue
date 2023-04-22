@@ -30,7 +30,7 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
-        :to="{ name: 'accounts.create' }"
+        :to="{ name: 'accounts.create', query: route.query }"
         variant="text"
       >
         Registrieren
@@ -69,10 +69,11 @@ async function fu() {
   tooltip.value = '';
   try {
     await login(account.value.email!, account.value.secret!);
+    await router.push(decodeURIComponent(route.query.location as string || '/'));
   } catch (e) {
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_BAD_REQUEST) {
-        tooltip.value = 'Falsche Anmeldedaten';
+        tooltip.value = 'Ungültige Anmeldedaten';
       }
       else if (e.code === AxiosError.ERR_NETWORK) {
         tooltip.value = 'Netzwerkfehler';
