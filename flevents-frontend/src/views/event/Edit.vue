@@ -102,7 +102,6 @@ async function submit() {
   try {
     console.log(selectedOrga.value.uuid);
     const response = await eventApi.edit(route.params.uuid as string, fleventsEvent.value);
-    await eventStore.hydrate();
     await router.push({ name: 'events.event', params: { uuid: route.params.uuid } });
   } catch (e) {
     tooltip.value = "Das Event konnte nicht bearbeitet werden.";

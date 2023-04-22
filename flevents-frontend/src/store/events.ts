@@ -8,9 +8,9 @@ import {computed} from "vue";
 
 export const useEventStore = defineStore('events', {
   state: () => ({
-    bookedEvents: [] as FleventsEvent[],
-    managedEvents: [] as FleventsEvent[],
-    exploreEvents: [] as FleventsEvent[],
+    bookedEventsIds: [] as string[],
+    managedEventsIds: [] as string[],
+    exploreEventsIds: [] as string[],
     lastSuccessfulHydration: undefined as Date|undefined,
 
     cachedEvents: new Map<string, FleventsEvent>,
@@ -20,8 +20,24 @@ export const useEventStore = defineStore('events', {
     loading: false,
     error: false,
   }),
+  getters: {
+    bookedEvents(state) {
+      return state.bookedEventsIds
+        .map(id => state.cachedEvents.get(id) || undefined)
+        .filter(e => e !== undefined);
+    },
+    managedEvents(state) {
+      return state.managedEventsIds
+        .map(id => state.cachedEvents.get(id) || undefined)
+        .filter(e => e !== undefined);
+    },
+    exploreEvents(state) {
+      return state.exploreEventsIds
+        .map(id => state.cachedEvents.get(id) || undefined)
+        .filter(e => e !== undefined);
+    },
+  },
   actions: {
-
     /**
      * Hydrates the store by requesting the data from the api.
      */
@@ -42,13 +58,19 @@ export const useEventStore = defineStore('events', {
           AccountApi.getManagedEvents(account.uuid),
           AccountApi.getExploreEvents(account.uuid)
         ]);
-        this.bookedEvents = responses[0].data as FleventsEvent[];
-        this.managedEvents = responses[1].data as FleventsEvent[];
-        this.exploreEvents = responses[2].data as FleventsEvent[];
-        this.bookedEvents.concat(this.managedEvents, this.exploreEvents).forEach(e =>
-          e.uuid ? this.cachedEvents.set(e.uuid, e) : undefined
-        );
+        const bookedEvents = responses[0].data as FleventsEvent[];
+        const managedEvents = responses[1].data as FleventsEvent[];
+        const exploreEvents = responses[2].data as FleventsEvent[];
+        bookedEvents.concat(managedEvents, exploreEvents).forEach(e => {
+          if (e.uuid) {
+            this.cachedEvents.set(e.uuid, e);
+            this.lastCaching.set(e.uuid, new Date());
+          }
+        });
         this.lastSuccessfulHydration = new Date();
+        this.bookedEventsIds = bookedEvents.map(e => e.uuid!);
+        this.managedEventsIds = managedEvents.map(e => e.uuid!);
+        this.exploreEventsIds = exploreEvents.map(e => e.uuid!);
       } catch (e) {
         console.warn('Failed to fetch events of logged-in user.', e);
         this.error = true;
@@ -111,15 +133,6 @@ export const useEventStore = defineStore('events', {
     setEvent(event: FleventsEvent|undefined) {
       if (event === undefined || event.uuid === undefined) return;
       this.cachedEvents.set(event.uuid, event);
-      this.bookedEvents[
-        this.bookedEvents.findIndex(e => e.uuid === event.uuid)
-      ] = event;
-      this.managedEvents[
-        this.managedEvents.findIndex(e => e.uuid === event.uuid)
-        ] = event;
-      this.exploreEvents[
-        this.exploreEvents.findIndex(e => e.uuid === event.uuid)
-        ] = event;
     },
 
     getEventGetter(uuid: string) {
@@ -132,11 +145,11 @@ export const useEventStore = defineStore('events', {
     async dehydrate() {
       this.loading = false;
       this.error = false;
-      this.bookedEvents = [];
-      this.managedEvents = [];
-      this.exploreEvents = [];
+      this.bookedEventsIds = [];
+      this.managedEventsIds = [];
+      this.exploreEventsIds = [];
       this.cachedEvents = new Map();
       this.lastSuccessfulHydration = undefined;
     }
   },
-})
+});
