@@ -29,6 +29,6 @@ defineProps({
 
 <style scoped>
 .l-gap-huge {
-  gap: 20px;
+  gap: 20px !important;
 }
 </style>
