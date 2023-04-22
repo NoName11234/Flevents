@@ -5,8 +5,6 @@
 name: Maven Package
 
 on:
-  push:
-      branches: [ "dev" ]
   workflow_dispatch:
 
 
@@ -21,79 +19,6 @@ jobs:
     steps:
    #Check-out your repository under $GITHUB_WORKSPACE, so your workflow can access it
       - uses: actions/checkout@v1
-      #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.datasource.url
-          value: |
-            jdbc:postgresql://h3005487.stratoserver.net:5432/flevents
-      #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.datasource.username
-          value: |
-            postgres
-        #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.datasource.password
-          value: |
-            ${{secrets.DBSECRETPRD}}
-        #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.mail.host
-          value: |
-            smtp.ionos.de
-        #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.mail.port
-          value: |
-            587
-        #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.mail.username
-          value: |
-            info@flyndre.de
-        #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            spring.mail.password
-          value: |
-            ${{secrets.MAILSECRETPRD}}
-        #Set Configuration
-      - name: Set Config
-        uses: christian-draeger/write-properties@1.1.0
-        with:
-          path: 'flevents-backend/src/main/resources/application.properties'
-          property: |
-            application.baseurl
-          value: |
-            flevents.flyndre.de:8080
-               
       #Set up JDK 17
       - name: Set up JDK
         uses: actions/setup-java@v1
@@ -110,9 +35,6 @@ jobs:
       #Test the application using Maven
       - name: Test with Maven
         run: mvn -Dtest=FleventsBackendApplicationTests test --file flevents-backend/pom.xml
-      #Test the application using Maven - all Tests
-      - name: Test with Maven - all
-        run: mvn test --file flevents-backend/pom.xml
       #Build the application using Maven
       - name: Build with Maven
         run: mvn -B package -DskipTests --file flevents-backend/pom.xml

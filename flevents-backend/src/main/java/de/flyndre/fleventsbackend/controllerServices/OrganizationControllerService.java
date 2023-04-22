@@ -164,4 +164,14 @@ public class OrganizationControllerService {
         FleventsAccount account = fleventsAccountService.getAccountById(accountId);
         return eventService.createEventInOrganization(event, account, organization);
     }
+
+    /**
+     *  A specified account leaves a specified organization.
+     * @param organizationId the id of the organization to remove the account from
+     * @param accountId the id of the account to be removed
+     */
+    public void leaveOrganization(String organizationId, String accountId){
+        organizationService.leaveOrganization(getOrganizationById(organizationId), fleventsAccountService.getAccountById(accountId));
+    }
+
 }
