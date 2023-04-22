@@ -149,7 +149,7 @@ public class FleventsAccountController {
      * @param auth the Authentication generated out of a barer token.
      * @return ResponseEntity with the overwritten account and the http status code
      */
-    @PostMapping("/edit")
+    @PutMapping()
     public ResponseEntity editAccount(@RequestBody FleventsAccount account, Authentication auth){
         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
         return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(details.getId(), account), AccountInformation.class),HttpStatus.OK);
