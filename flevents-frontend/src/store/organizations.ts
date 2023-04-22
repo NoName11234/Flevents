@@ -59,6 +59,17 @@ export const useOrganizationStore = defineStore('organizations', {
       return this.managedOrganizations.find(e => e.uuid === uuid);
     },
 
+    /**
+     * Changes the cached organization to the given one.
+     * If one of `event` or `event.uuid` is `undefined` no action is taken.
+     * @param organization the organization
+     */
+    setOrganization(organization: Organization) {
+      this.managedOrganizations[
+        this.managedOrganizations.findIndex(o => o.uuid === organization.uuid)
+      ] = organization;
+    },
+
     async dehydrate() {
       this.loading = false;
       this.error = false;
