@@ -7,7 +7,7 @@ export interface Account {
   firstname: string;
   lastname: string;
   email: string;
-  secret : string;
+  secret : string|undefined;
   role : string;
   eventPreviews: FleventsEventPreview[];
   organizationPreviews: OrganizationPreview[];
