@@ -212,7 +212,7 @@ public class EventService {
         if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(role)).findAny().isPresent()){
             throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
         }
-        eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
         eventRegistrationRepository.delete(optional.get());
     }
 
@@ -233,8 +233,16 @@ public class EventService {
      */
     public void attendeesCheckIn(String eventId, String accountId){
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId, eventId, EventRole.attendee).isPresent()){
-            //throw new IllegalArgumentException("this account is already checked in");
-
+            List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
+            if(eventRegistrations.isEmpty()){
+                throw new NoSuchElementException("This Event doesnt have any registrations");
+            }
+            for (EventRegistration er :eventRegistrations
+            ) {
+                if(er.getAccount().getUuid().equals(accountId)){
+                    er.setCheckedIn(true);
+                }
+            }
         }
     }
 

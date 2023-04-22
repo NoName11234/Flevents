@@ -256,7 +256,7 @@ private final ModelMapper mapper;
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try{
-         //TODO: Implement
+         eventControllerService.attendeesCheckIn(eventId,accountId);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
          return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
