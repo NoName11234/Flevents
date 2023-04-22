@@ -7,19 +7,14 @@ import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
 import de.flyndre.fleventsbackend.security.payload.request.LoginRequest;
+import de.flyndre.fleventsbackend.security.payload.request.LogoutRequest;
 import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
-import de.flyndre.fleventsbackend.services.FleventsAccountService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,10 +33,12 @@ import java.util.stream.Collectors;
 public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;
     private final ModelMapper mapper;
+    private final JwtUtils jwtUtils;
 
-    public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper){
+    public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper, JwtUtils jwtUtils){
         this.fleventsAccountControllerService = fleventsAccountControllerService;
         this.mapper = mapper;
+        this.jwtUtils = jwtUtils;
     }
 
     /**
@@ -58,6 +55,11 @@ public class FleventsAccountController {
     public ResponseEntity getnewToken(Authentication auth){
         JwtResponse token = fleventsAccountControllerService.reevaluate(auth);
         return ResponseEntity.ok(token);
+    }
+    @PostMapping("/logout")
+    public ResponseEntity logout(@RequestBody LogoutRequest request){
+        jwtUtils.invalidateToken(request.getToken());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     /**

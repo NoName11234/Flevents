@@ -3,18 +3,22 @@ package de.flyndre.fleventsbackend.security.jwt;
 
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
+import net.jodah.expiringmap.ExpiringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtils {
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-
+  private ExpiringMap<String,String> invalidTokens = ExpiringMap.builder().variableExpiration().build();
   @Value("${application.jwtSecret}")
   private String jwtSecret;
 
@@ -38,6 +42,9 @@ public class JwtUtils {
   public boolean validateJwtToken(String authToken) {
     try {
       Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+      if(invalidTokens.containsKey(authToken)){
+        return false;
+      }
       return true;
     } catch (SignatureException e) {
       logger.error("Invalid JWT signature: {}", e.getMessage());
@@ -52,5 +59,8 @@ public class JwtUtils {
     }
 
     return false;
+  }
+  public void invalidateToken(String token){
+    invalidTokens.put(token,token,jwtExpirationMs, TimeUnit.MILLISECONDS);
   }
 }

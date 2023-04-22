@@ -16,9 +16,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import java.util.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -27,6 +28,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Autowired
   private UserDetailsServiceImpl userDetailsService;
+
 
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
