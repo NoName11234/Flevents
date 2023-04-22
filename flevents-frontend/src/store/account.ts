@@ -1,8 +1,8 @@
-// Utilities
 import { defineStore } from 'pinia'
 import api from "@/api/api";
 import {Account} from "@/models/account";
 import {useAppStore} from "@/store/app";
+import {STORES} from "@/constants";
 
 /**
  * Stores the events received from the API.
@@ -49,7 +49,7 @@ export const useAccountStore = defineStore({
     async requestHydration() {
       if (
         this.lastSuccessfulHydration === undefined
-        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > 60000
+        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > STORES.CACHE_MAX_AGE
       ) {
         await this.hydrate();
       }

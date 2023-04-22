@@ -1,9 +1,5 @@
-// Utilities
 import { defineStore } from 'pinia'
-import {Account} from "@/models/account";
-
-// The time for which toasts will be in the toasts queue in ms.
-const toastTimeout = 3000;
+import {UI} from "@/constants";
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -35,7 +31,7 @@ export const useAppStore = defineStore('app', {
      */
     addToast(toastText: string) {
       this.toasts.push(toastText);
-      setTimeout(() => this.toasts.shift(), toastTimeout);
+      setTimeout(() => this.toasts.shift(), UI.TOAST_DISPLAY_TIMEOUT);
     }
   },
 })

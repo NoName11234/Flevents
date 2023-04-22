@@ -5,6 +5,7 @@ import {useAccountStore} from "@/store/account";
 import {Account} from "@/models/account";
 import eventApi from "@/api/eventApi";
 import {computed} from "vue";
+import {STORES} from "@/constants";
 
 export const useEventStore = defineStore('events', {
   state: () => ({
@@ -101,7 +102,7 @@ export const useEventStore = defineStore('events', {
     async requestHydration() {
       if (
         this.lastSuccessfulHydration === undefined
-        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > 60000
+        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > STORES.CACHE_MAX_AGE
       ) {
         await this.hydrate();
       }
@@ -118,7 +119,7 @@ export const useEventStore = defineStore('events', {
       const lastUpdate = this.lastCaching.get(uuid);
       if (
         requestedEvent === undefined
-        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > 60000
+        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
       ) {
         this.hydrateSpecific(uuid);
       }

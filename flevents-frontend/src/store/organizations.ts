@@ -6,6 +6,7 @@ import {FleventsEvent} from "@/models/fleventsEvent";
 import eventApi from "@/api/eventApi";
 import organizationsApi from "@/api/organizationsApi";
 import {computed} from "vue";
+import {STORES} from "@/constants";
 
 export const useOrganizationStore = defineStore('organizations', {
   state: () => ({
@@ -84,7 +85,7 @@ export const useOrganizationStore = defineStore('organizations', {
     async requestHydration() {
       if (
         this.lastSuccessfulHydration === undefined
-        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > 60000
+        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > STORES.CACHE_MAX_AGE
       ) {
         await this.hydrate();
       }
@@ -99,7 +100,7 @@ export const useOrganizationStore = defineStore('organizations', {
       const lastUpdate = this.lastCaching.get(uuid);
       if (
         requestedOrganization === undefined
-        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > 60000
+        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
       ) {
         this.hydrateSpecific(uuid);
       }

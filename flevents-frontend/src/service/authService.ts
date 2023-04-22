@@ -15,11 +15,7 @@ import router from "@/router";
 import {useJwt} from "@vueuse/integrations/useJwt";
 import security from "@/service/security";
 import {dehydrateAll, hydrateAll, requestHydrateAll} from "@/service/storesService";
-
-// How many milliseconds to refresh the token before its expiry
-const refreshBuffer = 60000;
-
-const tokenCookieKey = 'TOKEN';
+import {AUTH} from "@/constants";
 
 let refreshTimeout: NodeJS.Timeout;
 let isRefreshing = false;
@@ -44,13 +40,13 @@ async function processResponse(accessToken: string) {
   if (!expiryDate||!accountId) throw new Error(`Invalid access token received.`);
 
   // Set timeout for token refresh
-  refreshTimeout = setTimeout(refresh, expiryDate - refreshBuffer);
+  refreshTimeout = setTimeout(refresh, expiryDate - AUTH.TOKEN_REFRESH_BUFFER);
 
   appStore.accessTokenExpiry = Date.now() + expiryDate;
   appStore.loggedIn = true;
   appStore.currentAccountId = accountId;
 
-  localStorage.setItem(tokenCookieKey, accessToken);
+  localStorage.setItem(AUTH.TOKEN_COOKIE_KEY, accessToken);
 
   appStore.globallyLoading = true;
   // Start loading stuff asynchronously to not slow down login
@@ -89,8 +85,8 @@ export async function refresh() {
   if (isRefreshing) return;
 
   // Do not refresh if token ist still sufficiently valid.
-  if (appStore.accessTokenExpiry && Date.now() < appStore.accessTokenExpiry - refreshBuffer) {
-    refreshTimeout = setTimeout(refresh, appStore.accessTokenExpiry - refreshBuffer - Date.now());
+  if (appStore.accessTokenExpiry && Date.now() < appStore.accessTokenExpiry - AUTH.TOKEN_REFRESH_BUFFER) {
+    refreshTimeout = setTimeout(refresh, appStore.accessTokenExpiry - AUTH.TOKEN_REFRESH_BUFFER - Date.now());
     return;
   }
 
@@ -119,7 +115,7 @@ export async function logout() {
 
   clearTimeout(refreshTimeout);
   security.resetAccount();
-  localStorage.removeItem(tokenCookieKey);
+  localStorage.removeItem(AUTH.TOKEN_COOKIE_KEY);
 
   appStore.loggedIn = false;
   appStore.accessTokenExpiry = -1;
@@ -134,7 +130,7 @@ export async function logout() {
  * @returns `true` if the restoration was successful, `false` otherwise
  */
 export async function tryRestoreSession() {
-  const encodedToken = localStorage.getItem(tokenCookieKey);
+  const encodedToken = localStorage.getItem(AUTH.TOKEN_COOKIE_KEY);
   if (encodedToken === null) return false;
   await processResponse(encodedToken);
   return true;
