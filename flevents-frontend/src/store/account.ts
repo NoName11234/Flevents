@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import api from "@/api/api";
 import {Account} from "@/models/account";
+import {useAppStore} from "@/store/app";
 
 /**
  * Stores the events received from the API.
@@ -12,21 +13,33 @@ export const useAccountStore = defineStore({
   state: () => ({
     currentAccount: null as Account|null,
     loading: false,
+    error: false,
+    lastSuccessfulHydration: undefined as Date|undefined,
   }),
   actions: {
     async hydrate() {
       this.loading = true;
-      if (this.currentAccount === null) {
+      this.error = false;
+      const appStore = useAppStore();
+      if (!appStore.currentAccountId) {
         throw Error('There is no logged in account present.');
       }
       try {
-        const { data } = await api.get(`/accounts/${this.currentAccount.uuid}`);
-        this.currentAccount = data;
+        const { data } = await api.get(`/accounts/${appStore.currentAccountId}`);
+        this.currentAccount = data as Account;
+        this.lastSuccessfulHydration = new Date();
       } catch (e) {
-        console.log(e)
+        console.log(e);
+        this.error = true;
       } finally {
         this.loading = false;
       }
     },
+    async dehydrate() {
+      this.loading = false;
+      this.currentAccount = null;
+      this.loading = false;
+      this.lastSuccessfulHydration = undefined;
+    }
   },
 })
