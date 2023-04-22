@@ -4,6 +4,7 @@ import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,13 +26,16 @@ public class EventControllerService {
     private  final FleventsAccountService accountService;
     private final EMailServiceImpl eMailService;
     private final InvitationTokenService invitationTokenService;
-    public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService){
+    private final AuthService authService;
+
+    public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService, AuthService authService){
         this.eventService = eventService;
         this.fleventsAccountService = fleventsAccountService;
         this.organizationService = organizationService;
         this.accountService = accountService;
         this.eMailService = eMailService;
         this.invitationTokenService = invitationTokenService;
+        this.authService = authService;
     }
 
     /**
@@ -192,5 +196,16 @@ public class EventControllerService {
                 }
             }
         }
+    }
+
+    /**
+     * Validate if the given Authentication matches to the given roles for the given event id.
+     * @param auth the Authentication to validate.
+     * @param uuid the id of the event in which context the validation should be done.
+     * @param roles the event roles that should match.
+     * @return true if the given parameters match, false if not.
+     */
+    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
+        return authService.validateRights(auth, roles, uuid);
     }
 }
