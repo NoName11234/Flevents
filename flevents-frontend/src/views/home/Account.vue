@@ -1,31 +1,11 @@
 <script setup lang="ts">
 import AccountInfo from "@/components/AccountInfo.vue";
-import { Account } from "@/models/account";
 import Heading from "@/components/Heading.vue";
-import {onMounted, ref, Ref} from "vue";
-import security from "@/service/security";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
 
-// TODO: Get from Pinia
-const account: Ref<Account> = ref({
-  uuid: "a1b2c3",
-  firstname: "Peter",
-  lastname: "Korstens",
-  email: "peter-korstens@hochweriges-mail.de",
-  secret: "",
-  role: ""
-} as Account);
-
-// function resetCookie(){
-//   console.log(document.cookie);
-//   document.cookie += "; Max-Age=-99999999; path=/;";
-//   console.log(document.cookie);
-//   router.push("/accounts/login")
-// }
-
-onMounted(() => {
-  //account.value = JSON.parse(document.cookie.split(";")[0].split("=")[1]);
-  account.value = security.getAccount() as Account;
-})
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
 </script>
 
 <template>

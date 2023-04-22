@@ -30,7 +30,7 @@
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
-            :disabled="account == null"
+            :disabled="!loggedIn"
             icon="mdi-logout-variant"
             @click="logout()"
           />
@@ -53,14 +53,14 @@ import router from "@/router";
 import security from "@/service/security";
 import {useAppStore} from "@/store/app";
 import {storeToRefs} from "pinia";
+import {logout as authLogout} from "@/service/authService";
 
 const account : any = ref(security.getAccount());
 const appStore = useAppStore();
-const { globallyLoading } = storeToRefs(appStore);
+const { globallyLoading, loggedIn } = storeToRefs(appStore);
 
 async function logout() {
   await router.push({ name: 'accounts.login' });
-  security.resetAccount();
-  account.value = null;
+  await authLogout();
 }
 </script>

@@ -56,6 +56,7 @@ import {useEventStore} from "@/store/events";
 import {storeToRefs} from "pinia";
 import {useOrganizationStore} from "@/store/organizations";
 import {useAppStore} from "@/store/app";
+import {useAccountStore} from "@/store/account";
 
 const eventStore = useEventStore();
 const { managedEvents, loading, error } = storeToRefs(eventStore);
@@ -65,15 +66,21 @@ const organizationStore = useOrganizationStore();
 const { managedOrganizations } = storeToRefs(organizationStore);
 organizationStore.requestHydration();
 
-const account = security.getAccount() as Account;
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
+
 const showCreateButton = computed( () => {return validateManaged()});
 
 useAppStore().addToast('test');
 setTimeout(() => useAppStore().addToast('test2'), 1000);
 
-function validateManaged(){
-  for(let i = 0; i < account.organizationPreviews.length; i++){
-    if(account.organizationPreviews[i].role == OrganizationRole.admin || account.organizationPreviews[i].role == OrganizationRole.organizer){
+function validateManaged() {
+  if (account.value === null) return false;
+  for (let i = 0; i < account.value.organizationPreviews.length; i++) {
+    if (
+      account.value.organizationPreviews[i].role == OrganizationRole.admin
+      || account.value.organizationPreviews[i].role == OrganizationRole.organizer
+    ) {
       return true;
     }
   }
