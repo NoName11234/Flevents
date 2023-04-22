@@ -127,7 +127,7 @@ public class OrganizationControllerService {
         invitationTokenService.deleteToken(invitationToken);
     }
 
-    public boolean getGranted(Authentication auth, String uuid, ArrayList<String> roles){
+    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
        return authService.validateRights(auth, roles, uuid);
     }
 
