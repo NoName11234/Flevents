@@ -29,8 +29,6 @@ const { currentAccount: account } = storeToRefs(accountStore);
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(route.params.uuid as string);
-eventStore.requestHydration();
-console.log(event.value.accountPreviews);
 
 const surveyStore = useSurveyStore();
 const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid as string) as Questionnaire[]);

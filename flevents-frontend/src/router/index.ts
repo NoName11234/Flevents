@@ -218,7 +218,6 @@ router.beforeEach(async (to, from) => {
     firstLoad = false;
     // On first load, try to restore an eventually present previous session
     await tryRestoreSession();
-    console.log(accountStore.currentAccount);
   }
 
   if (!appStore.loggedIn) {
