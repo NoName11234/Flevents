@@ -22,10 +22,14 @@ const tooltip = ref('');
 const base64String : any = ref();
 
 const eventStore = useEventStore();
+const { loading: storeLoading } = storeToRefs(eventStore);
 const fleventsEvent = eventStore.getEventGetter(route.params.uuid as string);
 
 const organizationStore = useOrganizationStore();
 const { managedOrganizations: organizations } = storeToRefs(organizationStore);
+
+const formLoading = ref(false);
+const loading = computed(() => formLoading.value||storeLoading.value);
 
 const imageFile: Ref<Array<File>> = ref([]);
 // image
@@ -78,19 +82,6 @@ function getBase64(file : any) {
 // submit
 // TODO: properly post to backend (including image file)
 async function submit() {
-  if (!fleventsEvent) {
-    tooltip.value = 'Event ist undefined.';
-    return;
-  }
-  if(imageFile.value.length != 0) {
-    const file = imageFile.value[0]
-    fleventsEvent.value.image = await getBase64(file) as string;
-    console.log(base64String.value);
-  }
-  let start = convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
-  let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
-  fleventsEvent.value.startTime = start.toISOString();
-  fleventsEvent.value.endTime = end.toISOString();
   if (
     fleventsEvent.value.name === ''
     || fleventsEvent.value.description === ''
@@ -99,12 +90,28 @@ async function submit() {
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
+  if (!fleventsEvent) {
+    tooltip.value = 'Event ist undefined.';
+    return;
+  }
+  formLoading.value = true;
+  if (imageFile.value.length != 0) {
+    const file = imageFile.value[0]
+    fleventsEvent.value.image = await getBase64(file) as string;
+    console.log(base64String.value);
+  }
+  let start = convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
+  let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
+  fleventsEvent.value.startTime = start.toISOString();
+  fleventsEvent.value.endTime = end.toISOString();
   try {
     console.log(selectedOrga.value.uuid);
     const response = await eventApi.edit(route.params.uuid as string, fleventsEvent.value);
     await router.push({ name: 'events.event', params: { uuid: route.params.uuid } });
   } catch (e) {
     tooltip.value = "Das Event konnte nicht bearbeitet werden.";
+  } finally {
+    formLoading.value = false;
   }
 }
 </script>
@@ -113,8 +120,7 @@ async function submit() {
 
   <Heading text="Event bearbeiten" />
 
-    <v-card>
-
+    <v-card :disabled="loading" :loading="loading">
       <v-img
         cover
         height="200"

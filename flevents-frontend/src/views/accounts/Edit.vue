@@ -19,9 +19,7 @@ const showCorr = ref(false);
 const correctPassword = ref("");
 const tooltip = ref("");
 const formLoading = ref(false);
-const loading = computed(() =>
-  formLoading || storeLoading
-);
+const loading = computed(() => formLoading.value||storeLoading.value);
 
 async function submit() {
   tooltip.value = "";
@@ -73,7 +71,7 @@ async function submit() {
 <template>
   <Heading text="Konto bearbeiten" />
 
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
       <v-container class="d-flex flex-column gap-3">
 
