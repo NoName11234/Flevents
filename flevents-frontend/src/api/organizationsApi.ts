@@ -85,11 +85,10 @@ class OrganizationApi {
   /**
    * Adds the account with given accountUuid to the event with given uuid if the token is valid.
    * @param uuid the uuid of the organization
-   * @param accountUuid the uuid of the account to be added
    * @param token the token the account has been invited with
    */
-  acceptInvitation(uuid: string, accountUuid: string, token: string) {
-    return api.post(`${base}/${uuid}/add-account/${accountUuid}`, {}, {
+  acceptInvitation(uuid: string, token: string) {
+    return api.post(`${base}/${uuid}/add-account`, {}, {
       params: {
         token,
       }
