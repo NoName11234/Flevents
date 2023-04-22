@@ -1,5 +1,6 @@
 // Utilities
 import { defineStore } from 'pinia'
+import {Account} from "@/models/account";
 
 // The time for which toasts will be in the toasts queue in ms.
 const toastTimeout = 3000;
@@ -22,6 +23,10 @@ export const useAppStore = defineStore('app', {
      * Whether any user is currently logged-in.
      */
     loggedIn: false,
+    /**
+     * ID of the currently logged-in account.
+     */
+    currentAccountId: undefined as string|undefined,
   }),
   actions: {
     /**
