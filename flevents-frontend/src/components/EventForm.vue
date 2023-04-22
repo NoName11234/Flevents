@@ -37,7 +37,7 @@ const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
 const loading = ref(false);
-const fleventsEvent = ref( props.presetEvent || {
+const fleventsEvent = ref( { ...props.presetEvent } as FleventsEvent || {
   name: "",
   description: "",
   location: "",
@@ -72,7 +72,7 @@ function remove(item: any){
 onMounted(async () =>{
   if (props.presetEvent) {
     imgUrl.value = props.presetEvent.image;
-    selectedOrga.value = managedOrganizations.value.find(o => o.uuid === props.presetEvent.organizationPreview.uuid);
+    selectedOrga.value = managedOrganizations.value.find(o => o.uuid === props.presetEvent?.organizationPreview.uuid);
   }
 });
 function getBase64(file : any) {
@@ -111,7 +111,9 @@ async function submit() {
   console.log(fleventsEvent.value.startTime);
   console.log(fleventsEvent.value.endTime);
   try {
-    console.log(selectedOrga.value.uuid);
+    fleventsEvent.value.uuid = undefined;
+    // TODO: Use real mailconfig
+    fleventsEvent.value.mailConfig = fleventsEvent.value.mailConfig ?? {};
     const response = await eventApi.create(fleventsEvent.value, selectedOrga.value.uuid);
     await router.push(props.submitRoute);
   } catch (e) {
