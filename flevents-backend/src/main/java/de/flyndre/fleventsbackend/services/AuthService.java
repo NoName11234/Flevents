@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
 import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
@@ -45,9 +46,9 @@ public class AuthService {
                 roles);
     }
 
-    public boolean validateRights(Authentication auth, ArrayList<String> roles, String allowedUuid){
+    public boolean validateRights(Authentication auth, List<Role> roles, String allowedUuid){
         for(GrantedAuthority authorization : auth.getAuthorities()){
-            for(String role : roles){
+            for(Role role : roles){
                 if(authorization.getAuthority().equals(allowedUuid+"."+role) || authorization.getAuthority().equals(allowedUuid+"."+role)){
                     return true;
                 }

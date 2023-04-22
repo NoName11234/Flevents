@@ -1,22 +1,34 @@
 package de.flyndre.fleventsbackend.controller;
 
+import de.flyndre.fleventsbackend.Models.EventRole;
+import de.flyndre.fleventsbackend.controllerServices.QuestionnaireControllerService;
 import de.flyndre.fleventsbackend.dtos.questionaire.AnsweredQuestionnaire;
 import de.flyndre.fleventsbackend.dtos.questionaire.Questionnaire;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+//todo: implement authorization
 @RestController
 @CrossOrigin
 @RequestMapping("/api/questionnaires")
 public class QuestionnaireController {
     private List<Questionnaire> questionnaireList = new ArrayList<Questionnaire>();
     private List<AnsweredQuestionnaire> answeredQuestionnaires = new ArrayList<>();
+    private final QuestionnaireControllerService questionnaireControllerService;
+
+    public QuestionnaireController(QuestionnaireControllerService questionnaireControllerService) {
+        this.questionnaireControllerService = questionnaireControllerService;
+    }
 
     @GetMapping
-    public ResponseEntity getQuestionnaires(@RequestParam String eventId){
+    public ResponseEntity getQuestionnaires(@RequestParam String eventId, Authentication auth){
+        if(!questionnaireControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
         ArrayList questionnaires = new ArrayList<Questionnaire>();
         for(Questionnaire questionnaire:questionnaireList){
             if(questionnaire.getEventId().equals(eventId)){
@@ -26,7 +38,8 @@ public class QuestionnaireController {
         return new ResponseEntity<>(questionnaires,HttpStatus.OK);
     }
     @GetMapping("/{questionnaireId}")
-    public ResponseEntity getQuestionnaire(@PathVariable String questionnaireId){
+    public ResponseEntity getQuestionnaire(@PathVariable String questionnaireId, Authentication auth){
+
        for(Questionnaire questionnaire:questionnaireList){
            if(questionnaire.getUuid().equals(questionnaireId)){
                return new ResponseEntity(questionnaire,HttpStatus.OK);
@@ -36,7 +49,7 @@ public class QuestionnaireController {
     }
 
     @GetMapping("/{questionnaireId}/answers/{userId}")
-    public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId){
+    public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId, Authentication auth){
         for(AnsweredQuestionnaire questionnaire:answeredQuestionnaires){
             if(questionnaire.getQuestionnaire().equals(questionnaireId)&&questionnaire.getUserId().equals(userId)){
                 return new ResponseEntity<>(questionnaire,HttpStatus.OK);
@@ -46,7 +59,7 @@ public class QuestionnaireController {
     }
 
     @PostMapping
-    public ResponseEntity createQuestionnaire(@RequestParam String eventId,@RequestBody Questionnaire bodyQuestionnaire){
+    public ResponseEntity createQuestionnaire(@RequestParam String eventId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
         bodyQuestionnaire.setUuid(UUID.randomUUID().toString());
         bodyQuestionnaire.setEventId(eventId);
         questionnaireList.add(bodyQuestionnaire);
@@ -65,7 +78,7 @@ public class QuestionnaireController {
         return new ResponseEntity<>(bodyQuestionnaire, HttpStatus.CREATED);
     }
     @PostMapping("/{questionnaireId}")
-    public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire){
+    public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
         Questionnaire questionnaire = null;
         for(Questionnaire questionnaireIt:questionnaireList){
             if(questionnaireIt.getEventId().equals(questionnaireId)){
@@ -82,7 +95,7 @@ public class QuestionnaireController {
     }
 
     @DeleteMapping("/{questionnaireId}")
-    public ResponseEntity deleteQuestionnaire(@PathVariable String questionnaireId) {
+    public ResponseEntity deleteQuestionnaire(@PathVariable String questionnaireId, Authentication auth) {
         Optional<Questionnaire> questionnaire = questionnaireList.stream()
                 .filter((q) -> q.getUuid().equals(questionnaireId))
                 .findFirst();
@@ -94,7 +107,7 @@ public class QuestionnaireController {
     }
 
     @PostMapping("/{questionnaireId}/answers")
-    public ResponseEntity addAnswer(@PathVariable String questionnaireId,@RequestBody AnsweredQuestionnaire answeredQuestionnaire){
+    public ResponseEntity addAnswer(@PathVariable String questionnaireId,@RequestBody AnsweredQuestionnaire answeredQuestionnaire, Authentication auth){
         for(AnsweredQuestionnaire questionnaire:answeredQuestionnaires){
             if(questionnaire.getQuestionnaire().equals(questionnaireId)&&questionnaire.getUserId().equals(answeredQuestionnaire.getUserId())){
                 return new ResponseEntity<>("Already answered",HttpStatus.BAD_REQUEST);

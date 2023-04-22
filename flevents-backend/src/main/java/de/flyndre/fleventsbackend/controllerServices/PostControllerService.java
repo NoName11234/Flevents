@@ -2,13 +2,14 @@ package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
+import de.flyndre.fleventsbackend.Models.Role;
+import de.flyndre.fleventsbackend.services.AuthService;
 import de.flyndre.fleventsbackend.services.EventService;
 import de.flyndre.fleventsbackend.services.FleventsAccountService;
 import de.flyndre.fleventsbackend.services.PostService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -24,11 +25,13 @@ public class PostControllerService {
     private final EventService eventService;
     private final PostService postService;
     private final FleventsAccountService accountService;
+    private final AuthService authService;
 
-    public PostControllerService(EventService eventService, PostService postService, FleventsAccountService accountService) {
+    public PostControllerService(EventService eventService, PostService postService, FleventsAccountService accountService, AuthService authService) {
         this.eventService = eventService;
         this.postService = postService;
         this.accountService = accountService;
+        this.authService = authService;
     }
 
     /**
@@ -91,5 +94,15 @@ public class PostControllerService {
         comment.setCreationDate(LocalDateTime.now());
         comment.setUuid(null);
         return postService.createComment(postService.getPostById(postId),comment);
+    }
+    /**
+     * Validate if the given Authentication matches to the given roles for the given event id.
+     * @param auth the Authentication to validate.
+     * @param uuid the id of the event in which context the validation should be done.
+     * @param roles the event roles that should match.
+     * @return true if the given parameters match, false if not.
+     */
+    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
+        return authService.validateRights(auth, roles, uuid);
     }
 }
