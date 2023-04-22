@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import AccountApi from "@/api/accountApi";
-import Security from "@/service/security";
 import {FleventsEvent} from "@/models/fleventsEvent";
+import {useAccountStore} from "@/store/account";
+import {Account} from "@/models/account";
 
 export const useEventStore = defineStore('events', {
   state: () => ({
@@ -21,7 +22,8 @@ export const useEventStore = defineStore('events', {
     async hydrate() {
       this.error = false;
       this.loading = true;
-      const account = Security.getAccount();
+      const accountStore = useAccountStore();
+      const account = accountStore.currentAccount as Account;
       if (account === null) {
         console.error('Cannot get events without logged-in user.');
         this.error = true;
@@ -68,5 +70,15 @@ export const useEventStore = defineStore('events', {
         .concat(this.bookedEvents, this.bookedEvents)
         .find(e => e.uuid === uuid);
     },
+
+    async dehydrate() {
+      this.loading = false;
+      this.error = false;
+      this.bookedEvents = [];
+      this.managedEvents = [];
+      this.exploreEvents = [];
+      this.cachedEvents = [];
+      this.lastSuccessfulHydration = undefined;
+    }
   },
 })

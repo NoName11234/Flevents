@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import AccountApi from "@/api/accountApi";
-import Security from "@/service/security";
 import {Organization} from "@/models/organization";
+import {useAccountStore} from "@/store/account";
 
 export const useOrganizationStore = defineStore('organizations', {
   state: () => ({
@@ -18,10 +18,10 @@ export const useOrganizationStore = defineStore('organizations', {
     async hydrate() {
       this.error = false;
       this.loading = true;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const account = Security.getAccount();
+      const accountStore = useAccountStore();
+      const account = accountStore.currentAccount;
       if (account === null) {
-        console.error('Cannot get events without logged-in user.');
+        console.error('Cannot get organizations without logged-in user.');
         this.error = true;
         this.loading = false;
         return;
@@ -58,5 +58,12 @@ export const useOrganizationStore = defineStore('organizations', {
     getOrganization(uuid: string) {
       return this.managedOrganizations.find(e => e.uuid === uuid);
     },
+
+    async dehydrate() {
+      this.loading = false;
+      this.error = false;
+      this.managedOrganizations = [];
+      this.lastSuccessfulHydration = undefined;
+    }
   },
 })
