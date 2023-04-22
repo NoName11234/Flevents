@@ -16,9 +16,10 @@ class EventApi {
   /**
    * Creates an event.
    * @param event the account to be created.
+   * @param organizationUuid the uuid of the organization the event belongs to
    */
-  create(event: FleventsEvent) {
-    return api.post(`${base}`, event);
+  create(event: FleventsEvent, organizationUuid: string) {
+    return api.post(`/organizations/${organizationUuid}/create-event`, event);
   }
 
   /**
@@ -35,7 +36,7 @@ class EventApi {
    * @param event the event object containing only the attributed to be modified
    */
   edit(uuid: string, event: FleventsEvent) {
-    return api.put(`${base}/${uuid}`, event);
+    return api.post(`${base}/${uuid}`, event);
   }
 
   /**

@@ -35,7 +35,7 @@ class AccountApi {
    * @param account the account object containing only the attributes to be modified
    */
   edit(uuid: string, account: Account) {
-    return api.put(`${base}/${uuid}`, account);
+    return api.post(`${base}/${uuid}`, account);
   }
 
   /**

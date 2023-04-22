@@ -35,7 +35,7 @@ class OrganizationApi {
    * @param organization the organization object containing only the attributes to be modified
    */
   edit(uuid: string, organization: Organization) {
-    return api.put(`${base}/${uuid}`, organization);
+    return api.post(`${base}/${uuid}`, organization);
   }
 
   /**
