@@ -5,11 +5,23 @@ import {useAccountStore} from "@/store/account";
 
 export const useOrganizationStore = defineStore('organizations', {
   state: () => ({
-    managedOrganizations: [] as Organization[],
+    managedOrganizationsIds: [] as string[],
+    lastSuccessfulHydration: undefined as Date|undefined,
+
+    cachedOrganizations: new Map<string, Organization>,
+    specificLoading: new Map<string, boolean>,
+    lastCaching: new Map<string, Date>,
+
     loading: false,
     error: false,
-    lastSuccessfulHydration: undefined as Date|undefined,
   }),
+  getters: {
+    managedOrganizations(state) {
+      return state.managedOrganizationsIds
+        .map(id => state.cachedOrganizations.get(id) || undefined)
+        .filter(e => e !== undefined) as Organization[];
+    },
+  },
   actions: {
 
     /**
@@ -28,7 +40,15 @@ export const useOrganizationStore = defineStore('organizations', {
       }
       try {
         const response = await AccountApi.getManagedOrganizations(account.uuid);
-        this.managedOrganizations = response.data as Organization[];
+
+        const managedOrganizations = response.data as Organization[];
+        managedOrganizations.forEach(o => {
+          if (o.uuid) {
+            this.cachedOrganizations.set(o.uuid, o);
+            this.lastCaching.set(o.uuid, new Date());
+          }
+        });
+        this.managedOrganizationsIds = managedOrganizations.map(o => o.uuid!);
         this.lastSuccessfulHydration = new Date();
       } catch (error) {
         console.warn('Failed to fetch events of logged-in user.');
@@ -73,7 +93,7 @@ export const useOrganizationStore = defineStore('organizations', {
     async dehydrate() {
       this.loading = false;
       this.error = false;
-      this.managedOrganizations = [];
+      this.managedOrganizationsIds = [];
       this.lastSuccessfulHydration = undefined;
     }
   },

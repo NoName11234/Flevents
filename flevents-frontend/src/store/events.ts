@@ -24,17 +24,17 @@ export const useEventStore = defineStore('events', {
     bookedEvents(state) {
       return state.bookedEventsIds
         .map(id => state.cachedEvents.get(id) || undefined)
-        .filter(e => e !== undefined);
+        .filter(e => e !== undefined) as FleventsEvent[];
     },
     managedEvents(state) {
       return state.managedEventsIds
         .map(id => state.cachedEvents.get(id) || undefined)
-        .filter(e => e !== undefined);
+        .filter(e => e !== undefined) as FleventsEvent[];
     },
     exploreEvents(state) {
       return state.exploreEventsIds
         .map(id => state.cachedEvents.get(id) || undefined)
-        .filter(e => e !== undefined);
+        .filter(e => e !== undefined) as FleventsEvent[];
     },
   },
   actions: {
@@ -67,10 +67,10 @@ export const useEventStore = defineStore('events', {
             this.lastCaching.set(e.uuid, new Date());
           }
         });
-        this.lastSuccessfulHydration = new Date();
         this.bookedEventsIds = bookedEvents.map(e => e.uuid!);
         this.managedEventsIds = managedEvents.map(e => e.uuid!);
         this.exploreEventsIds = exploreEvents.map(e => e.uuid!);
+        this.lastSuccessfulHydration = new Date();
       } catch (e) {
         console.warn('Failed to fetch events of logged-in user.', e);
         this.error = true;
