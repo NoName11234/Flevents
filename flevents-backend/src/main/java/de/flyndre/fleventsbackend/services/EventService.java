@@ -201,6 +201,9 @@ public class EventService {
     public List<String> getCheckedIn(String eventId){
         List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
         List<String> checkedIns = null;
+        if(eventRegistrations.isEmpty()){
+            throw new NoSuchElementException("This Event doesnt have any registrations");
+        }
         for (EventRegistration er :eventRegistrations
         ) {
             if(er.isCheckedIn()){

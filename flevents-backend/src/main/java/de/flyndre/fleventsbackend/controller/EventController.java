@@ -222,8 +222,13 @@ private final ModelMapper mapper;
     * @return a list with the Uuid of all checked-In attendees
     */
    @GetMapping
-   public List<String> getCheckedIn(String eventId){
-      return eventControllerService.getCheckedIn(eventId);
+   public ResponseEntity getCheckedIn(String eventId){
+      try{
+         List checkedIns = eventControllerService.getCheckedIn(eventId);
+         return new ResponseEntity( checkedIns, HttpStatus.OK);
+      }catch (Exception ex){
+         return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+      }
    }
 
 
