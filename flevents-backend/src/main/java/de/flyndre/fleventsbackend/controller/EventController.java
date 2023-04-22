@@ -171,7 +171,7 @@ private final ModelMapper mapper;
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      UserDetailsImpl details = (UserDetailsImpl) auth.getDetails();
+      UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
       eventControllerService.acceptInvitation(eventId, details.getId(), token);
       return new ResponseEntity(HttpStatus.OK);
    }

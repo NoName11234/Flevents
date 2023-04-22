@@ -184,7 +184,7 @@ public class OrganizationController {
     */
    @PostMapping("/{organizationId}/add-account")
    public ResponseEntity acceptInvitation(@PathVariable String organizationId,@RequestParam String token,Authentication auth){
-      UserDetailsImpl details = (UserDetailsImpl) auth.getDetails();
+      UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
       organizationControllerService.acceptInvitation(organizationId, details.getId(), token);
       return new ResponseEntity(HttpStatus.OK);
    }
