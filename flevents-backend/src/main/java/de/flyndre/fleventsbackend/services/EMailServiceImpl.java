@@ -14,6 +14,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+
+/**
+ * Author: Lukas Burkhardt
+ * Version:
+ * This Class is the service for the email service.
+ * It provides methods regarding different types of emails.
+ */
 
 @Component
 public class EMailServiceImpl implements EMailService{
@@ -31,6 +39,7 @@ public class EMailServiceImpl implements EMailService{
     @Value("${spring.mail.username}") private String sender;
 
     /**
+     * Sends a simple mail defined by the given EmailDetails.
      * @param details all details necessary for sending a mail
      * @throws MessagingException gets thrown if something goes wrong while sending the mail
      */
@@ -75,7 +84,7 @@ public class EMailServiceImpl implements EMailService{
     }
 
     /**
-     * sends an email to the specified address containing an invitation link, combined out of the link to the event and a validation token, to the specified organization
+     * Sends an email to the specified address containing an invitation link, combined out of the link to the event and a validation token, to the specified organization.
      * @param organization the organization where the owner of the email gets invited to
      * @param emailAddress the email address to send the mail to
      * @param token the token to validate the invitation link
@@ -91,7 +100,7 @@ public class EMailServiceImpl implements EMailService{
     }
 
     /**
-     * sends an email to the specified address containing an invitation link, combined out of the link to the event and a validation token, to the specified event
+     * Sends an email to the specified address containing an invitation link, combined out of the link to the event and a validation token, to the specified event.
      * @param event the event where the owner of the email gets invited to
      * @param emailAddress the email address to send the mail to
      * @param token the token to validate the invitation link
@@ -113,7 +122,7 @@ public class EMailServiceImpl implements EMailService{
     }
 
     /**
-     * sends an email to the specified address containing a new temporary password
+     * Sends an email to the specified address containing a new temporary password.
      * @param emailAddress the email address to send the mail to
      * @param secret the temporary password
      * @throws MessagingException gets thrown if something goes wrong while sending the mail
@@ -128,7 +137,7 @@ public class EMailServiceImpl implements EMailService{
     }
 
     /**
-     * sends an email to the specified address containing a default or a custom reminder event text, which can be specified in the mailconfig object of the event
+     * Sends an email to the specified address containing a default or a custom reminder event text, which can be specified in the mailconfig object of the event.
      * @param event the event to send the reminder for
      * @param emailAddress the email address to send the mail to
      * @throws MessagingException gets thrown if something goes wrong while sending the mail
@@ -142,14 +151,14 @@ public class EMailServiceImpl implements EMailService{
         if(event.getMailConfig().equals(null)){
             details.setMsgBody("The event "+event.getName()+" starts tomorrow at "+event.getStartTime() + "! Dont miss it!");
         }else{
-            details.setMsgBody(event.getMailConfig().getAlertMessage());
+            details.setMsgBody(event.getMailConfig().getInfoMessage());
         }
 
         sendSimpleEmail(details);
     }
 
     /**
-     * sends an email to the specified address containing a default or a custom text with a thank-you-message for participating, which can be specified in the mailconfig object of the event
+     * Sends an email to the specified address containing a default or a custom text with a thank-you-message for participating, which can be specified in the mailconfig object of the event.
      * @param event the event to send the mail for
      * @param emailAddress the email address to send the mail to
      * @throws MessagingException gets thrown if something goes wrong while sending the mail
@@ -163,9 +172,27 @@ public class EMailServiceImpl implements EMailService{
         if(event.getMailConfig().equals(null)){
             details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
         }else{
-            details.setMsgBody(event.getMailConfig().getThankMessage());
+            details.setMsgBody(event.getMailConfig().getFeedbackMessage());
         }
 
+        sendSimpleEmail(details);
+    }
+
+    @Override
+    public void sendAlertMessage(Event event) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setSubject("Last information for "+event.getName());
+        details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
+        details.setMsgBody(event.getMailConfig().getInfoMessage());
+        sendSimpleEmail(details);
+    }
+
+    @Override
+    public void sendThankMessage(Event event) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setSubject("Thanks to be part of "+event.getName());
+        details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
+        details.setMsgBody(event.getMailConfig().getFeedbackMessage());
         sendSimpleEmail(details);
     }
 }
