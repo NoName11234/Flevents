@@ -1,10 +1,10 @@
 // Composables
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory, RouteLocationRaw} from 'vue-router'
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 import security, {setAccount} from "@/service/security";
 import {Account} from "@/models/account";
-import {tryRestoreSession} from "@/service/authService";
+import {logout, tryRestoreSession} from "@/service/authService";
 
 const routes = [
   {
@@ -201,6 +201,10 @@ let firstLoad = true;
 router.beforeEach(async (to, from) => {
   // console.log(document.cookie);
   // console.log(router.currentRoute.value);
+  const loginRoute = {
+    name: 'accounts.login',
+    query: { location: encodeURIComponent(to.fullPath) }
+  } as RouteLocationRaw;
 
   // If target route is public do not intercept
   if (to.meta?.public === true) {
@@ -212,19 +216,28 @@ router.beforeEach(async (to, from) => {
 
   if (firstLoad) {
     firstLoad = false;
-    // TODO: restore previous session
+    // On first load, try to restore an eventually present previous session
     await tryRestoreSession();
+    console.log(accountStore.currentAccount);
   }
 
   if (!appStore.loggedIn) {
-    // It's because none is logged-in
+    // Not logged-in
     appStore.addToast('Für die angefragte Seite müssen Sie sich einloggen.');
-    return { name: 'accounts.login', query: { location: encodeURIComponent(to.fullPath) } };
+    return loginRoute;
   }
 
   if (!accountStore.currentAccount) {
-    // No current account is present
+    // Logged-in but no account is loaded
+    // Try to load an account:
     await accountStore.hydrate();
+    if (accountStore.error) {
+      // Logged-in but cannot load account
+      // Log-out and get new re-login:
+      await logout();
+      return loginRoute;
+    }
+    // Logged-in and account loaded (previous session restored)
     return true;
   }
 })
