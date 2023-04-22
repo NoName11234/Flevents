@@ -12,10 +12,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Author: Paul Lehmann
- * Version:
- * This Class is the service for the event repository and the eventRegistrationRepository.
+ * This Service provides logic and usage for the event repository and the eventRegistrationRepository.
  * It provides methods for manipulating the data of these repositories.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service

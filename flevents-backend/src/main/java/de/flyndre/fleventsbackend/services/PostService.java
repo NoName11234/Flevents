@@ -10,12 +10,11 @@ import java.util.*;
 import org.springframework.stereotype.Service;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
- * This Class is the service for the Post repository.
+ * This Service provides logic and usage for the Post repository.
  * It provides methods for manipulating the data of these repositories.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
-
 @Service
 public class PostService {
     private final PostRepository postRepository;

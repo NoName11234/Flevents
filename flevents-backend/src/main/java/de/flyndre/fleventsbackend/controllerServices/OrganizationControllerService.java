@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the service for the OrganizationController class.
  * It provides methods regarding organizations. The methods of the OrganizationController are mapped on them.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service

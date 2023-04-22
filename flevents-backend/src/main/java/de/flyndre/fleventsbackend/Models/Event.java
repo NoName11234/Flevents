@@ -15,7 +15,13 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * This Class is the Modelclass for Events.
+ * It provides getter as well as setter and a Merge-Method.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter

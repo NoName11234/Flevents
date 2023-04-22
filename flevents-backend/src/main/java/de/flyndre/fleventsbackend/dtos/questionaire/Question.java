@@ -6,6 +6,13 @@ import org.springframework.lang.Nullable;
 
 import java.util.List;
 
+/**
+ * This Class is a common Questions.
+ * It provides getter as well as setter.
+ * @implNote This Class should not be used and should only be extended of
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Getter
 @Setter
 public class Question {

@@ -11,7 +11,13 @@ import org.hibernate.annotations.GenericGenerator;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * This Class is the Modelclass for Organizations.
+ * It provides getter as well as setter and a Merge-Method.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter

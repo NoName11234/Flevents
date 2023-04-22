@@ -11,10 +11,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Author: Paul Lehmann
- * Version:
- * This Class is the service for the Organization repository and the OrganizationAccount repository.
+ * This Service provides usage and logic for the Organization repository and the OrganizationAccount repository.
  * It provides methods for manipulating the data of these repositories.
+ * @author Paul Lehmann
+ * @version $I$
  */
 
 @Service

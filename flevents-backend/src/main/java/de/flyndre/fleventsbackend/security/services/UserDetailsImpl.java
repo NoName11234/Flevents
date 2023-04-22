@@ -16,6 +16,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+/**
+ * This Class contains Information of the Account, wich is encoded in the Token in the Backend but not in the Frontend.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 public class UserDetailsImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 

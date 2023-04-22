@@ -7,6 +7,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * This Class is the service for the QuestionnaireController class.
+ * It provides methods regarding Questionnaires.
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Service
 public class QuestionnaireControllerService {
     private final AuthService authService;

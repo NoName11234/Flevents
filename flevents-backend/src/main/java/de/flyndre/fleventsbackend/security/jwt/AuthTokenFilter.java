@@ -21,6 +21,11 @@ import java.util.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * This ist the Filter for validating and giving Authorization.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
   @Autowired
