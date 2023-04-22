@@ -16,36 +16,21 @@ import {useEventStore} from "@/store/events";
 import {useSurveyStore} from "@/store/surveys";
 import {usePostStore} from "@/store/posts";
 import {AccountPreview} from "@/models/accountPreview";
-import eventApi from "@/api/eventApi";
+import api from "@/api/api";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
 
 const openContext = ref(false);
-const validateRole = computed(() => {
-  //TODO: Ändern in JWT
-  for(let j = 0; j < organizers?.value?.length; j++){
-    if(security.getAccount()?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer"){
-      return  EventRole.organizer;
-    }
-  }
-  for(let i = 0; i < allAttendees?.value?.length; i++){
-    if(security.getAccount()?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "organizer"){
-      return  EventRole.organizer;
-    }else if(security.getAccount()?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor"){
-      return  EventRole.tutor;
-    }
-  }
-  return EventRole.attendee
-})
-
 const tab = ref(null);
 const address = ref("");
 const route = useRoute();
-const account = security.getAccount() as Account;
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
 
 const eventStore = useEventStore();
-const event = computed(() => {
-  return eventStore.getEvent(route.params.uuid as string) as FleventsEvent
-});
+const event = eventStore.getEventGetter(route.params.uuid as string);
 eventStore.requestHydration();
+console.log(event.value.accountPreviews);
 
 const surveyStore = useSurveyStore();
 const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid as string) as Questionnaire[]);
@@ -69,8 +54,26 @@ const organizers = computed(() => {
 const allAttendees = computed(() => attendees?.value?.concat(organizers.value));
 
 const isAttending = computed(() => {
-  return attendees?.value?.find(v => v!.uuid === account.uuid) != undefined;
+  return attendees?.value?.find(v => v!.uuid === account.value!.uuid) != undefined;
 });
+
+const validateRole = computed(() => {
+  //TODO: Ändern in JWT
+  for (let j = 0; j < organizers?.value?.length; j++){
+    if (account.value?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer") {
+      return EventRole.organizer;
+    }
+  }
+  for (let i = 0; i < allAttendees?.value?.length; i++){
+    if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "organizer") {
+      return EventRole.organizer;
+    }
+    else if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor") {
+      return EventRole.tutor;
+    }
+  }
+  return EventRole.attendee;
+})
 
 const debugPosts = ref([
   {
@@ -119,7 +122,7 @@ const eventStatus = computed(() => {
 async function enroll(){
   enrollLoading.value = true;
   try {
-    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.uuid as string}`);
+    const response = await api.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.value!.uuid as string}`);
     console.log(response);
   } catch (e) {
     // already enrolled
@@ -129,7 +132,7 @@ async function enroll(){
 }
 async function disenroll(){
   enrollLoading.value = true;
-  if (account.organizationPreviews.filter(o => o.uuid === event.value.organizationPreview.uuid).length === 0) {
+  if (account.value!.organizationPreviews.filter(o => o.uuid === event.value.organizationPreview.uuid).length === 0) {
     const accept = window.confirm("Das Event wird von einer Organisation veranstaltet, der Sie nicht angehören. Wenn Sie sich abmelden, können Sie nur über erneute Einladung wieder teilnehmen. Sind Sie sicher?");
     if (!accept) {
       enrollLoading.value = false;
@@ -137,7 +140,7 @@ async function disenroll(){
     }
   }
   try {
-    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.uuid as string}`, {}, {params: {role: "attendee"}});
+    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.value!.uuid as string}`, {}, {params: {role: "attendee"}});
     console.log(response);
   } catch (e) {
     // not enrolled
@@ -257,6 +260,7 @@ async function deleteEvent() {
         Umfragen
       </v-tab>
       <v-tab
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendees"
         :disabled="storesLoading"
       >
