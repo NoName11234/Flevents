@@ -4,7 +4,7 @@
     :logo-src="organization?.icon"
   />
 
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
 
     <v-progress-linear
       indeterminate
@@ -165,36 +165,49 @@ import axios from "axios";
 import security from "@/service/security";
 import {useOrganizationStore} from "@/store/organizations";
 import organizationsApi from "@/api/organizationsApi";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import api from "@/api/api";
+import {load} from "webfontloader";
+import {useAppStore} from "@/store/app";
 
 const route = useRoute();
 const tab = ref(null);
-const account = security.getAccount()!;
+const loading = ref(false);
+
+const appStore = useAppStore();
+
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
 
 const organizationStore = useOrganizationStore();
-const organization = computed(() => organizationStore.getOrganization(route.params.uuid as string) as Organization)
-organizationStore.requestHydration();
+const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
 
 // TODO: replace authorization with token auth
 const currentAccountRole = computed(() => {
-  return organization.value?.accountPreviews?.find(a => a.uuid === account.uuid)?.role as OrganizationRole;
+  return organization.value?.accountPreviews?.find(a => a.uuid === account.value!.uuid)?.role as OrganizationRole;
 });
 
-async function updateRole(account: AccountPreview) {
-  const prevRole = security.getAccount()!
+async function updateRole(newAccount: AccountPreview) {
+  const prevRole = account.value!
     .organizationPreviews
     .find(o => o.uuid === organization.value.uuid)!
     .role as OrganizationRole;
-  if (account.uuid === security.getAccount().uuid) {
-    const ok = window.confirm(`Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${account.role}" ändern möchten?`);
+  if (newAccount.uuid === account.value!.uuid) {
+    const ok = window.confirm(`Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newAccount.role}" ändern möchten?`);
     if (!ok) {
-      account.role = prevRole;
+      newAccount.role = prevRole;
       return;
     }
   }
   try {
-    await axios.post(`http://localhost:8082/api/organizations/${organization.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    loading.value = true;
+    const response = await organizationsApi.changeRole(organization.value.uuid, newAccount.uuid, newAccount.role as OrganizationRole);
   } catch (e) {
     console.log("Failed to update role.", e);
+    appStore.addToast("Rolle konnte nicht geupdated werden.");
+  } finally {
+    loading.value = false;
   }
 }
 
