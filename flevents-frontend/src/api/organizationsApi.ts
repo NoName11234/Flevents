@@ -96,6 +96,13 @@ class OrganizationApi {
   }
 
   /**
+   * Leaves the organization as the current user.
+   */
+  leave(uuid: string, accountUuid: string) {
+    return api.post(`${base}/${uuid}/leave-organization/${accountUuid}`);
+  }
+
+  /**
    * Changes the role of an organization member.
    * @param uuid the uuid of the organization
    * @param accountUuid the uuid of the account

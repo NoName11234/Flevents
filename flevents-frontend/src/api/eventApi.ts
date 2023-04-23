@@ -123,6 +123,27 @@ class EventApi {
       }
     });
   }
+
+  /**
+   * Accepts an invitation link as the current user.
+   * @param uuid the uuid of the event
+   * @param token the token the account has been invited with
+   */
+  acceptInvitation(uuid: string, token: string) {
+    return api.post(`${base}/${uuid}/accept-invitation`, {}, {
+      params: {
+        token: token,
+      }
+    });
+  }
+
+  /**
+   * Enrolls the current user to the event.
+   * @param uuid the uuid of the event
+   */
+  addAccount(uuid: string) {
+    return api.post(`${base}/${uuid}/add-account`);
+  }
 }
 
 export default new EventApi();

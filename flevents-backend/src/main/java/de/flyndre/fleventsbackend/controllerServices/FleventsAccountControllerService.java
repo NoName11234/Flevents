@@ -160,7 +160,7 @@ public class FleventsAccountControllerService {
      * Overwrites a specified account with the given account object.
      * @param accountId the id of the account to be edited
      * @param account the account object with the new information of the account
-     * @return the edited accoun
+     * @return the edited account
      */
     public FleventsAccount editAccount(String accountId, FleventsAccount account){
         return fleventsAccountService.editAccount(accountId, account);

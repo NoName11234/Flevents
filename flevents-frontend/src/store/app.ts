@@ -38,7 +38,6 @@ export const useAppStore = defineStore('app', {
     },
 
     dehydrate() {
-      this.toasts = [];
       this.accessTokenExpiry = -1;
       this.loggedIn = false;
       this.currentAccountId = undefined;

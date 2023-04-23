@@ -231,8 +231,8 @@ public class OrganizationController {
     * @param accountId the id of the account to be removed
     * @return ReponseEntity with the http status code
     */
-   @PostMapping("/{organizationId}/leave-organisation/{acountId}")
-   public ResponseEntity leaveOrganization(@PathVariable String organizationId, @PathVariable String accountId){
+   @PostMapping("/{organizationId}/leave-organization/{accountId}")
+   public ResponseEntity leaveOrganization(@PathVariable String organizationId, @PathVariable String accountId, Authentication auth){
       organizationControllerService.leaveOrganization(organizationId, accountId);
       return new ResponseEntity<>(HttpStatus.OK);
    }

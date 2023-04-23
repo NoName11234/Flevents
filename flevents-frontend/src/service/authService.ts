@@ -16,6 +16,7 @@ import {useJwt} from "@vueuse/integrations/useJwt";
 import security from "@/service/security";
 import {dehydrateAll, hydrateAll, requestHydrateAll} from "@/service/storesService";
 import {AUTH} from "@/constants";
+import {AxiosError} from "axios";
 
 let refreshTimeout: NodeJS.Timeout;
 let isRefreshing = false;
@@ -66,7 +67,7 @@ export async function login(email: string, plainSecret: string) {
   // TODO: encode secret!
   const encodedSecret = plainSecret;
 
-  const response = await accountApi.validate(email, encodedSecret);
+  const response = await accountApi.login(email, encodedSecret);
 
   await processResponse(response.data.accessToken);
 }
@@ -93,9 +94,13 @@ export async function refresh() {
   isRefreshing = true;
 
   try {
-    const response = await accountApi.revalidate();
+    const response = await accountApi.refresh();
     await processResponse(response.data.accessToken);
   } catch (e) {
+    appStore.addToast({
+      text: `Erneuern der Session fehlgeschlagen. Sie werden abgemeldet.`,
+      color: 'error',
+    });
     await logout();
   } finally {
     isRefreshing = false;
@@ -109,19 +114,29 @@ export async function refresh() {
 export async function logout() {
   const appStore = useAppStore();
 
+  // Try to invalidate token in backend
+  try {
+    const token = api.defaults.headers.common['Authorization'] as string;
+    await accountApi.logout(token);
+  } catch (e) {
+    // Ignore if failed
+    console.warn('Failed to kill session in backend.', e);
+  }
+
+  // Remove auth header from all requests
   delete api.defaults.headers.common['Authorization'];
 
-  //TODO: post to logout-endpoint of api?
-
+  // Stop refreshment of token
   clearTimeout(refreshTimeout);
+
+  // Clear all related data
   security.resetAccount();
   localStorage.removeItem(AUTH.TOKEN_COOKIE_KEY);
-
   appStore.loggedIn = false;
   appStore.accessTokenExpiry = -1;
   appStore.currentAccountId = undefined;
-
   await dehydrateAll();
+
   await router.push({ path: '/' });
 }
 

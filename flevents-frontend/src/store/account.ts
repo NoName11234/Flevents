@@ -3,6 +3,7 @@ import api from "@/api/api";
 import {Account} from "@/models/account";
 import {useAppStore} from "@/store/app";
 import {STORES} from "@/constants";
+import AccountApi from "@/api/accountApi";
 
 /**
  * Stores the events received from the API.
@@ -25,7 +26,7 @@ export const useAccountStore = defineStore({
         throw Error('There is no logged in account present.');
       }
       try {
-        const { data } = await api.get(`/accounts/${appStore.currentAccountId}`);
+        const { data } = await AccountApi.getMe();
         this.currentAccount = data as Account;
         this.lastSuccessfulHydration = new Date();
       } catch (e) {

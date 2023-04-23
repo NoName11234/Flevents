@@ -21,29 +21,52 @@ class AccountApi {
     return api.post(`${base}`, account);
   }
 
+  // /**
+  //  * Retrieves an account.
+  //  * @param uuid the uuid of the account
+  //  * @deprecated
+  //  */
+  // get(uuid: string) {
+  //   return api.get(`${base}/${uuid}`);
+  // }
+  //
+  // /**
+  //  * Modifies the account with the given uuid.
+  //  * @param uuid the uuid of the account
+  //  * @param account the account object containing only the attributes to be modified
+  //  */
+  // edit(uuid: string, account: Account) {
+  //   return api.post(`${base}/${uuid}`, account);
+  // }
+  //
+  // /**
+  //  * Deletes an account.
+  //  * @param uuid the uuid of the account
+  //  */
+  // delete(uuid: string) {
+  //   return api.delete(`${base}/${uuid}`);
+  // }
+
   /**
-   * Retrieves an account.
-   * @param uuid the uuid of the account
+   * Returns the currently logged-in account.
    */
-  get(uuid: string) {
-    return api.get(`${base}/${uuid}`);
+  getMe() {
+    return api.get(`${base}`);
   }
 
   /**
-   * Modifies the account with the given uuid.
-   * @param uuid the uuid of the account
-   * @param account the account object containing only the attributes to be modified
+   * Modified the currently logged-in account.
+   * @param account the modified account
    */
-  edit(uuid: string, account: Account) {
-    return api.post(`${base}/${uuid}`, account);
+  editMe(account: Account) {
+    return api.put(`${base}`, account);
   }
 
   /**
-   * Deletes an account.
-   * @param uuid the uuid of the account
+   * Deletes the currently logged-in account.
    */
-  delete(uuid: string) {
-    return api.delete(`${base}/${uuid}`);
+  deleteMe() {
+    return api.delete(`${base}`);
   }
 
 
@@ -55,8 +78,8 @@ class AccountApi {
    * @param email a valid email-address
    * @param secret a the corresponding encoded password
    */
-  validate(email: string, secret: string) {
-    return api.post(`${base}/validate`, {
+  login(email: string, secret: string) {
+    return api.post(`${base}/login`, {
       username: email,
       password: secret
     });
@@ -65,9 +88,17 @@ class AccountApi {
   /**
    * Renews the current authentication.
    */
-  revalidate() {
-    // TODO: implement
-    return new Promise<AxiosResponse>(r => {});
+  refresh() {
+    return api.post(`${base}/refresh`);
+  }
+
+  /**
+   * Logs the user out and ends the session.
+   */
+  logout(token: string) {
+    return api.post(`${base}/logout`, {
+      token: token,
+    });
   }
 
 
@@ -91,7 +122,7 @@ class AccountApi {
    * @param uuid the uuid of the account
    */
   getBookedEvents(uuid: string) {
-    return api.get(`${base}/${uuid}/booked-events`);
+    return api.get(`${base}/booked-events`);
   }
 
   /**
@@ -99,7 +130,7 @@ class AccountApi {
    * @param uuid the uuid of the account
    */
   getManagedEvents(uuid: string) {
-    return api.get(`${base}/${uuid}/managed-events`);
+    return api.get(`${base}/managed-events`);
   }
 
   /**
@@ -107,7 +138,7 @@ class AccountApi {
    * @param uuid the uuid of the account
    */
   getExploreEvents(uuid: string) {
-    return api.get(`${base}/${uuid}/explore-events`);
+    return api.get(`${base}/explore-events`);
   }
 
   /**
@@ -115,7 +146,7 @@ class AccountApi {
    * @param uuid the uuid of the account
    */
   getManagedOrganizations(uuid: string) {
-    return api.get(`${base}/${uuid}/managed-organizations`);
+    return api.get(`${base}/managed-organizations`);
   }
 }
 
