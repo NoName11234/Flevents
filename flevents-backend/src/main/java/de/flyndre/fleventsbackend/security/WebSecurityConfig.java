@@ -19,6 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * This Class contains the Security-Configuration.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
@@ -85,7 +90,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeRequests().requestMatchers("/api/accounts/validate").permitAll()
+                .authorizeRequests().requestMatchers("/api/accounts/login", "/api/accounts","/api/accounts/reset-password").permitAll()
                 .requestMatchers("/api/test/**").permitAll()
                 .anyRequest().authenticated();
 

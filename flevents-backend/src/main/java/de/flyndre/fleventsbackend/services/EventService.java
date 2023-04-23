@@ -1,6 +1,8 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.AccountInformation;
+import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
 import de.flyndre.fleventsbackend.repositories.EventRepository;
 import de.flyndre.fleventsbackend.repositories.MailConfigRepository;
@@ -12,10 +14,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Author: Paul Lehmann
- * Version:
- * This Class is the service for the event repository and the eventRegistrationRepository.
+ * This Service provides logic and usage for the event repository and the eventRegistrationRepository.
  * It provides methods for manipulating the data of these repositories.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service
@@ -173,7 +175,7 @@ public class EventService {
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
             throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
-        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        return eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
     }
 
     /**
@@ -210,7 +212,7 @@ public class EventService {
         if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(role)).findAny().isPresent()){
             throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
         }
-        eventRegistrationRepository.save(new EventRegistration(null,event,account,role));
+        eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
         eventRegistrationRepository.delete(optional.get());
     }
 
@@ -224,5 +226,37 @@ public class EventService {
         eventRegistrationRepository.delete(getEventRegistration(event.getUuid(), account.getUuid(), role));
     }
 
+    /**
+     * Sets the attendees status to checkedIn.
+     * @param event the event to check in
+     * @param account the account to be checked in
+     */
+    public void attendeesCheckIn(Event event, FleventsAccount account){
+        for(EventRegistration eventRegistration:event.getAttendees()) {
+            if (account.getUuid().equals(eventRegistration.getAccount().getUuid())) {
+                eventRegistration.setCheckedIn(true);
+            }
+        }
+        eventRepository.save(event);
+    }
 
+    /**
+     * Gets all checked-In attendees
+     * @param eventId the if of the event to get the checked-In attendees from
+     * @return a list with the Uuid of all checked-In attendees
+     */
+    public List<String> getCheckedIn(String eventId){
+        List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
+        List<String> checkedIns = null;
+        if(eventRegistrations.isEmpty()){
+            throw new NoSuchElementException("This Event doesnt have any registrations");
+        }
+        for (EventRegistration er :eventRegistrations
+        ) {
+            if(er.isCheckedIn()){
+                checkedIns.add(er.getAccount().getUuid());
+            }
+        }
+        return checkedIns;
+    }
 }

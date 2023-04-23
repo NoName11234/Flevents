@@ -4,6 +4,12 @@ import lombok.Setter;
 
 import java.util.*;
 
+/**
+ * This Class is a model for the Single Choice Question.
+ * It provides getter as well as setter.
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Getter
 @Setter
 public class SingleChoiceQuestion extends Question{

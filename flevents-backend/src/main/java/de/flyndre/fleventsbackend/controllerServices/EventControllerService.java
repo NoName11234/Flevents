@@ -4,6 +4,7 @@ import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the service for the EventController class.
  * It provides methods regarding accounts. The methods of the EventController are mapped on them.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service
@@ -25,13 +26,16 @@ public class EventControllerService {
     private  final FleventsAccountService accountService;
     private final EMailServiceImpl eMailService;
     private final InvitationTokenService invitationTokenService;
-    public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService){
+    private final AuthService authService;
+
+    public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService, AuthService authService){
         this.eventService = eventService;
         this.fleventsAccountService = fleventsAccountService;
         this.organizationService = organizationService;
         this.accountService = accountService;
         this.eMailService = eMailService;
         this.invitationTokenService = invitationTokenService;
+        this.authService = authService;
     }
 
     /**
@@ -192,5 +196,34 @@ public class EventControllerService {
                 }
             }
         }
+    }
+
+    /**
+     * Validate if the given Authentication matches to the given roles for the given event id.
+     * @param auth the Authentication to validate.
+     * @param uuid the id of the event in which context the validation should be done.
+     * @param roles the event roles that should match.
+     * @return true if the given parameters match, false if not.
+     */
+    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
+        return authService.validateRights(auth, roles, uuid);
+    }
+
+    /**
+     * Sets the attendees status to checkedIn.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckIn(String eventId, String accountId){
+        eventService.attendeesCheckIn(getEventById(eventId), accountService.getAccountById(accountId));
+    }
+
+    /**
+     * Gets all checked-In attendees
+     * @param eventId the if of the event to get the checked-In attendees from
+     * @return a list with all the Uuid of checked-In attendees
+     */
+    public List<String> getCheckedIn(String eventId){
+        return eventService.getCheckedIn(eventId);
     }
 }

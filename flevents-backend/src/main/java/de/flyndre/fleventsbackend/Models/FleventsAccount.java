@@ -13,7 +13,12 @@ import java.net.URI;
 import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * This Class is the Modelclass for the FleventsAccount.
+ * It provides getter as well as setter and a Merge-Method.
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter

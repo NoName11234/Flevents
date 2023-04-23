@@ -15,9 +15,9 @@ import java.util.ArrayList;
 This Controller is deprecated!
  */
 
-@RestController
-@CrossOrigin
-@RequestMapping("/api/mail")
+//@RestController
+//@CrossOrigin
+//@RequestMapping("/api/mail")
 public class EMailController {
     private final EMailService eMailService;
 
@@ -25,7 +25,7 @@ public class EMailController {
         this.eMailService = eMailService;
     }
 
-    @PostMapping("/sendMail")
+    //@PostMapping("/sendMail")
     public ResponseEntity sendMail(@RequestBody JsonNode details) {
         ArrayNode node = (ArrayNode) details.get("to");
         ArrayList to = new ArrayList();

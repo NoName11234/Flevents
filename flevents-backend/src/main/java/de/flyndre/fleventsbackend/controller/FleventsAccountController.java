@@ -7,29 +7,24 @@ import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
 import de.flyndre.fleventsbackend.security.payload.request.LoginRequest;
+import de.flyndre.fleventsbackend.security.payload.request.LogoutRequest;
 import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
-import de.flyndre.fleventsbackend.services.FleventsAccountService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the Controller for the REST-API path "/api/accounts".
  * It an interface functionality regarding accounts.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @RestController
@@ -38,76 +33,94 @@ import java.util.stream.Collectors;
 public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;
     private final ModelMapper mapper;
+    private final JwtUtils jwtUtils;
 
-    public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper){
+    public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper, JwtUtils jwtUtils){
         this.fleventsAccountControllerService = fleventsAccountControllerService;
         this.mapper = mapper;
+        this.jwtUtils = jwtUtils;
     }
 
     /**
      * @param loginRequest the email and password of the account to get the preview from
      * @return ResponseEntity with the http status code
      */
-    @PostMapping("/validate")
+    @PostMapping("/login")
     public ResponseEntity getAccountPreview(@Valid @RequestBody LoginRequest loginRequest){
         JwtResponse token = fleventsAccountControllerService.login(loginRequest.getUsername(), loginRequest.getPassword());
         return ResponseEntity.ok(token);
     }
-
-    @PostMapping("/revalidate")
+    /**
+     * @param auth The AuthenticationToken of the current logged-in User
+     * @return ResponseEntity with the http status code
+     */
+    @PostMapping("/refresh")
     public ResponseEntity getnewToken(Authentication auth){
         JwtResponse token = fleventsAccountControllerService.reevaluate(auth);
         return ResponseEntity.ok(token);
     }
+    @PostMapping("/logout")
+    public ResponseEntity logout(@RequestBody LogoutRequest request){
+        jwtUtils.invalidateToken(request.getToken());
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
     /**
-     * Returns the account with the specified id.
-     * @param accountId the id of the account to get the account information from
+     * Returns the account extracted of the barer token
+     * @param auth the Authentication generated out of a barer token.
      * @return AccountInformation of the specified account
      */
-    @GetMapping("/{accountId}")
-    public AccountInformation getAccountInfo(@PathVariable String accountId){
-        return mapper.map(fleventsAccountControllerService.getAccountById(accountId), AccountInformation.class);
+    @GetMapping()
+    public AccountInformation getAccountInfo(Authentication auth){
+        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+        return mapper.map(fleventsAccountControllerService.getAccountById(details.getId()), AccountInformation.class);
     }
 
     /**
-     * Returns the booked events from a specified account.
-     * @param accountId the id of the account to get the booked events from
+     * Returns the booked events of the account extracted of the barer token
+     * @param auth the Authentication generated out of a barer token.
      * @return List<EventInformation> list with the booked events of the given account
      */
-    @GetMapping("/{accountId}/booked-events")
-    public List<EventInformation> getBookedEvents(@PathVariable String accountId){
-        return fleventsAccountControllerService.getBookedEvents(accountId).stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+    @GetMapping("/booked-events")
+    public List<EventInformation> getBookedEvents(Authentication auth){
+        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+        return fleventsAccountControllerService.getBookedEvents(details.getId()).stream()
+                .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
     }
 
     /**
-     * Returns the managed events from the specified account.
-     * @param accountId the id of the account to get the managed events from
+     * Returns the managed events of the account extracted of the barer token
+     * @param auth the Authentication generated out of a barer token.
      * @return List<EventInformation> list with the managed events of the given account
      */
-    @GetMapping("/{accountId}/managed-events")
-    public List<EventInformation> getManagedEvents(@PathVariable String accountId){
-        return fleventsAccountControllerService.getManagedEvents(accountId).stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+    @GetMapping("/managed-events")
+    public List<EventInformation> getManagedEvents(Authentication auth){
+        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+        return fleventsAccountControllerService.getManagedEvents(details.getId()).stream()
+                .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
     }
 
     /**
-     * Returns a list of events to explore for the specified account.
-     * @param accountId the id of the account to get a list of events to explore for
+     * Returns a list of events to explore for the account extracted of the barer token.
+     * @param auth the Authentication generated out of a barer token.
      * @return List<EventInformation> list with events to explore for the specified account
      */
     @GetMapping("/{accountId}/explore-events")
-    public List<EventInformation> getExploreEvents(@PathVariable String accountId){
-        return fleventsAccountControllerService.getExploreEvents(accountId).stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+    public List<EventInformation> getExploreEvents(Authentication auth){
+        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+        return fleventsAccountControllerService.getExploreEvents(details.getId()).stream()
+                .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
     }
 
     /**
-     * Get organizations where the given account has the role "administrator".
-     * @param accountId the id of the account
+     * Get organizations where the account extracted of the barer token has the role "administrator".
+     * @param auth the Authentication generated out of a barer token.
      * @return List<OrganizationInformation> list with the organizations where the account is administrator
      */
-    @GetMapping("/{accountId}/managed-organizations")
-    public List<OrganizationInformation> getManagedOrganization(@PathVariable String accountId){
-        return fleventsAccountControllerService.getManagedOrganization(accountId).stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList());
+    @GetMapping("/managed-organizations")
+    public List<OrganizationInformation> getManagedOrganization(Authentication auth){
+        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+        return fleventsAccountControllerService.getManagedOrganization(details.getId()).stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList());
     }
 
     /**
@@ -117,7 +130,11 @@ public class FleventsAccountController {
      */
     @PostMapping()
     public ResponseEntity createAccount(@RequestBody FleventsAccount account){
-        return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAccount(account), AccountInformation.class),HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAccount(account), AccountInformation.class), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -136,25 +153,27 @@ public class FleventsAccountController {
     }
 
     /**
-     * Overwrites a specified account with the given account object.
-     * @param accountId the id of the account to be edited
+     * Overwrites the account extracted of the barer token with the given account object.
      * @param account the account object with the new information of the account
+     * @param auth the Authentication generated out of a barer token.
      * @return ResponseEntity with the overwritten account and the http status code
      */
-    @PostMapping("/{accountId}")
-    public ResponseEntity editAccount(@PathVariable String accountId, @RequestBody FleventsAccount account){
-        return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(accountId, account), AccountInformation.class),HttpStatus.OK);
+    @PutMapping()
+    public ResponseEntity editAccount(@RequestBody FleventsAccount account, Authentication auth){
+        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+        return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(details.getId(), account), AccountInformation.class),HttpStatus.OK);
     }
 
     /**
-     * Deletes the specified account.
-     * @param accountId the id of the account to be deleted
+     * Deletes the account extracted of the barer token.
+     * @param auth the Authentication generated out of a barer token.
      * @return ResponseEntity with the http status code and an optional error message
      */
-    @DeleteMapping("/{accountId}")
-    public ResponseEntity deleteAccount(@PathVariable String accountId){
+    @DeleteMapping()
+    public ResponseEntity deleteAccount(Authentication auth){
         try{
-            fleventsAccountControllerService.deleteAccount(accountId);
+            UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+            fleventsAccountControllerService.deleteAccount(details.getId());
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception ex){
             return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);

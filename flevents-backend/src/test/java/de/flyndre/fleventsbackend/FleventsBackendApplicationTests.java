@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -80,6 +82,11 @@ class FleventsBackendApplicationTests {
 	@Test
 	void getEventTest() throws Exception {
 		mockMvc.perform(get("/api/events")).andExpect(status().isOk());
+	}
+
+	@Test
+	void getCheckedInTest() throws  Exception {
+		mockMvc.perform(get("/{eventId}/checkedIns", "2c9180848752d53801875315d979000b")).andExpect(status().isOk());
 	}
 
 

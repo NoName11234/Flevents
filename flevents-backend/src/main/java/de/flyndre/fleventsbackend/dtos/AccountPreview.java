@@ -4,8 +4,13 @@ import de.flyndre.fleventsbackend.Models.Role;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.net.URI;
-
+/**
+ * This Class is the Data Transfer Object for specific Preview of the Account.
+ * It provides getter as well as setter.
+ * @implNote This DTO should only be returned in the Controller
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Getter
 @Setter
 public class AccountPreview {
@@ -21,6 +26,8 @@ public class AccountPreview {
     private String icon;
 
     private Role role;
+
+    private boolean checkedIn;
 
     private Boolean isActive;
 }
