@@ -44,7 +44,10 @@ async function submit() {
       failedInvitations.push(email);
     }
   }
-  appStore.addToast(`Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`)
+  appStore.addToast({
+    text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
+    color: 'error',
+  });
   await router.push( { name: 'organizations.organization', params: { uuid: uuid } } );
 }
 </script>

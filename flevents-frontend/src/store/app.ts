@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import {UI} from "@/constants";
+import {Toast} from "@/models/toast";
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -9,8 +10,11 @@ export const useAppStore = defineStore('app', {
     globallyLoading: false,
     /**
      * Queue for globally shown toast-messages.
+     * **Do not modify directly or the toasts will be displayed permanently!**
      */
-    toasts: [] as string[],
+    toasts: [{
+      text: 'lala'
+    }] as Toast[],
     /**
      * Date of when the current access token will expire.
      */
@@ -25,13 +29,21 @@ export const useAppStore = defineStore('app', {
     currentAccountId: undefined as string|undefined,
   }),
   actions: {
+
     /**
      * Adds a toast message to the global toast queue.
-     * @param toastText the text of the toast
+     * @param toast the toast
      */
-    addToast(toastText: string) {
-      this.toasts.push(toastText);
-      setTimeout(() => this.toasts.shift(), UI.TOAST_DISPLAY_TIMEOUT);
-    }
+    addToast(toast: Partial<Toast>) {
+      toast.timeout = setTimeout(() => this.toasts.shift(), UI.TOAST_DISPLAY_TIMEOUT);
+      this.toasts.push(toast as Toast);
+    },
+
+    dehydrate() {
+      this.toasts = [];
+      this.accessTokenExpiry = -1;
+      this.loggedIn = false;
+      this.currentAccountId = undefined;
+    },
   },
 })

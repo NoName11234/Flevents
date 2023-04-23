@@ -206,7 +206,10 @@ async function updateRole(newAccount: AccountPreview) {
     const response = await organizationsApi.changeRole(organization.value.uuid, newAccount.uuid, newAccount.role as OrganizationRole);
   } catch (e) {
     console.log("Failed to update role.", e);
-    appStore.addToast("Rolle konnte nicht geupdated werden.");
+    appStore.addToast({
+      text: "Rolle konnte nicht geupdated werden.",
+      color: "error"
+    });
   } finally {
     loading.value = false;
   }
@@ -223,7 +226,10 @@ async function removeAccount(account: Account) {
     }
   } catch (e) {
     console.error("Failed to remove account.", e);
-    appStore.addToast(`Entfernen des Accounts ${account.firstname} ${account.lastname} aus ${organization.value.name} fehlgeschlagen.`);
+    appStore.addToast({
+      text: `Entfernen des Accounts ${account.firstname} ${account.lastname} aus ${organization.value.name} fehlgeschlagen.`,
+      color: 'error',
+    });
   }
 }
 

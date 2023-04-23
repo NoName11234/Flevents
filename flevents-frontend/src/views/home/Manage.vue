@@ -71,9 +71,6 @@ const { currentAccount: account } = storeToRefs(accountStore);
 
 const showCreateButton = computed( () => {return validateManaged()});
 
-useAppStore().addToast('test');
-setTimeout(() => useAppStore().addToast('test2'), 1000);
-
 function validateManaged() {
   if (account.value === null) return false;
   for (let i = 0; i < account.value.organizationPreviews.length; i++) {

@@ -222,7 +222,6 @@ router.beforeEach(async (to, from) => {
 
   if (!appStore.loggedIn) {
     // Not logged-in
-    appStore.addToast('Für die angefragte Seite müssen Sie sich einloggen.');
     return loginRoute;
   }
 
