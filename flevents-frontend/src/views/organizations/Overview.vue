@@ -139,7 +139,7 @@
                   variant="text"
                   size="small"
                   icon="mdi-delete"
-                  @click="removeAccount(item.uuid)"
+                  @click="removeAccount(item)"
                   :disabled="
                     organization?.accountPreviews?.filter(a => a.role === OrganizationRole.admin).length <= 1
                     && item.role === OrganizationRole.admin
@@ -170,6 +170,7 @@ import {storeToRefs} from "pinia";
 import api from "@/api/api";
 import {load} from "webfontloader";
 import {useAppStore} from "@/store/app";
+import {Account} from "@/models/account";
 
 const route = useRoute();
 const tab = ref(null);
@@ -211,7 +212,8 @@ async function updateRole(newAccount: AccountPreview) {
   }
 }
 
-async function removeAccount(uuid : string) {
+async function removeAccount(account: Account) {
+  const uuid = account.uuid;
   try {
     await organizationsApi.removeMember(organization.value.uuid, uuid);
     for (let i = 0; i < organization.value.accountPreviews.length; i++) {
@@ -221,6 +223,7 @@ async function removeAccount(uuid : string) {
     }
   } catch (e) {
     console.error("Failed to remove account.", e);
+    appStore.addToast(`Entfernen des Accounts ${account.firstname} ${account.lastname} aus ${organization.value.name} fehlgeschlagen.`);
   }
 }
 
