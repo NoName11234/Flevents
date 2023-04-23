@@ -81,10 +81,14 @@ public class EventService {
     }
 
     /**
-     * Deletes the given event in the database.
+     * Deletes the given event and all according registrations in the database.
      * @param event the event to be deleted
      */
     public void deleteEvent(Event event){
+        event.getAttendees().stream().map(registration -> {
+            eventRegistrationRepository.delete(registration);
+            return null;
+        });
         eventRepository.delete(event);
     }
 
