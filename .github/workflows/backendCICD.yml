@@ -26,12 +26,36 @@ jobs:
         with: 
           path: flevents-backend/src/main/resources/application.properties
           contents: |
-            spring.datasource.url=jdbc:postgresql://localhost:5432/flevents
+            spring.datasource.url=jdbc:postgresql://h3005487.stratoserver.net:5432/flevents
             spring.datasource.username=postgres
             spring.datasource.password=${{secrets.DBSECRETPRD}}
             spring.jpa.hibernate.ddl-auto=update
             spring.datasource.driverClassName = org.postgresql.Driver
             spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+            spring.mail.host=smtp.ionos.de
+            spring.mail.port=587
+            spring.mail.username=info@flyndre.de
+            spring.mail.password=${{secrets.MAILSECRETPRD}}
+            spring.mail.properties.mail.smtp.auth=true
+            spring.mail.properties.mail.smtp.starttls.enable=true
+            spring.datasource.hikari.auto-commit=false
+            server.port=8082
+            application.baseurl=http://flevents.flyndre.de:3000/
+            application.jwtSecret=${{secrets.MAILSECRETPRD}}
+            application.jwtExpirationMs=86400000
+          write-mode: overwrite
+      #Set Configuration
+      - name: Set Config
+        uses: DamianReeves/write-file-action@master
+        with: 
+          path: flevents-backend/src/main/resources/application.properties
+          contents: |
+            spring.datasource.url=jdbc:h2:mem:test
+            spring.datasource.username=postgres
+            spring.datasource.password=${{secrets.DBSECRETPRD}}
+            spring.jpa.hibernate.ddl-auto=update
+            spring.datasource.driverClassName = org.h2.Driver
+            spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
             spring.mail.host=smtp.ionos.de
             spring.mail.port=587
             spring.mail.username=info@flyndre.de
