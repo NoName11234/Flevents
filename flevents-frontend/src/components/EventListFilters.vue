@@ -1,47 +1,24 @@
 <script setup lang="ts">
-
 import {ref} from "vue";
-import {FleventsEvent} from "@/models/fleventsEvent"
-
-const props = defineProps({
-  eventList: {
-    required: true,
-    type: Array<FleventsEvent>
-  }
-});
 
 const emits = defineEmits<{
-  (e: 'update', value: Array<FleventsEvent>): void
+  (e: 'update', value: string): void
 }>();
 
 const showFilterDialog = ref(false);
 const searchLoading = ref(false);
 const searchTerm = ref("");
-const fullEventList = Array.from(props.eventList);
 let loadTimeout = setTimeout(() => {}, 0);
 async function search() {
   let term = searchTerm.value.toLowerCase();
   clearTimeout(loadTimeout);
   searchLoading.value = true;
-  if (term.length === 0) {
-    emits.call(emits,'update', fullEventList);
-  }
-  try {
-    let filteredList = fullEventList.filter((event) => (
-        event.description?.toLowerCase().includes(term)
-        || event.name?.toLowerCase().includes(term)
-        || event.location?.toLowerCase().includes(term)
-        || event.organizationPreview?.name.toLowerCase().includes(term)
-        || event.organizationPreview?.description.toLowerCase().includes(term)
-      )
-    );
-    emits.call(emits,'update', filteredList);
-  } catch (e) {
-    console.log(e);
-  } finally {
-    loadTimeout = setTimeout(() => searchLoading.value = false, 500);
-  }
+  emits.call(emits,'update', term);
+  loadTimeout = setTimeout(() => searchLoading.value = false, 500);
 }
+
+// TODO: Filtermöglichkeiten (Organisation, Suche, Datumsauswahl, Sortierung), Liste aller verfügbaren Events (die ersten 20 oder so)
+
 </script>
 
 <template>

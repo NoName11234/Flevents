@@ -1,12 +1,8 @@
 import axios from "axios";
-
-
-const properties = {
-  url: 'http://h3005487.stratoserver.net:8082/api',
-}
+import {API} from "@/constants";
 
 const api = axios.create({
-  baseURL: properties.url,
+  baseURL: API.BASE_URL,
   // withCredentials: true,
 });
 

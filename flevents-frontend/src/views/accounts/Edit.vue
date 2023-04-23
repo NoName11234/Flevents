@@ -1,27 +1,32 @@
 <script setup lang="ts">
 import Heading from "@/components/Heading.vue";
-import {Ref, ref} from "vue";
+import {computed, Ref, ref} from "vue";
 import {Account} from "@/models/account";
-import axios from "axios";
+import axios, {AxiosError, HttpStatusCode} from "axios";
 import {useRouter} from "vue-router";
 import security from "@/service/security";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import accountApi from "@/api/accountApi";
+import api from "@/api/api";
 
 const router = useRouter();
+const accountStore = useAccountStore();
+const { currentAccount: account, loading: storeLoading, error } = storeToRefs(accountStore);
+
 const showPass = ref(false);
 const showCorr = ref(false);
 const correctPassword = ref("");
 const tooltip = ref("");
-const account : Ref<Partial<Account>> = ref({
-  secret: ""
-});
+const formLoading = ref(false);
+const loading = computed(() => formLoading.value||storeLoading.value);
 
-// onMounted(() => {
-//   account.value = JSON.parse(document.cookie.split(";")[0].split("=")[1]);
-//   account.value.secret = "";
-// })
-account.value = security.getAccount() as Account;
-
-async function submit(){
+async function submit() {
+  tooltip.value = "";
+  if (account.value === null) {
+    tooltip.value = "Error: Account ist null.";
+    return;
+  }
   if (account.value.firstname === "" || account.value.lastname === "" || account.value.email === "") {
     tooltip.value = "Nicht alle Felder wurden angegeben.";
     return;
@@ -35,20 +40,38 @@ async function submit(){
   } else {
     account.value.secret = undefined;
   }
-  tooltip.value = '';
-  await axios.post(`http://localhost:8082/api/accounts/${account.value.uuid}`, account.value);
-  const response2 = await axios.get(`http://localhost:8082/api/accounts/${account.value.uuid}`);
-  document.cookie = `ACCOUNT=${JSON.stringify(response2.data)}`;
-  security.setAccount(response2.data);
-  tooltip.value = "Anfrage erfolgreich gesendet.";
-  await router.push({name: 'home.account'});
+  formLoading.value = true;
+  try {
+    console.log(api.defaults.headers.common['Authorization']);
+    const response = await accountApi.editMe(account.value);
+    // const response = await api.post()
+    if (Math.floor(response.status/100) !== 2) {
+      throw new Error(`Request failed ${response}`);
+    }
+    accountStore.hydrate().then();
+    await router.push({name: 'home.account'});
+  } catch (e) {
+    console.log('Failed to edit account', e);
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Eingaben';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
+  } finally {
+    formLoading.value = false;
+  }
 }
 </script>
 
 <template>
   <Heading text="Konto bearbeiten" />
 
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
       <v-container class="d-flex flex-column gap-3">
 

@@ -2,7 +2,7 @@
 
   <Heading text="Login" />
 
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-container class="d-flex flex-column gap-3" @keydown.enter="fu()">
       <v-text-field
         label="Mailadresse"
@@ -30,7 +30,7 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
-        :to="{ name: 'accounts.create' }"
+        :to="{ name: 'accounts.create', query: route.query }"
         variant="text"
       >
         Registrieren
@@ -47,15 +47,16 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, Ref} from "vue";
+import {ref, Ref} from "vue";
 import {Account} from "@/models/account";
-import axios from "axios";
+import {AxiosError} from "axios";
 import Heading from "@/components/Heading.vue";
-import security from "@/service/security";
 import {useRoute, useRouter} from "vue-router";
-import useJwt from '../../../node_modules/jwt-decode'
+import {login} from "@/service/authService";
+import {load} from "webfontloader";
 const route = useRoute();
 const showPass = ref(false);
+const loading = ref(false);
 const tooltip = ref("");
 const router = useRouter();
 const account : Ref<Partial<Account>> = ref({
@@ -63,35 +64,46 @@ const account : Ref<Partial<Account>> = ref({
   secret: ""
 });
 
-async function fu(){
-  document.cookie = "";
-  security.resetAccount();
-  let response = await axios.post("http://localhost:8082/api/accounts/validate",{ username: account.value.email, password: account.value.secret }); 
-  console.log(response); 
-  if(response.data === ""){
-    document.cookie = "";
-    security.resetAccount();
-    tooltip.value = "Passwort oder Email ist falsch."
-  }else{
-    document.cookie = `TOKEN=${JSON.stringify(response.data.accessToken)}`;
-    let account = (await axios.get(`http://localhost:8082/api/accounts/${response.data.id}`, {headers: {'Authorization': `Bearer ${response.data.accessToken}` }})).data as Account
-    security.setAccount(account);
-    console.log(account); 
-    const decodedJwt = useJwt(response.data.accessToken); 
-    console.log(decodedJwt); 
+async function fu() {
+  loading.value = true;
+  tooltip.value = '';
+  try {
+    await login(account.value.email!, account.value.secret!);
+    await router.push(decodeURIComponent(route.query.location as string || '/'));
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Anmeldedaten';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
+  }
+  loading.value = false;
+  // console.log(response);
+  // if(response.data === ""){
+  //   document.cookie = "";
+  //   security.resetAccount();
+  //   tooltip.value = "Passwort oder Email ist falsch."
+  // }else{
+  //   document.cookie = `TOKEN=${JSON.stringify(response.data.accessToken)}`;
+  //   let account = (await axios.get(`http://localhost:8082/api/accounts/${response.data.id}`, {headers: {'Authorization': `Bearer ${response.data.accessToken}` }})).data as Account
+  //   security.setAccount(account);
+  //   console.log(account);
+  //   const decodedJwt = useJwt()
+  //   console.log(decodedJwt);
    /* let url = "/";
     if(route.query.location != null && route.query.location !== "/accounts/login"){
       url = route.query.location as string
     }
     router.push({path: url});
     setTimeout(() => router.go(0), 100);*/
-  }
-  
-}
+  // }
 
-onMounted(() => {
-  console.log();
-})
+}
 </script>
 
 <style scoped>

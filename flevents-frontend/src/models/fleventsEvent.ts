@@ -9,7 +9,7 @@ export interface FleventsEvent {
   image: string;
   startTime: string;
   endTime: string;
-  mailConfig : string;
+  mailConfig : Object;
   organizationPreview: OrganizationPreview;
   accountPreviews: AccountPreview[];
 }

@@ -48,41 +48,46 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref} from "vue";
-import {getAccount} from "@/service/security";
+import {computed} from "vue";
 import {OrganizationRole} from "@/models/organizationRole";
 import {EventRole} from "@/models/eventRole";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
 
 const showManaged = computed( () => {return validateManaged()});
 const showExplore = computed( () => {return validateExplore()});
 
 function validateManaged(){
-  let user = getAccount();
-  console.log(user);
-  if(user != null){
-  for(let i = 0; i < getAccount().organizationPreviews.length; i++){
-    if(getAccount().organizationPreviews[i].role == OrganizationRole.admin || getAccount().organizationPreviews[i].role == OrganizationRole.organizer){
+  if (account.value === null) return false;
+  for (let i = 0; i < account.value.organizationPreviews.length; i++) {
+    if (
+      account.value.organizationPreviews[i].role == OrganizationRole.admin
+      || account.value.organizationPreviews[i].role == OrganizationRole.organizer
+    ){
       return true;
     }
   }
-  for(let i = 0; i < getAccount().eventPreviews.length; i++){
-    if(getAccount().eventPreviews[i].role == EventRole.tutor || getAccount().eventPreviews[i].role == EventRole.organizer){
+  for (let i = 0; i < account.value.eventPreviews.length; i++) {
+    if(
+      account.value.eventPreviews[i].role == EventRole.tutor
+      || account.value.eventPreviews[i].role == EventRole.organizer
+    ){
       return true;
     }
   }
-  }
-  return false;
 }
 
 function validateExplore(){
-  let user = getAccount();
-  console.log(user);
-  if(user != null){
-    if (user.organizationPreviews && user.organizationPreviews.length > 0) {
-      return true;
-    }
+  if (account.value === null) return false;
+  if (
+    account.value.organizationPreviews
+    && account.value.organizationPreviews.length > 0
+  ) {
+    return true;
   }
-  return false;
 }
 </script>
 

@@ -1,51 +1,85 @@
 <script setup lang="ts">
-import {computed, onBeforeMount, ref} from "vue";
+import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
-import {FleventsEvent} from "@/models/fleventsEvent";
 import axios from "axios";
 import {Post} from "@/models/post";
 import router from "@/router";
 import EventPost from "@/components/EventPost.vue";
 import {Account} from "@/models/account";
-import security from "@/service/security";
 import {EventRole} from "@/models/eventRole";
 import {Questionnaire} from "@/models/questionnaire";
 import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
-import Security from "@/service/security";
-const wholeAttendees = ref([] as Account[]);
-const organizers = ref([] as Account[])
-const openContext = ref(false);
-const validateRole = computed(() => {
-  //TODO: Ändern in organizers.value.lenght!!!
+import {useEventStore} from "@/store/events";
+import {useSurveyStore} from "@/store/surveys";
+import {usePostStore} from "@/store/posts";
+import {AccountPreview} from "@/models/accountPreview";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import eventApi from "@/api/eventApi";
+import {useAppStore} from "@/store/app";
+import api from "@/api/api";
 
-  for(let j = 0; j < organizers.value.length; j++){
-    if(security.getAccount()?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer"){
-      return  EventRole.organizer;
-    }
-  }
-  for(let i = 0; i < wholeAttendees.value.length; i++){
-    if(security.getAccount()?.uuid === wholeAttendees.value[i]!.uuid && wholeAttendees.value[i]!.role === "organizer"){
-      return  EventRole.organizer;
-    }else if(security.getAccount()?.uuid === wholeAttendees.value[i]!.uuid && wholeAttendees.value[i]!.role === "tutor"){
-      return  EventRole.tutor;
-    }
-  }
-  return EventRole.attendee
-})
+const openContext = ref(false);
 const tab = ref(null);
-const address = ref("")
+const address = ref("");
 const route = useRoute();
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
+
+const appStore = useAppStore();
+
+const eventStore = useEventStore();
+const event = eventStore.getEventGetter(route.params.uuid as string);
+
+const surveyStore = useSurveyStore();
+const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid as string) as Questionnaire[]);
+
+const postStore = usePostStore();
+const posts = computed(() => postStore.getPosts(route.params.uuid as string) as Post[]);
+
 const enrollLoading = ref(false);
-const account = security.getAccount() as Account;
-const event = ref({
-  uuid: route.params.uuid as string,
-} as FleventsEvent);
-const attendees = ref([] as Account[]);
-const attending = computed(() => {
-  return attendees.value.find(v => v!.uuid === account.uuid) != undefined;
+const storesLoading = computed(() =>
+  eventStore.specificLoading.get(route.params.uuid as string)
+  || surveyStore.loading
+  || postStore.loading
+);
+
+const attendees = computed(() => {
+  return event?.value?.accountPreviews.filter(a => [EventRole.attendee||EventRole.tutor].includes(a.role as EventRole))
 });
-const posts = ref([
+const organizers = computed(() => {
+  return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole))
+});
+const allAttendees = computed(() => attendees?.value?.concat(organizers.value));
+
+const isAttending = computed(() => {
+  return attendees?.value?.find(v => v!.uuid === account.value!.uuid) != undefined;
+});
+
+const validateRole = computed(() => {
+  //TODO: Ändern in JWT
+  //TODO: als admin anzeigen
+  for (let j = 0; j < organizers?.value?.length; j++){
+    if (account.value?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer") {
+      return EventRole.organizer;
+    }
+  }
+  for (let i = 0; i < allAttendees?.value?.length; i++){
+    if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "organizer") {
+      return EventRole.organizer;
+    }
+    else if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor") {
+      return EventRole.tutor;
+    }
+  }
+  if (eventStore.managedEventsIds.includes(event.value.uuid!)) {
+    return EventRole.organizer;
+  }
+  return EventRole.attendee;
+})
+
+const debugPosts = ref([
   {
     title: "Ankündigung des Sprechers",
     text: "Nach langem Warten können wir Ihnen endlich unseren Sprecher vorstellen! Peter Korstens hat begeistert zugesagt und wird Sie durch den Termin begleiten. Anbei finden Sie das Handout zum Vortrag. Wir freuen uns auf Ihr Kommen!",
@@ -72,31 +106,10 @@ const posts = ref([
     ],
   }
 ] as Post[]);
-const questionnaires = ref([] as Questionnaire[]);
-
-
-async function setup() {
-  try {
-    address.value = route.params.uuid as string;
-    const response = await axios.get(`http://localhost:8082/api/events/${address.value}`);
-    console.log(response);
-    response.status == 200 ? event.value = response.data : event.value = {} as FleventsEvent;
-    attendees.value = (await axios.get(`http://localhost:8082/api/events/${address.value}/attendees`)).data
-    organizers.value = (await axios.get(`http://localhost:8082/api/events/${address.value}/organizers`)).data
-    console.log(organizers.value);
-    wholeAttendees.value = attendees.value.concat(organizers.value);
-    questionnaires.value = (await axios.get(`http://localhost:8082/api/questionnaires`, { params: {eventId: event.value.uuid}})).data;
-    console.log(questionnaires);
-  } catch (e) {
-    console.error("Failed to fetch event data.");
-  }
-}
-
-onBeforeMount(setup);
 
 const eventStatus = computed(() => {
-  let start = new Date(event.value.startTime!);
-  let end = new Date(event.value.endTime!);
+  let start = new Date(event?.value?.startTime);
+  let end = new Date(event?.value?.endTime);
   let now = new Date();
   switch (true) {
     case start > now:
@@ -112,37 +125,46 @@ const eventStatus = computed(() => {
 
 async function enroll(){
   enrollLoading.value = true;
-  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.uuid as string}`);
-    console.log(response);
+    // const response = await api.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.value!.uuid as string}`);
+    const response = await eventApi.addAccount(route.params.uuid as string);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
   } catch (e) {
     // already enrolled
     console.error("Enrollment failed, probably already enrolled.", e);
+    appStore.addToast({
+      text: 'Anmelden fehlgeschlagen. Sie sind womöglich bereits angemeldet. Versuchen Sie die Seite neu zu laden.',
+      color: 'error',
+    });
   }
-  await setup();
   enrollLoading.value = false;
+  eventStore.hydrate();
 }
-async function disenroll(){
+async function disEnroll(){
   enrollLoading.value = true;
-
-  if (account.organizationPreviews.filter(o => o.uuid === event.value.organizationPreview.uuid).length === 0) {
+  if (account.value!.organizationPreviews.filter(o => o.uuid === event.value.organizationPreview.uuid).length === 0) {
     const accept = window.confirm("Das Event wird von einer Organisation veranstaltet, der Sie nicht angehören. Wenn Sie sich abmelden, können Sie nur über erneute Einladung wieder teilnehmen. Sind Sie sicher?");
     if (!accept) {
       enrollLoading.value = false;
       return;
     }
   }
-
   try {
-    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.uuid as string}`, {}, {params: {role: "attendee"}});
-    console.log(response);
+    // const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.value!.uuid as string}`, {}, {params: {role: "attendee"}});
+    const role = attendees.value.find(a => a.uuid === account.value!.uuid) as Account|undefined;
+    if (role === undefined) throw new Error('Not in attendee list');
+    const response = await eventApi.removeAccount(route.params.uuid as string, account.value!.uuid, role.role as EventRole);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
   } catch (e) {
     // not enrolled
     console.error("Disenrollment failed.", e);
+    appStore.addToast({
+      text: 'Abmelden fehlgeschlagen. Sie sind womöglich gar nicht angemeldet. Versuchen Sie die Seite neu zu laden.',
+      color: 'error',
+    });
   }
-  await setup();
   enrollLoading.value = false;
+  eventStore.hydrate();
 }
 
 function parseDate(from: any, to: any) {
@@ -173,7 +195,7 @@ function isSameDay(a: Date, b: Date) {
 }
 
 function removeOrganizer(uuid : string){
-  axios.post(`http://localhost:8082/api/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
+  api.post(`/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
   for(let i = 0; i < organizers.value.length; i++){
     if(organizers.value[i].uuid === uuid){
       organizers.value.splice(i,1);
@@ -182,7 +204,7 @@ function removeOrganizer(uuid : string){
 }
 
 function removeAccount(uuid : string, role : string){
-  axios.post(`http://localhost:8082/api/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
+  api.post(`/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
   for(let i = 0; i < attendees.value.length; i++){
     if(attendees.value[i].uuid === uuid){
       attendees.value.splice(i,1);
@@ -190,10 +212,13 @@ function removeAccount(uuid : string, role : string){
   }
 }
 
-async function updateRole(account: Account) {
+async function updateRole(account: AccountPreview) {
   console.log("changing role to: ", account.role);
+  console.log(attendees.value, account.uuid)
+  const fromRole = attendees.value.find(a => a.uuid === account.uuid)!.role;
   try {
-    await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    //await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    await api.post(`/events/${event.value.uuid}/change-role/${account.uuid}?toRole=${account.role}&fromRole=${fromRole}`);
   } catch (e) {
     console.log("Failed to update role.", e);
   }
@@ -201,7 +226,7 @@ async function updateRole(account: Account) {
 
 async function deleteEvent() {
   try {
-    const response = await axios.delete(`http://localhost:8082/api/events/${event.value.uuid}`)
+    const response = await eventApi.delete(route.params.uuid as string);
     openContext.value = false;
     await router.push({ name: 'home.manage', force: true });
   } catch (e) {
@@ -213,15 +238,18 @@ async function deleteEvent() {
 </script>
 
 <template>
-  <Heading :text="event.name ?? 'Eventtitel'" />
+  <Heading :text="event?.name ?? 'Lade Event...'" />
 
-  <v-card>
+  <v-card
+    :loading="storesLoading"
+    :disabled="storesLoading"
+  >
 
     <v-img
        height="250"
        class="bg-gradient"
        cover
-       :src="event.image"
+       :src="event?.image ?? ''"
     >
       <v-badge
         :color="eventStatus.color"
@@ -234,22 +262,43 @@ async function deleteEvent() {
       v-model="tab"
       class="bg-primary"
     >
-      <v-tab value="info">
+      <v-tab
+        value="info"
+        :disabled="storesLoading"
+      >
         Informationen
       </v-tab>
-      <v-tab value="posts">
-        Posts
-      </v-tab>
-      <v-tab value="polls">
-        Umfragen
-      </v-tab>
-      <v-tab value="attendees">
+<!--      <v-tab-->
+<!--        value="posts"-->
+<!--        :disabled="storesLoading"-->
+<!--      >-->
+<!--        Posts-->
+<!--      </v-tab>-->
+<!--      <v-tab-->
+<!--        value="polls"-->
+<!--        :disabled="storesLoading"-->
+<!--        >-->
+<!--        Umfragen-->
+<!--      </v-tab>-->
+      <v-tab
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+        value="attendees"
+        :disabled="storesLoading"
+      >
         Teilnehmer
       </v-tab>
-      <v-tab v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer" value="attendance">
+      <v-tab
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+        value="attendance"
+        :disabled="storesLoading"
+      >
         Anwesenheit
       </v-tab>
-      <v-tab v-if="validateRole == EventRole.organizer" value="organizers">
+      <v-tab
+        v-if="validateRole == EventRole.organizer"
+        value="organizers"
+        :disabled="storesLoading"
+      >
         Verwalter
       </v-tab>
     </v-tabs>
@@ -258,26 +307,27 @@ async function deleteEvent() {
 
       <v-window-item value="info">
         <v-container>
-          {{event.description}}
+          {{event?.description}}
         </v-container>
         <v-divider />
         <v-list>
           <v-list-item
+            v-if="event?.startTime && event?.endTime"
             prepend-icon="mdi-clock"
           >
-            {{parseDate(event.startTime, event.endTime)}}
+            {{parseDate(event?.startTime, event?.endTime)}}
           </v-list-item>
           <v-list-item
-            v-if="event.location"
+            v-if="event?.location"
             prepend-icon="mdi-map-marker"
           >
-            {{event.location}}
+            {{event?.location}}
           </v-list-item>
           <v-list-item
-            v-if="event.organizationPreview?.name"
+            v-if="event?.organizationPreview?.name"
             prepend-icon="mdi-account-group"
           >
-            {{event.organizationPreview.name}}
+            {{event?.organizationPreview?.name}}
           </v-list-item>
         </v-list>
         <v-divider/>
@@ -314,7 +364,7 @@ async function deleteEvent() {
           <v-btn
             :loading="enrollLoading"
             :disabled="enrollLoading"
-            v-if="!attending"
+            v-if="!isAttending"
             color="primary"
             variant="elevated"
             prepend-icon="mdi-check"
@@ -325,11 +375,11 @@ async function deleteEvent() {
           <v-btn
             :loading="enrollLoading"
             :disabled="enrollLoading"
-            v-if="attending"
+            v-if="isAttending"
             color="primary"
             variant="tonal"
             prepend-icon="mdi-close"
-            @click="disenroll()"
+            @click="disEnroll()"
           >
             Abmelden
           </v-btn>
@@ -386,7 +436,6 @@ async function deleteEvent() {
             :key="index"
             :questionnaire="questionnaire"
             :event="event"
-            @update="setup()"
           />
         </v-expansion-panels>
       </v-window-item>

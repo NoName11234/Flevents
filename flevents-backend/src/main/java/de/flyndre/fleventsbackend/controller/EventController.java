@@ -52,9 +52,10 @@ private final ModelMapper mapper;
     */
    @GetMapping("/{eventId}")
    public ResponseEntity getEventById(@PathVariable String eventId, Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-      }
+      // TODO: In below out-commented code also check if in organization of event
+//      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
+//         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+//      }
       return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
    }
 
@@ -245,9 +246,6 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/remove-account/{accountId}")
    public ResponseEntity removeAccountToEvent(@PathVariable String eventId, @PathVariable String accountId, @RequestParam EventRole role, Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-      }
       try{
          eventControllerService.removeAccountFromEvent(eventId,accountId,role);
          return new ResponseEntity(HttpStatus.OK);

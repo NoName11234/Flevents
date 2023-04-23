@@ -1,55 +1,70 @@
 <script setup lang="ts">
-import {Ref, ref} from "vue";
+import {ref} from "vue";
 import {Account} from "@/models/account";
-import axios from "axios";
-import {useRouter} from "vue-router";
+import {AxiosError} from "axios";
+import {RouteLocationRaw, useRouter} from "vue-router";
+import accountApi from "@/api/accountApi";
 
 const router = useRouter();
 const showPass = ref(false);
 const showCorr = ref(false);
 const correctPassword = ref("");
 const tooltip = ref("");
+const loading = ref(false);
 const props = defineProps({
   backRoute: {
     required: true,
-    type: String,
+    type: Object as () => RouteLocationRaw,
   },
   submitRoute: {
     required: true,
-    type: String,
+    type: Object as () => RouteLocationRaw,
   },
 })
-const account : Ref<Partial<Account>> = ref({
+const account = ref({
   firstname: "",
   lastname: "",
   email: "",
   secret: ""
-})
+} as Account);
 
-async function submit(){
+async function submit() {
   // Folgende Zeile niemals entfernen!
   console.log("ich bin echt jetzt in der post methode drin, wie krass");
+  loading.value = true;
   tooltip.value = '';
-  if(account.value.firstname === "" || account.value.lastname === "" || account.value.email === "" || account.value.secret === "") {
+  if (account.value.firstname === "" || account.value.lastname === "" || account.value.email === "" || account.value.secret === "") {
     tooltip.value = "Nicht alle Felder wurden angegeben.";
+    loading.value = false;
     return;
   }
-  if(account.value.secret !== correctPassword.value) {
+  if (account.value.secret !== correctPassword.value) {
     tooltip.value = "Die Passwörter stimmen nicht überein.";
+    loading.value = false;
     return;
   }
   try {
-    await axios.post("http://localhost:8082/api/accounts", account.value);
+    await accountApi.create(account.value);
+    tooltip.value = "Anfrage erfolgreich gesendet.";
+    await router.push(props.backRoute);
   } catch (e) {
-    tooltip.value = "Die angegebene E-Mail-Adresse ist bereits registriert.";
-    return;
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Nicht authentifiziert';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
   }
-  tooltip.value = "Anfrage erfolgreich gesendet.";
-  await router.push(props.backRoute);
+  loading.value = false;
 }
 </script>
+
 <template>
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
       <v-container class="d-flex flex-column gap-3">
         <div class="d-flex flex-column flex-sm-row gap-3">
