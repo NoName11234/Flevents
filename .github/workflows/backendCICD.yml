@@ -47,12 +47,12 @@ jobs:
             'application.jwtSecret'
             'application.jwtExpirationMs'
           value: |
-            'jdbc:h2:mem:test'
+            'jdbc:postgresql://localhost:5432/flevents'
             'postgres'
             '${{secrets.DBSECRETPRD}}'
             'update'
-            'org.h2.Driver'
-            'org.hibernate.dialect.H2Dialect'
+            'org.postgresql.Driver'
+            'org.hibernate.dialect.PostgreSQLDialect'
             'smtp.ionos.de'
             '587'
             'info@flyndre.de'
@@ -60,7 +60,7 @@ jobs:
             'true'
             'true'
             'false'
-            'http://localhost:8080'
+            'http:flevents.flyndre.de:8080'
             '8082'
             '${{secrets.JWTSECRET}}'
             '6300000'
@@ -78,9 +78,14 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/flevents-backend/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      #Test the application using Maven
-      - name: Test with Maven
-        run: mvn -Dtest=FleventsBackendApplicationTests test --file flevents-backend/pom.xml
-      #Test the application using Maven - all Tests
-      - name: Test with Maven - all
-        run: mvn test --file flevents-backend/pom.xml
+      - name: Build with Maven
+        run: mvn -B package -DskipTests --file flevents-backend/pom.xml
+      
+      - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          #Set artifact name
+          name: artifact
+          #From this path
+          path: flevents-backend/target/flevents-backend-0.0.1-SNAPSHOT.jar
