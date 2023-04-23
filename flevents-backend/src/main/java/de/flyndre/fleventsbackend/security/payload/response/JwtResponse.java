@@ -1,7 +1,11 @@
 package de.flyndre.fleventsbackend.security.payload.response;
 
 import java.util.List;
-
+/**
+ * This is the DTO of the Answer of the JWT-Token which is sent to the Frontend.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 public class JwtResponse {
 	private String token;
 	private String type = "Bearer";

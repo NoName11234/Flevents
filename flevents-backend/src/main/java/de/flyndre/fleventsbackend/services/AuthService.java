@@ -18,7 +18,11 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+/**
+ * This ist the Service-Class for Authentication and Authorization.
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Service
 public class AuthService {
     @Autowired
@@ -29,6 +33,12 @@ public class AuthService {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    /**
+     * @param account the Account that should be Authorized
+     * @param password the given password for checking
+     * @return JwtResponse which contains the Token and Roles
+     */
     public JwtResponse authorize(FleventsAccount account, String password){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(account.getUuid(), password)
@@ -46,6 +56,11 @@ public class AuthService {
                 roles);
     }
 
+    /**
+     * @param auth the current logged-in User
+     * @param roles the roles that are allowed
+     * @return boolean if the User is allowed or not
+     */
     public boolean validateRights(Authentication auth, List<Role> roles, String allowedUuid){
         for(GrantedAuthority authorization : auth.getAuthorities()){
             for(Role role : roles){

@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the service for the OrganizationController class.
  * It provides methods regarding organizations. The methods of the OrganizationController are mapped on them.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service
@@ -164,4 +164,14 @@ public class OrganizationControllerService {
         FleventsAccount account = fleventsAccountService.getAccountById(accountId);
         return eventService.createEventInOrganization(event, account, organization);
     }
+
+    /**
+     *  A specified account leaves a specified organization.
+     * @param organizationId the id of the organization to remove the account from
+     * @param accountId the id of the account to be removed
+     */
+    public void leaveOrganization(String organizationId, String accountId){
+        organizationService.leaveOrganization(getOrganizationById(organizationId), fleventsAccountService.getAccountById(accountId));
+    }
+
 }

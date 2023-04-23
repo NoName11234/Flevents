@@ -17,10 +17,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
- * This Class is the service for the email service.
+ * This Service contains logic and usage for the email service.
  * It provides methods regarding different types of emails.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Component
@@ -178,6 +178,10 @@ public class EMailServiceImpl implements EMailService{
         sendSimpleEmail(details);
     }
 
+    /**
+     * Sends an email to the specified address containing a default or a custom text with a Alert for participating, which can be specified in the mailconfig object of the event.
+     * @param event the event to send the mail for
+     */
     @Override
     public void sendAlertMessage(Event event) throws MessagingException {
         EmailDetails details = new EmailDetails();

@@ -8,10 +8,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
- * This Class is the service for the InvitationToken repository.
+ * This Service provides logic and usage for the InvitationToken repository.
  * It provides methods for manipulating the data of these repositories.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service

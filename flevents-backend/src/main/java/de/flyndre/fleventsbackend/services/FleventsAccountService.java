@@ -24,10 +24,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Author: Paul Lehmann
- * Version:
- * This Class is the service for the FleventsAccount repository.
+ * This Service provides usage and logic for the FleventsAccount repository.
  * It provides methods for manipulating the data of these repositories.
+ * @author Paul Lehmann
+ * @version $I$
  */
 
 @Service

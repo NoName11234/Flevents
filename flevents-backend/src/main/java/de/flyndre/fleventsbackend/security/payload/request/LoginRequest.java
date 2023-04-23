@@ -2,7 +2,11 @@ package de.flyndre.fleventsbackend.security.payload.request;
 
 
 import jakarta.validation.constraints.NotBlank;
-
+/**
+ * This is the DTO of the Login which the Frontend sends to the Backend.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 public class LoginRequest {
 	@NotBlank
 	private String username;

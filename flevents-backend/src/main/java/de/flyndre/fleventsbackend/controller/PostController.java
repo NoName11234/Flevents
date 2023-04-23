@@ -16,10 +16,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the Controller for the REST-API path "/api/events".
  * It provides an interface regarding posts.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @RestController

@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+/**
+ * This ist the Service-Class for the ApiControllerService.
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Service
 public class ApiService {
     private OrganizationRepository organizationRepository;

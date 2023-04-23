@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the service for the PostController class.
  * It provides methods regarding posts. The methods of the PostController are mapped on them.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @Service

@@ -17,10 +17,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
- * Author: Lukas Burkhardt
- * Version:
  * This Class is the Controller for the REST-API path "/api/organizations".
  * It provides an interface regarding organizations.
+ * @author Lukas Burkhardt
+ * @version $I$
  */
 
 @RestController
@@ -222,6 +222,18 @@ public class OrganizationController {
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
       organizationControllerService.changeRole(organizationId, accountId, fromRole,toRole);
+      return new ResponseEntity<>(HttpStatus.OK);
+   }
+
+   /**
+    * A specified account leaves a specified organization.
+    * @param organizationId the id of the organization to remove the account from
+    * @param accountId the id of the account to be removed
+    * @return ReponseEntity with the http status code
+    */
+   @PostMapping("/{organizationId}/leave-organisation/{acountId}")
+   public ResponseEntity leaveOrganization(@PathVariable String organizationId, @PathVariable String accountId){
+      organizationControllerService.leaveOrganization(organizationId, accountId);
       return new ResponseEntity<>(HttpStatus.OK);
    }
 }

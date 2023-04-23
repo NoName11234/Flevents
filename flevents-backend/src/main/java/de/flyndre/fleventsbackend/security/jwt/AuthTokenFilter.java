@@ -16,10 +16,16 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import java.util.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+/**
+ * This ist the Filter for validating and giving Authorization.
+ * @author Ruben Kraft
+ * @version $I$
+ */
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
   @Autowired
@@ -27,6 +33,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   @Autowired
   private UserDetailsServiceImpl userDetailsService;
+
 
   private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
