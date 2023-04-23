@@ -232,12 +232,11 @@ public class EventService {
      * @param account the account to be checked in
      */
     public void attendeesCheckIn(Event event, FleventsAccount account){
-        event.getAttendees().stream().map(eventRegistration ->{
-                if(account.getUuid().equals(eventRegistration.getAccount().getUuid())){
-                    eventRegistration.setCheckedIn(true);
-                }
-                return null;
-            });
+        for(EventRegistration eventRegistration:event.getAttendees()) {
+            if (account.getUuid().equals(eventRegistration.getAccount().getUuid())) {
+                eventRegistration.setCheckedIn(true);
+            }
+        }
         eventRepository.save(event);
     }
 

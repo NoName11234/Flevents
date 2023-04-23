@@ -77,6 +77,7 @@ public class AppConfiguration {
                 return eventRegistrations.stream().map(eventRegistration -> {
                     AccountPreview accountPreview = modelMapper.map(eventRegistration.getAccount(),AccountPreview.class);
                     accountPreview.setRole(eventRegistration.getRole());
+                    accountPreview.setCheckedIn(eventRegistration.isCheckedIn());
                     return accountPreview;
                 }).collect(Collectors.toList());
             }
