@@ -15,14 +15,18 @@ function closeToast(toast: ToastType) {
 
 <template>
   <v-container
-    class="d-flex flex-column justify-center justify-sm-start gap c-toast-display"
+    class="c-toast-display"
   >
-    <Toast
-      v-for="(toast, index) in toasts"
-      :key="index"
-      :toast="toast"
-      @close="closeToast"
-    />
+    <div
+      class="d-flex flex-column justify-center justify-sm-start gap"
+    >
+      <Toast
+        v-for="(toast, index) in toasts"
+        :key="index"
+        :toast="toast"
+        @close="closeToast"
+      />
+    </div>
   </v-container>
 </template>
 
@@ -30,9 +34,11 @@ function closeToast(toast: ToastType) {
 .c-toast-display {
   position: fixed;
   bottom: 4rem;
-  left: 0;
-  z-index: 1008;
+  right: 0;
+  z-index: 1005;
   width: 100%;
   max-width: 350px;
+  max-height: 50vh;
+  overflow: auto;
 }
 </style>

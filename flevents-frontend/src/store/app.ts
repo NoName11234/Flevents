@@ -12,9 +12,7 @@ export const useAppStore = defineStore('app', {
      * Queue for globally shown toast-messages.
      * **Do not modify directly or the toasts will be displayed permanently!**
      */
-    toasts: [{
-      text: 'lala'
-    }] as Toast[],
+    toasts: [] as Toast[],
     /**
      * Date of when the current access token will expire.
      */
