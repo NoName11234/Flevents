@@ -215,7 +215,7 @@ public class EventControllerService {
      * @param accountId the id of the account to be checked in
      */
     public void attendeesCheckIn(String eventId, String accountId){
-        eventService.attendeesCheckIn(eventId, accountId);
+        eventService.attendeesCheckIn(getEventById(eventId), accountService.getAccountById(accountId));
     }
 
     /**

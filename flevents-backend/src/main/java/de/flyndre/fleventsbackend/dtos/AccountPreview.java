@@ -27,5 +27,7 @@ public class AccountPreview {
 
     private Role role;
 
+    private boolean checkedIn;
+
     private Boolean isActive;
 }
