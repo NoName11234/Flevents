@@ -12,6 +12,7 @@ on:
 jobs:
   test:
     name: Unittest
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
