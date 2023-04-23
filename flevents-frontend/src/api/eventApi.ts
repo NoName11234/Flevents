@@ -98,14 +98,28 @@ class EventApi {
   /**
    * Invites an account to be associated with the event under the given role.
    * @param uuid the uuid of the event
-   * @param accountUuid the uuid of the account to be invited
+   * @param email the e-mail of the person to be invited
    * @param role the role the account will have
    */
-  inviteAttendee(uuid: string, accountUuid: string, role: EventRole.attendee|EventRole.tutor) {
+  inviteAttendee(uuid: string, email: string, role: EventRole.attendee|EventRole.tutor) {
     return api.post(`${base}/${uuid}/invite`, {}, {
       params: {
-        accountId: accountUuid,
+        email: email,
         role: role,
+      }
+    });
+  }
+
+  /**
+   * Invites an account to be associated with the event as organizer.
+   * @param uuid the uuid of the event
+   * @param email the e-mail of the person to be invited
+   */
+  inviteOrganizer(uuid: string, email: string) {
+    return api.post(`${base}/${uuid}/invite`, {}, {
+      params: {
+        email: email,
+        role: EventRole.organizer,
       }
     });
   }
