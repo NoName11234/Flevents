@@ -129,7 +129,14 @@ public class FleventsAccountControllerService {
      * @return the created account
      */
     public FleventsAccount createAccount(FleventsAccount account){
-        return fleventsAccountService.createAccount(account);
+        try{
+            account = fleventsAccountService.createAccount(account);
+            eMailService.sendRegistraitionMail(account);
+            return account;
+        }catch (MessagingException e) {
+            deleteAccount(account.getUuid());
+            throw new RuntimeException("Was not able to send the registration mail, so the account was not created", e);
+        }
     }
 
 
