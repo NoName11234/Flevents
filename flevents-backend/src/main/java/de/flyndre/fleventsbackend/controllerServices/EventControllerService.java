@@ -226,4 +226,13 @@ public class EventControllerService {
     public List<String> getCheckedIn(String eventId){
         return eventService.getCheckedIn(eventId);
     }
+
+    /**
+     * Ands an account as an attendee to the given event.
+     * @param eventId the event to add the account
+     * @param accountId the account to be added.
+     */
+    public void addAccountToEvent(String eventId, String accountId) {
+        eventService.addAccountToEvent(getEventById(eventId),accountService.getAccountById(accountId),EventRole.attendee);
+    }
 }

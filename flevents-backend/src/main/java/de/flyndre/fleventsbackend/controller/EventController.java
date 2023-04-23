@@ -1,14 +1,10 @@
 package de.flyndre.fleventsbackend.controller;
 
-import de.flyndre.fleventsbackend.Models.EventRegistration;
-import de.flyndre.fleventsbackend.Models.EventRole;
+import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
-import de.flyndre.fleventsbackend.Models.Event;
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.controllerServices.EventControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
-import org.h2.engine.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -167,13 +163,31 @@ private final ModelMapper mapper;
     * @param auth the Authentication generated out of a barer token.
     * @return ResponseEntity with the http status code
     */
-   @PostMapping("/{eventId}/add-account")
-   public ResponseEntity addAccountToEvent(@PathVariable String eventId, @RequestParam(required = false) String token,Authentication auth){
+   @PostMapping("/{eventId}/accept-invitation")
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, Authentication auth){
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
       eventControllerService.acceptInvitation(eventId, details.getId(), token);
+      return new ResponseEntity(HttpStatus.OK);
+   }
+
+   /**
+    * Adds an account as an attendee to the event if the account is in the organization of this event.
+    * Allows access for member and above of the organization of the specified event.
+    * @param eventId the id of the event to add the account to
+    * @param auth the Authentication generated out of a barer token.
+    * @return ResponseEntity with the http status code
+    */
+   @PostMapping("/{eventId}/add-account")
+   public ResponseEntity addAccountToEvent(@PathVariable String eventId,Authentication auth){
+      Event event = eventControllerService.getEventById(eventId);
+      if(!eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.values()))){
+         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+      }
+      UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+      eventControllerService.addAccountToEvent(eventId,details.getId());
       return new ResponseEntity(HttpStatus.OK);
    }
 
