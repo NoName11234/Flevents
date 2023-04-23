@@ -39,7 +39,7 @@ const eventList = computed(() => {
       || event.organizationPreview?.name.toLowerCase().includes(term.value)
       || event.organizationPreview?.description.toLowerCase().includes(term.value)
     )
-  );
+  ).sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
 });
 
 function updateList(newTerm: string) {

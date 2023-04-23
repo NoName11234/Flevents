@@ -51,7 +51,7 @@ export const UI = {
 export const API = {
 
   /**
-   * The base-URL of the REST-API endpoints.
+   * The base-URL of the REST-API endpoints without a trailing slash.
    */
   BASE_URL: 'http://localhost:8082/api',
 
