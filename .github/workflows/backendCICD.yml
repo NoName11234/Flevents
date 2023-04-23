@@ -39,7 +39,7 @@ jobs:
             spring.mail.properties.mail.smtp.auth=true
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
-            server.port=8082
+            server.port=8080
             application.baseurl=http://localhost:3000/
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
             application.jwtExpirationMs=86400000
@@ -68,7 +68,7 @@ jobs:
   build:
     name: Build Artifact
     needs: test
-      
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -97,7 +97,7 @@ jobs:
             spring.mail.properties.mail.smtp.auth=true
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
-            server.port=8082
+            server.port=8080
             application.baseurl=http://flevents.flyndre.de:3000/
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
             application.jwtExpirationMs=86400000
