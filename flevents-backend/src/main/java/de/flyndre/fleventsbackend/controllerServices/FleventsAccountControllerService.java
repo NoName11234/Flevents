@@ -19,8 +19,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -80,12 +79,30 @@ public class FleventsAccountControllerService {
     }
 
     /**
-     * Returns the managed events from the specified account.
+     * Returns the managed events from the specified account, also containing all events from the organizations where the account is registered as admin.
      * @param accountId the id of the account to get the managed events from
      * @return List<EventInformation> list with the managed events of the given account
      */
     public List<Event> getManagedEvents(String accountId){
-        return eventService.getManagedEvents(getAccountById(accountId));
+        //get all managed events for the given account
+        List<Event> managedEvents = eventService.getManagedEvents(getAccountById(accountId));
+        //get all organizations where the account is registered as admin
+        List<Organization> managedOrganizations = organizationService.getManagedOrganization(getAccountById(accountId));
+        List<Event> organizationEvents = new ArrayList<>();
+
+        //get all events from the organizations where the account is registered as admin
+        for(int i=0; i<managedOrganizations.size();i++){
+            organizationEvents.addAll(managedOrganizations.get(i).getEvents());
+        }
+        //merge the lists
+        managedEvents.addAll(organizationEvents);
+
+        //delete duplicates: converting to a set automatically deletes all duplicates
+        Set<Event> set = new HashSet<>(managedEvents);
+        managedEvents.clear();
+        managedEvents.addAll(set);
+
+        return managedEvents;
     }
 
     /**
