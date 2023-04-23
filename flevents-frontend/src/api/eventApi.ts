@@ -144,6 +144,20 @@ class EventApi {
   addAccount(uuid: string) {
     return api.post(`${base}/${uuid}/add-account`);
   }
+
+  /**
+   * Dis-enrolls the current user from the event.
+   * @param uuid the uuid of the event
+   * @param accountUuid the uuid of the account
+   * @param role the role the account was previously associated with the event
+   */
+  removeAccount(uuid: string, accountUuid: string, role: EventRole) {
+    return api.post(`${base}/${uuid}/remove-account/${accountUuid}`, {}, {
+      params: {
+        role: role,
+      }
+    });
+  }
 }
 
 export default new EventApi();

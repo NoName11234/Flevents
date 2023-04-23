@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import {computed, onBeforeMount, ref} from "vue";
+import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
-import {FleventsEvent} from "@/models/fleventsEvent";
 import axios from "axios";
 import {Post} from "@/models/post";
 import router from "@/router";
 import EventPost from "@/components/EventPost.vue";
 import {Account} from "@/models/account";
-import security from "@/service/security";
 import {EventRole} from "@/models/eventRole";
 import {Questionnaire} from "@/models/questionnaire";
 import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
@@ -16,9 +14,11 @@ import {useEventStore} from "@/store/events";
 import {useSurveyStore} from "@/store/surveys";
 import {usePostStore} from "@/store/posts";
 import {AccountPreview} from "@/models/accountPreview";
-import api from "@/api/api";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
+import eventApi from "@/api/eventApi";
+import {useAppStore} from "@/store/app";
+import api from "@/api/api";
 
 const openContext = ref(false);
 const tab = ref(null);
@@ -26,6 +26,8 @@ const address = ref("");
 const route = useRoute();
 const accountStore = useAccountStore();
 const { currentAccount: account } = storeToRefs(accountStore);
+
+const appStore = useAppStore();
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(route.params.uuid as string);
@@ -38,7 +40,7 @@ const posts = computed(() => postStore.getPosts(route.params.uuid as string) as 
 
 const enrollLoading = ref(false);
 const storesLoading = computed(() =>
-  eventStore.loading
+  eventStore.specificLoading.get(route.params.uuid as string)
   || surveyStore.loading
   || postStore.loading
 );
@@ -57,6 +59,7 @@ const isAttending = computed(() => {
 
 const validateRole = computed(() => {
   //TODO: Ändern in JWT
+  //TODO: als admin anzeigen
   for (let j = 0; j < organizers?.value?.length; j++){
     if (account.value?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer") {
       return EventRole.organizer;
@@ -69,6 +72,9 @@ const validateRole = computed(() => {
     else if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor") {
       return EventRole.tutor;
     }
+  }
+  if (eventStore.managedEventsIds.includes(event.value.uuid!)) {
+    return EventRole.organizer;
   }
   return EventRole.attendee;
 })
@@ -120,15 +126,21 @@ const eventStatus = computed(() => {
 async function enroll(){
   enrollLoading.value = true;
   try {
-    const response = await api.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.value!.uuid as string}`);
-    console.log(response);
+    // const response = await api.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.value!.uuid as string}`);
+    const response = await eventApi.addAccount(route.params.uuid as string);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
   } catch (e) {
     // already enrolled
     console.error("Enrollment failed, probably already enrolled.", e);
+    appStore.addToast({
+      text: 'Anmelden fehlgeschlagen. Sie sind womöglich bereits angemeldet. Versuchen Sie die Seite neu zu laden.',
+      color: 'error',
+    });
   }
   enrollLoading.value = false;
+  eventStore.hydrate();
 }
-async function disenroll(){
+async function disEnroll(){
   enrollLoading.value = true;
   if (account.value!.organizationPreviews.filter(o => o.uuid === event.value.organizationPreview.uuid).length === 0) {
     const accept = window.confirm("Das Event wird von einer Organisation veranstaltet, der Sie nicht angehören. Wenn Sie sich abmelden, können Sie nur über erneute Einladung wieder teilnehmen. Sind Sie sicher?");
@@ -138,13 +150,21 @@ async function disenroll(){
     }
   }
   try {
-    const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.value!.uuid as string}`, {}, {params: {role: "attendee"}});
-    console.log(response);
+    // const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.value!.uuid as string}`, {}, {params: {role: "attendee"}});
+    const role = attendees.value.find(a => a.uuid === account.value!.uuid) as Account|undefined;
+    if (role === undefined) throw new Error('Not in attendee list');
+    const response = await eventApi.removeAccount(route.params.uuid as string, account.value!.uuid, role.role as EventRole);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
   } catch (e) {
     // not enrolled
     console.error("Disenrollment failed.", e);
+    appStore.addToast({
+      text: 'Abmelden fehlgeschlagen. Sie sind womöglich gar nicht angemeldet. Versuchen Sie die Seite neu zu laden.',
+      color: 'error',
+    });
   }
   enrollLoading.value = false;
+  eventStore.hydrate();
 }
 
 function parseDate(from: any, to: any) {
@@ -175,7 +195,7 @@ function isSameDay(a: Date, b: Date) {
 }
 
 function removeOrganizer(uuid : string){
-  axios.post(`http://localhost:8082/api/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
+  api.post(`/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
   for(let i = 0; i < organizers.value.length; i++){
     if(organizers.value[i].uuid === uuid){
       organizers.value.splice(i,1);
@@ -184,7 +204,7 @@ function removeOrganizer(uuid : string){
 }
 
 function removeAccount(uuid : string, role : string){
-  axios.post(`http://localhost:8082/api/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
+  api.post(`/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
   for(let i = 0; i < attendees.value.length; i++){
     if(attendees.value[i].uuid === uuid){
       attendees.value.splice(i,1);
@@ -194,8 +214,11 @@ function removeAccount(uuid : string, role : string){
 
 async function updateRole(account: AccountPreview) {
   console.log("changing role to: ", account.role);
+  console.log(attendees.value, account.uuid)
+  const fromRole = attendees.value.find(a => a.uuid === account.uuid)!.role;
   try {
     //await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
+    await api.post(`/events/${event.value.uuid}/change-role/${account.uuid}?toRole=${account.role}&fromRole=${fromRole}`);
   } catch (e) {
     console.log("Failed to update role.", e);
   }
@@ -203,7 +226,7 @@ async function updateRole(account: AccountPreview) {
 
 async function deleteEvent() {
   try {
-    const response = await axios.delete(`http://localhost:8082/api/events/${event.value.uuid}`)
+    const response = await eventApi.delete(route.params.uuid as string);
     openContext.value = false;
     await router.push({ name: 'home.manage', force: true });
   } catch (e) {
@@ -245,18 +268,18 @@ async function deleteEvent() {
       >
         Informationen
       </v-tab>
-      <v-tab
-        value="posts"
-        :disabled="storesLoading"
-      >
-        Posts
-      </v-tab>
-      <v-tab
-        value="polls"
-        :disabled="storesLoading"
-        >
-        Umfragen
-      </v-tab>
+<!--      <v-tab-->
+<!--        value="posts"-->
+<!--        :disabled="storesLoading"-->
+<!--      >-->
+<!--        Posts-->
+<!--      </v-tab>-->
+<!--      <v-tab-->
+<!--        value="polls"-->
+<!--        :disabled="storesLoading"-->
+<!--        >-->
+<!--        Umfragen-->
+<!--      </v-tab>-->
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendees"
@@ -340,7 +363,7 @@ async function deleteEvent() {
           <v-spacer/>
           <v-btn
             :loading="enrollLoading"
-            :disabled="enrollLoading || eventStore.loading"
+            :disabled="enrollLoading"
             v-if="!isAttending"
             color="primary"
             variant="elevated"
@@ -351,12 +374,12 @@ async function deleteEvent() {
           </v-btn>
           <v-btn
             :loading="enrollLoading"
-            :disabled="enrollLoading || eventStore.loading"
+            :disabled="enrollLoading"
             v-if="isAttending"
             color="primary"
             variant="tonal"
             prepend-icon="mdi-close"
-            @click="disenroll()"
+            @click="disEnroll()"
           >
             Abmelden
           </v-btn>

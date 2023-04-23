@@ -1,5 +1,6 @@
 import {FleventsEventPreview} from "@/models/fleventsEventPreview";
 import {OrganizationPreview} from "@/models/organizationPreview";
+import {Role} from "@/models/role";
 
 export interface Account {
 
@@ -8,7 +9,7 @@ export interface Account {
   lastname: string;
   email: string;
   secret : string|undefined;
-  role : string;
+  role : Role;
   eventPreviews: FleventsEventPreview[];
   organizationPreviews: OrganizationPreview[];
 
