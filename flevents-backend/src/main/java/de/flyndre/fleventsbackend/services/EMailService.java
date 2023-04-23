@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.Organization;
 import de.flyndre.fleventsbackend.dtos.EmailDetails;
 import jakarta.mail.MessagingException;
@@ -22,4 +23,6 @@ public interface EMailService{
     void sendAlertMessage(Event event) throws MessagingException;
 
     void sendThankMessage(Event event) throws MessagingException;
+
+    void sendRegistraitionMail(FleventsAccount account) throws MessagingException;
 }

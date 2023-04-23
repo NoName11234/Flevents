@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.Organization;
 import de.flyndre.fleventsbackend.dtos.EmailDetails;
 
@@ -197,6 +198,15 @@ public class EMailServiceImpl implements EMailService{
         details.setSubject("Thanks to be part of "+event.getName());
         details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
         details.setMsgBody(event.getMailConfig().getFeedbackMessage());
+        sendSimpleEmail(details);
+    }
+
+    @Override
+    public void sendRegistraitionMail(FleventsAccount account) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setSubject("You have been registered on flevents.");
+        details.setTo(Arrays.asList(account.getEmail()));
+        details.setMsgBody(String.format("Hi %s,\n we are glad that you choose to register you at flevents. You're account is now ready to use. Visit simple our website and enjoy our great tool. \n Your flevents team",account.getFirstname()));
         sendSimpleEmail(details);
     }
 }
