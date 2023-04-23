@@ -47,7 +47,7 @@ jobs:
             'application.jwtSecret'
             'application.jwtExpirationMs'
           value: |
-            'jdbc:h2:mem:test'
+            'jdbc:postgresql://localhost:5432/flevents'
             'postgres'
             '${{secrets.DBSECRETPRD}}'
             'update'
