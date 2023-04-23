@@ -129,7 +129,7 @@ class FleventsBackendApplicationTests {
 
 	@Test
 	void createUser() throws  Exception {
-		mockMvc.perform(post("/api/accounts", "2c9180848752d53801875315d979000b").contentType(MediaType.APPLICATION_JSON).content("{\n" +
+		mockMvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("{\n" +
 				"    \"firstname\":\"tete\",\n" +
 				"    \"lastname\":\"tester\",\n" +
 				"    \"email\":\"test@test.de\",\n" +
@@ -148,9 +148,8 @@ class FleventsBackendApplicationTests {
 	@Test
 	void logout() throws  Exception {
 		login();
-		mockMvc.perform(post("/accounts/logout", "2c9180848752d53801875315d979000b").header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken).contentType(MediaType.APPLICATION_JSON).content("{\n" +
-				"    \"token\":\""+ accesstoken +"\",\n" +
-				"    \"deviceInfo\":\"\"" +
+		mockMvc.perform(post("/api/accounts/logout").header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken).contentType(MediaType.APPLICATION_JSON).content("{\n" +
+				"    \"token\":\""+ accesstoken +"\"" +
 				"}")).andExpect(status().isOk());
 	}
 
