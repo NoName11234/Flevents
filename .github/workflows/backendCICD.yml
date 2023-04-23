@@ -65,49 +65,65 @@ jobs:
             '${{secrets.JWTSECRET}}'
             '6300000'
                
-            - name: Set Config
-            uses: christian-draeger/write-properties@1.1.0
-            with:
-              path: 'flevents-backend/src/main/resources/application-integration.properties'
-              property: |
-                'spring.datasource.url'
-                'spring.datasource.username'
-                'spring.datasource.password'
-                'spring.jpa.hibernate.ddl-auto'
-                'spring.datasource.driverClassName'
-                'spring.jpa.properties.hibernate.dialect'
-                'spring.mail.host'
-                'spring.mail.port'
-                'spring.mail.username'
-                'spring.mail.password'
-                'spring.mail.properties.mail.smtp.auth'
-                'spring.mail.properties.mail.smtp.starttls.enable'
-                'mail.smtp.ssl.protocols'
-                'spring.datasource.hikari.auto-commit'
-                'application.organizationjoinurl'
-                'application.eventjoinurl'
-                'server.port'
-                'application.baseurl'
-                'application.jwtSecret'
-                'application.jwtExpirationMs'
-              value: |
-                'jdbc:postgresql://localhost:5432/flevents'
-                'postgres'
-                '${{secrets.DBSECRETPRD}}'
-                'update'
-                'org.postgresql.Driver'
-                'org.hibernate.dialect.PostgreSQLDialect'
-                'smtp.ionos.de'
-                '587'
-                'info@flyndre.de'
-                '${{secrets.MAILSECRETPRD}}'
-                'true'
-                'true'
-                'false'
-                'http:flevents.flyndre.de:8080'
-                '8082'
-                '${{secrets.JWTSECRET}}'
-                '6300000'
+      - name: Set Config
+        uses: christian-draeger/write-properties@1.1.0
+        with:
+          path: 'flevents-backend/src/main/resources/application-integration.properties'
+          property: |
+            'spring.datasource.url'
+            'spring.datasource.username'
+            'spring.datasource.password'
+            'spring.jpa.hibernate.ddl-auto'
+            'spring.datasource.driverClassName'
+            'spring.jpa.properties.hibernate.dialect'
+            'spring.mail.host'
+            'spring.mail.port'
+            'spring.mail.username'
+            'spring.mail.password'
+            'spring.mail.properties.mail.smtp.auth'
+            'spring.mail.properties.mail.smtp.starttls.enable'
+            'mail.smtp.ssl.protocols'
+            'spring.datasource.hikari.auto-commit'
+            'application.organizationjoinurl'
+            'application.eventjoinurl'
+            'server.port'
+            'application.baseurl'
+            'application.jwtSecret'
+            'application.jwtExpirationMs'
+          value: |
+            'jdbc:postgresql://localhost:5432/flevents'
+            'postgres'
+            '${{secrets.DBSECRETPRD}}'
+            'update'
+            'org.postgresql.Driver'
+            'org.hibernate.dialect.PostgreSQLDialect'
+            'smtp.ionos.de'
+            '587'
+            'info@flyndre.de'
+            '${{secrets.MAILSECRETPRD}}'
+            'true'
+            'true'
+            'false'
+            'http:flevents.flyndre.de:8080'
+            '8082'
+            '${{secrets.JWTSECRET}}'
+            '6300000'
+      - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          #Set artifact name
+          name: artifact
+          #From this path
+          path: flevents-backend/src/main/resources/application-integration.properties
+      - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          #Set artifact name
+          name: artifact
+          #From this path
+          path: flevents-backend/src/main/resources/application.properties
       #Set up JDK 17
       - name: Set up JDK
         uses: actions/setup-java@v1
