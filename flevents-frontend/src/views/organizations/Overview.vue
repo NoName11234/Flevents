@@ -6,27 +6,17 @@
 
   <v-card :loading="loading" :disabled="loading">
 
-    <v-progress-linear
-      indeterminate
-      absolute
-      location="top"
-      color="secondary"
-      :active="organizationStore.loading"
-    />
-
     <v-tabs
       v-model="tab"
       class="bg-primary"
     >
       <v-tab
         value="info"
-        :disabled="organizationStore.loading"
       >
         Informationen
       </v-tab>
       <v-tab
         value="members"
-        :disabled="organizationStore.loading"
       >
         Mitglieder
       </v-tab>
@@ -87,10 +77,7 @@
           <thead>
             <tr>
               <th>
-                Vorname
-              </th>
-              <th>
-                Nachname
+                Name
               </th>
               <th>
                 E-Mail
@@ -110,21 +97,12 @@
               v-for="(item, index) in organization?.accountPreviews"
               :key="index"
             >
-              <td>{{item.firstname}}</td>
-              <td>{{item.lastname}}</td>
+              <td>{{item.firstname}} {{item.lastname}}</td>
               <td>{{item.email}}</td>
               <td>
-                <v-select
-                  :items="[
-                    OrganizationRole.admin,
-                    OrganizationRole.organizer,
-                    OrganizationRole.member
-                  ]"
-                  density="compact"
-                  v-model="item.role"
+                <v-btn
+                  append-icon="mdi-chevron-down"
                   variant="outlined"
-                  hide-details="auto"
-                  @update:model-value="updateRole(item)"
                   :disabled="
                     (
                       organization?.accountPreviews?.filter(a => a.role === OrganizationRole.admin).length <= 1
@@ -132,7 +110,30 @@
                     )
                     || currentAccountRole != OrganizationRole.admin
                   "
-                />
+                >
+                  {{ item.role }}
+
+                  <v-menu activator="parent">
+                    <v-list>
+                      <v-list-subheader>
+                        Rolle wechseln zu:
+                      </v-list-subheader>
+                      <v-list-item
+                        v-for="(role, index) in [
+                          OrganizationRole.admin,
+                          OrganizationRole.organizer,
+                          OrganizationRole.member
+                        ]"
+                        :key="index"
+                        :value="index"
+                        :disabled="role === item.role"
+                        :title="role.toString()"
+                        @click="updateRole(item, role)"
+                        density="compact"
+                      />
+                    </v-list>
+                  </v-menu>
+                </v-btn>
               </td>
               <td v-if="currentAccountRole === OrganizationRole.admin">
                 <v-btn
@@ -158,23 +159,18 @@
 import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
-import {Organization} from "@/models/organization";
 import {OrganizationRole} from "@/models/organizationRole";
 import {AccountPreview} from "@/models/accountPreview";
-import axios from "axios";
-import security from "@/service/security";
+import axios, {AxiosError} from "axios";
 import {useOrganizationStore} from "@/store/organizations";
 import organizationsApi from "@/api/organizationsApi";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import api from "@/api/api";
-import {load} from "webfontloader";
 import {useAppStore} from "@/store/app";
 import {Account} from "@/models/account";
 
 const route = useRoute();
 const tab = ref(null);
-const loading = ref(false);
 
 const appStore = useAppStore();
 
@@ -184,53 +180,81 @@ const { currentAccount: account } = storeToRefs(accountStore);
 const organizationStore = useOrganizationStore();
 const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
 
+const customLoading = ref(false);
+const loading = computed(() =>
+  customLoading.value
+  || organizationStore.specificLoading.get(route.params.uuid as string)
+);
+
 // TODO: replace authorization with token auth
 const currentAccountRole = computed(() => {
   return organization.value?.accountPreviews?.find(a => a.uuid === account.value!.uuid)?.role as OrganizationRole;
 });
 
-async function updateRole(newAccount: AccountPreview) {
-  const prevRole = account.value!
-    .organizationPreviews
-    .find(o => o.uuid === organization.value.uuid)!
-    .role as OrganizationRole;
-  if (newAccount.uuid === account.value!.uuid) {
-    const ok = window.confirm(`Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newAccount.role}" ändern möchten?`);
+async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationRole) {
+  if (updatedAccount.uuid === account.value!.uuid) {
+    const ok = window.confirm(`Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newRole}" ändern möchten?`);
     if (!ok) {
-      newAccount.role = prevRole;
       return;
     }
   }
+  customLoading.value = true;
   try {
-    loading.value = true;
-    const response = await organizationsApi.changeRole(organization.value.uuid, newAccount.uuid, newAccount.role as OrganizationRole);
-  } catch (e) {
-    console.log("Failed to update role.", e);
+    await organizationsApi.changeRole(route.params.uuid as string, updatedAccount.uuid, updatedAccount.role as OrganizationRole, newRole)
+    await organizationStore.hydrateSpecific(route.params.uuid as string);
     appStore.addToast({
-      text: "Rolle konnte nicht geupdated werden.",
-      color: "error"
+      text: 'Rolle aktualisiert.',
+      color: 'success',
     });
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function removeAccount(account: Account) {
-  const uuid = account.uuid;
-  try {
-    await organizationsApi.removeMember(organization.value.uuid, uuid);
-    for (let i = 0; i < organization.value.accountPreviews.length; i++) {
-      if (organization.value.accountPreviews[i].uuid === uuid) {
-        organization.value.accountPreviews.splice(i,1);
-      }
-    }
   } catch (e) {
-    console.error("Failed to remove account.", e);
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
     appStore.addToast({
-      text: `Entfernen des Accounts ${account.firstname} ${account.lastname} aus ${organization.value.name} fehlgeschlagen.`,
+      text: `Rolle konnte nicht aktualisiert werden: ${errorMessage}`,
       color: 'error',
     });
   }
+  customLoading.value = false;
+  organizationStore.hydrate();
+}
+
+async function removeAccount(account: Account) {
+  customLoading.value = true;
+  try {
+    await organizationsApi.removeMember(route.params.uuid as string, account.uuid);
+    await organizationStore.hydrateSpecific(route.params.uuid as string);
+    appStore.addToast({
+      text: 'Mitglied entfernt.',
+      color: 'success',
+    });
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Mitglied konnte nicht entfernt werden: ${errorMessage}`,
+      color: 'error',
+    });
+  }
+  customLoading.value = false;
+  organizationStore.hydrate();
 }
 
 </script>
