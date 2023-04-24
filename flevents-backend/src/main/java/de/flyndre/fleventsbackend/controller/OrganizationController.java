@@ -6,6 +6,7 @@ import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -97,6 +98,11 @@ public class OrganizationController {
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity<>(organizationControllerService.getEvents(organizationId).stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+   }
+
+   @GetMapping("/{organizationId}/preview?token=<token>")
+   public ResponseEntity getOrganizationPreview(@PathVariable @NotEmpty String organizationId, @RequestParam @NotEmpty String token){
+      return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
    }
 
    /**

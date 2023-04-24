@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.security.core.Authentication;
@@ -51,6 +52,21 @@ public class OrganizationControllerService {
      */
     public Organization getOrganizationById(String organizationId){
         return organizationService.getOrganizationById(organizationId);
+    }
+
+    public OrganizationPreview getOrganizationPreview(String organizationId, String token){
+        invitationTokenService.validate(token);
+        Organization orga = organizationService.getOrganizationById(organizationId);
+        OrganizationPreview preview = new OrganizationPreview();
+        preview.setName(orga.getName());
+        preview.setRole(null);
+        preview.setIcon(orga.getIcon());
+        preview.setUuid(orga.getUuid());
+        preview.setAddress(orga.getAddress());
+        preview.setDescription(orga.getDescription());
+        preview.setPhoneContact(orga.getPhoneContact());
+
+        return preview;
     }
 
     /**
