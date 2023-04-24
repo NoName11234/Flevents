@@ -74,7 +74,7 @@ class OrganizationApi {
    * @param role the role the account should be associated with the organization
    */
   invite(uuid: string, email: string, role: OrganizationRole = OrganizationRole.member) {
-    return api.post(`${base}/${uuid}/managed-events`, {}, {
+    return api.post(`${base}/${uuid}/invite`, {}, {
       params: {
         email,
         role,
