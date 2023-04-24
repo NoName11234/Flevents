@@ -1,6 +1,7 @@
 import api from "@/api/api";
 import {Organization} from "@/models/organization";
 import {OrganizationRole} from "@/models/organizationRole";
+import {ro} from "vuetify/locale";
 
 const base = `/organizations`
 
@@ -106,12 +107,14 @@ class OrganizationApi {
    * Changes the role of an organization member.
    * @param uuid the uuid of the organization
    * @param accountUuid the uuid of the account
-   * @param newRole the new role
+   * @param fromRole the previous role
+   * @param toRole the future role
    */
-  changeRole(uuid: string, accountUuid: string, newRole: OrganizationRole) {
+  changeRole(uuid: string, accountUuid: string, fromRole: OrganizationRole, toRole: OrganizationRole) {
     return api.post(`${base}/${uuid}/change-role/${accountUuid}`, {}, {
       params: {
-        role: newRole,
+        fromRole: fromRole,
+        toRole: toRole,
       }
     });
   }
