@@ -2,6 +2,7 @@ package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.MailConfig;
 import de.flyndre.fleventsbackend.Models.Organization;
 import de.flyndre.fleventsbackend.dtos.EmailDetails;
 
@@ -113,7 +114,14 @@ public class EMailServiceImpl implements EMailService{
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be part of "+event.getName());
 
-        if(event.getMailConfig()==null){
+        MailConfig mailConfig = event.getMailConfig();
+
+        if (
+            mailConfig == null
+            || mailConfig.getInfoMessage() == null
+            || mailConfig.getFeedbackMessage() == null
+            || mailConfig.getRegisterMessage() == null
+        ) {
             details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/organizations/join/" +event.getUuid()+"?token="+token);
         }else{
             details.setMsgBody(event.getMailConfig().getRegisterMessage());
