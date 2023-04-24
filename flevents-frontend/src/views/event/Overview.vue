@@ -18,6 +18,7 @@ import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventApi";
 import {useAppStore} from "@/store/app";
+import {useOrganizationStore} from "@/store/organizations";
 
 const openContext = ref(false);
 const tab = ref(null);
@@ -36,6 +37,8 @@ const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid a
 
 const postStore = usePostStore();
 const posts = computed(() => postStore.getPosts(route.params.uuid as string) as Post[]);
+
+const organizationStore = useOrganizationStore();
 
 const enrollLoading = ref(false);
 const storesLoading = computed(() =>
@@ -58,22 +61,18 @@ const isAttending = computed(() => {
 
 const validateRole = computed(() => {
   //TODO: Ändern in JWT
-  //TODO: als admin anzeigen
-  for (let j = 0; j < organizers?.value?.length; j++){
-    if (account.value?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer") {
-      return EventRole.organizer;
-    }
-  }
-  for (let i = 0; i < allAttendees?.value?.length; i++){
-    if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "organizer") {
-      return EventRole.organizer;
-    }
-    else if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor") {
-      return EventRole.tutor;
-    }
-  }
-  if (eventStore.managedEventsIds.includes(event.value.uuid!)) {
+
+  // If admin in event's organization then show everything
+  if (organizationStore.managedOrganizations.find(o => o.uuid === event.value.organizationPreview.uuid)) {
     return EventRole.organizer;
+  }
+
+  // Else check for specific rights
+  if (organizers.value.find(o => o.uuid === account.value?.uuid)) {
+    return EventRole.organizer;
+  }
+  if (attendees.value.find(a => a.uuid === account.value?.uuid && a.role === EventRole.tutor)) {
+    return EventRole.tutor;
   }
   return EventRole.attendee;
 })
