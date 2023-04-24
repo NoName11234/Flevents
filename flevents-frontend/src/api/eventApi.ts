@@ -60,6 +60,20 @@ class EventApi {
   }
 
   /**
+   * Invites an account to be associated with the event as organizer.
+   * @param uuid the uuid of the event
+   * @param email the e-mail of the person to be invited
+   */
+  inviteOrganizer(uuid: string, email: string) {
+    return api.post(`${base}/${uuid}/invite`, {}, {
+      params: {
+        email: email,
+        role: EventRole.organizer,
+      }
+    });
+  }
+
+  /**
    * Adds the account with given accountUuid to the event with given uuid if the token is valid.
    * @param uuid the uuid of the event
    * @param accountUuid the uuid of the account to be added
@@ -80,7 +94,7 @@ class EventApi {
    * @param accountUuid the uuid of the account to be removed
    */
   removeOrganizer(uuid: string, accountUuid: string) {
-    return api.delete(`${base}/organizers/${accountUuid}`);
+    return this.removeAccount(uuid, accountUuid, EventRole.organizer);
   }
 
 
@@ -111,20 +125,6 @@ class EventApi {
   }
 
   /**
-   * Invites an account to be associated with the event as organizer.
-   * @param uuid the uuid of the event
-   * @param email the e-mail of the person to be invited
-   */
-  inviteOrganizer(uuid: string, email: string) {
-    return api.post(`${base}/${uuid}/invite`, {}, {
-      params: {
-        email: email,
-        role: EventRole.organizer,
-      }
-    });
-  }
-
-  /**
    * Accepts an invitation link as the current user.
    * @param uuid the uuid of the event
    * @param token the token the account has been invited with
@@ -146,7 +146,7 @@ class EventApi {
   }
 
   /**
-   * Dis-enrolls the current user from the event.
+   * Dis-enrolls the given user from the event.
    * @param uuid the uuid of the event
    * @param accountUuid the uuid of the account
    * @param role the role the account was previously associated with the event
@@ -155,6 +155,22 @@ class EventApi {
     return api.post(`${base}/${uuid}/remove-account/${accountUuid}`, {}, {
       params: {
         role: role,
+      }
+    });
+  }
+
+  /**
+   * Changes the role of the given user to `toRole`.
+   * @param uuid the uuid of the event
+   * @param accountUuid the uuid of the account
+   * @param fromRole the previous role
+   * @param toRole the future role
+   */
+  changeRole(uuid: string, accountUuid: string, fromRole: EventRole, toRole: EventRole) {
+    return api.post(`${base}/${uuid}/change-role/${accountUuid}`, {}, {
+      params: {
+        fromRole: fromRole,
+        toRole: toRole,
       }
     });
   }
