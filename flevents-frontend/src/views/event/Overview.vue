@@ -2,7 +2,7 @@
 import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
-import axios from "axios";
+import {AxiosError} from "axios";
 import {Post} from "@/models/post";
 import router from "@/router";
 import EventPost from "@/components/EventPost.vue";
@@ -18,7 +18,7 @@ import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventApi";
 import {useAppStore} from "@/store/app";
-import api from "@/api/api";
+import {useOrganizationStore} from "@/store/organizations";
 
 const openContext = ref(false);
 const tab = ref(null);
@@ -38,6 +38,8 @@ const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid a
 const postStore = usePostStore();
 const posts = computed(() => postStore.getPosts(route.params.uuid as string) as Post[]);
 
+const organizationStore = useOrganizationStore();
+
 const enrollLoading = ref(false);
 const storesLoading = computed(() =>
   eventStore.specificLoading.get(route.params.uuid as string)
@@ -46,35 +48,31 @@ const storesLoading = computed(() =>
 );
 
 const attendees = computed(() => {
-  return event?.value?.accountPreviews.filter(a => [EventRole.attendee||EventRole.tutor].includes(a.role as EventRole))
+  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor].includes(a.role as EventRole)) as AccountPreview[]
 });
 const organizers = computed(() => {
-  return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole))
+  return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole)) as AccountPreview[]
 });
-const allAttendees = computed(() => attendees?.value?.concat(organizers.value));
+const allAttendees = computed(() => attendees?.value?.concat(organizers.value) as AccountPreview[]);
 
 const isAttending = computed(() => {
-  return attendees?.value?.find(v => v!.uuid === account.value!.uuid) != undefined;
+  return (attendees?.value?.find(v => v!.uuid === account.value!.uuid) != undefined) as boolean;
 });
 
 const validateRole = computed(() => {
   //TODO: Ändern in JWT
-  //TODO: als admin anzeigen
-  for (let j = 0; j < organizers?.value?.length; j++){
-    if (account.value?.uuid === organizers.value[j]!.uuid && organizers.value[j]!.role === "organizer") {
-      return EventRole.organizer;
-    }
-  }
-  for (let i = 0; i < allAttendees?.value?.length; i++){
-    if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "organizer") {
-      return EventRole.organizer;
-    }
-    else if (account.value?.uuid === allAttendees.value[i]!.uuid && allAttendees.value[i]!.role === "tutor") {
-      return EventRole.tutor;
-    }
-  }
-  if (eventStore.managedEventsIds.includes(event.value.uuid!)) {
+
+  // If admin in event's organization then show everything
+  if (organizationStore.managedOrganizations.find(o => o.uuid === event.value.organizationPreview.uuid)) {
     return EventRole.organizer;
+  }
+
+  // Else check for specific rights
+  if (organizers.value.find(o => o.uuid === account.value?.uuid)) {
+    return EventRole.organizer;
+  }
+  if (attendees.value.find(a => a.uuid === account.value?.uuid && a.role === EventRole.tutor)) {
+    return EventRole.tutor;
   }
   return EventRole.attendee;
 })
@@ -129,6 +127,10 @@ async function enroll(){
     // const response = await api.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.value!.uuid as string}`);
     const response = await eventApi.addAccount(route.params.uuid as string);
     await eventStore.hydrateSpecific(route.params.uuid as string);
+    appStore.addToast({
+      text: 'Erfolgreich angemeldet.',
+      color: 'success',
+    });
   } catch (e) {
     // already enrolled
     console.error("Enrollment failed, probably already enrolled.", e);
@@ -155,6 +157,10 @@ async function disEnroll(){
     if (role === undefined) throw new Error('Not in attendee list');
     const response = await eventApi.removeAccount(route.params.uuid as string, account.value!.uuid, role.role as EventRole);
     await eventStore.hydrateSpecific(route.params.uuid as string);
+    appStore.addToast({
+      text: 'Erfolgreich abgemeldet.',
+      color: 'success',
+    });
   } catch (e) {
     // not enrolled
     console.error("Disenrollment failed.", e);
@@ -194,34 +200,88 @@ function isSameDay(a: Date, b: Date) {
   return sameYear && sameMonth && sameDay;
 }
 
-function removeOrganizer(uuid : string){
-  api.post(`/events/${address.value}/remove-account/${uuid}?role=organizer`).then(() => {return true;})
-  for(let i = 0; i < organizers.value.length; i++){
-    if(organizers.value[i].uuid === uuid){
-      organizers.value.splice(i,1);
-    }
-  }
-}
-
-function removeAccount(uuid : string, role : string){
-  api.post(`/events/${address.value}/remove-account/${uuid}?role=${role}`).then(() => {return true;})
-  for(let i = 0; i < attendees.value.length; i++){
-    if(attendees.value[i].uuid === uuid){
-      attendees.value.splice(i,1);
-    }
-  }
-}
-
-async function updateRole(account: AccountPreview) {
-  console.log("changing role to: ", account.role);
-  console.log(attendees.value, account.uuid)
-  const fromRole = attendees.value.find(a => a.uuid === account.uuid)!.role;
+async function removeOrganizer(uuid: string) {
   try {
-    //await axios.post(`http://localhost:8082/api/events/${event.value.uuid}/change-role/${account.uuid}?role=${account.role}`)
-    await api.post(`/events/${event.value.uuid}/change-role/${account.uuid}?toRole=${account.role}&fromRole=${fromRole}`);
+    await eventApi.removeAccount(route.params.uuid as string, uuid, EventRole.organizer);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
+    appStore.addToast({
+      text: 'Organisator entfernt.',
+      color: 'success',
+    });
   } catch (e) {
-    console.log("Failed to update role.", e);
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Organisator konnte nicht entfernt werden: ${errorMessage}`,
+      color: 'error',
+    });
   }
+  eventStore.hydrate();
+}
+
+async function removeAccount(uuid: string, role: string) {
+  try {
+    await eventApi.removeAccount(route.params.uuid as string, uuid, role as EventRole);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
+    appStore.addToast({
+      text: 'Account entfernt.',
+      color: 'success',
+    });
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Account konnte nicht entfernt werden: ${errorMessage}`,
+      color: 'error',
+    });
+  }
+  eventStore.hydrate();
+}
+
+async function updateRole(account: AccountPreview, newRole: EventRole) {
+  try {
+    await eventApi.changeRole(route.params.uuid as string, account.uuid, account.role as EventRole, newRole);
+    await eventStore.hydrateSpecific(route.params.uuid as string);
+    appStore.addToast({
+      text: 'Rolle aktualisiert.',
+      color: 'success',
+    });
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Rolle konnte nicht aktualisiert werden: ${errorMessage}`,
+      color: 'error',
+    });
+  }
+  eventStore.hydrate();
 }
 
 async function deleteEvent() {
@@ -458,10 +518,7 @@ async function deleteEvent() {
           <thead>
             <tr>
               <th>
-                Vorname
-              </th>
-              <th>
-                Nachname
+                Name
               </th>
               <th>
                 E-Mail
@@ -469,9 +526,9 @@ async function deleteEvent() {
               <th v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
                 Rolle
               </th>
-              <th>
-                Bestätigt
-              </th>
+<!--              <th>-->
+<!--                Bestätigt-->
+<!--              </th>-->
               <th v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">Entfernen</th>
             </tr>
           </thead>
@@ -480,28 +537,48 @@ async function deleteEvent() {
              v-for="(item, index) in attendees"
              :key="index"
             >
-              <td>{{item.firstname}}</td>
-              <td>{{item.lastname}}</td>
+              <td>{{item.firstname}} {{item.lastname}}</td>
               <td>{{item.email}}</td>
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
-                <v-select
-                  :items="[
-                    EventRole.attendee,
-                    EventRole.tutor
-                  ]"
-                  v-model="item.role"
-                  density="compact"
+                <v-btn
+                  append-icon="mdi-chevron-down"
                   variant="outlined"
-                  hide-details="auto"
-                  @update:model-value="updateRole(item)"
-                />
+                >
+                  {{ item.role }}
+
+                  <v-menu activator="parent">
+                    <v-list>
+                      <v-list-subheader>
+                        Rolle wechseln zu:
+                      </v-list-subheader>
+                      <v-list-item
+                        v-for="(role, index) in [
+                          EventRole.attendee,
+                          EventRole.tutor
+                        ]"
+                        :key="index"
+                        :value="index"
+                        :disabled="role === item.role"
+                        :title="role.toString()"
+                        @click="updateRole(item, role)"
+                        density="compact"
+                      />
+                    </v-list>
+                  </v-menu>
+                </v-btn>
               </td>
-              <td>
-                <v-icon v-if="item.role !== 'invited'" icon="mdi-check-circle" color="gray"/>
-                <v-icon v-if="item.role === 'invited'" icon="mdi-close-circle" color="gray"/>
-              </td>
+<!--              <td>-->
+<!--                <v-icon v-if="item.role !== 'invited'" icon="mdi-check-circle" color="gray"/>-->
+<!--                <v-icon v-if="item.role === 'invited'" icon="mdi-close-circle" color="gray"/>-->
+<!--              </td>-->
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
-                <v-btn variant="text" size="small" icon="mdi-delete" v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer" @click="removeAccount(item.uuid, item.role)"></v-btn>
+                <v-btn
+                  variant="text"
+                  size="small"
+                  icon="mdi-delete"
+                  v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+                  @click="removeAccount(item.uuid, item.role)"
+                />
               </td>
             </tr>
           </tbody>
@@ -524,10 +601,7 @@ async function deleteEvent() {
           <thead>
           <tr>
             <th>
-              Vorname
-            </th>
-            <th>
-              Nachname
+              Name
             </th>
             <th>
               E-Mail
@@ -542,8 +616,7 @@ async function deleteEvent() {
             v-for="(item, index) in attendees"
             :key="index"
           >
-            <td>{{item.firstname}}</td>
-            <td>{{item.lastname}}</td>
+            <td>{{item.firstname}} {{item.lastname}}</td>
             <td>{{item.email}}</td>
             <td>
               <v-checkbox
@@ -572,10 +645,7 @@ async function deleteEvent() {
           <thead>
           <tr>
             <th>
-              Vorname
-            </th>
-            <th>
-              Nachname
+              Name
             </th>
             <th>
               E-Mail
@@ -588,8 +658,7 @@ async function deleteEvent() {
             v-for="(item, index) in organizers"
             :key="index"
           >
-            <td>{{item.firstname}}</td>
-            <td>{{item.lastname}}</td>
+            <td>{{item.firstname}} {{item.lastname}}</td>
             <td>{{item.email}}</td>
             <td><v-btn
               :disabled="organizers.length <= 1"

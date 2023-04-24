@@ -204,7 +204,11 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole fromRole, @RequestParam EventRole toRole,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      Event event = eventControllerService.getEventById(eventId);
+      if (
+         !eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))
+         && !eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.values()))
+      ) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       eventControllerService.changeRole(eventId, accountId, fromRole,toRole);
