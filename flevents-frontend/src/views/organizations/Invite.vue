@@ -35,19 +35,30 @@ function remove(item: any){
 
 async function submit() {
   let failedInvitations = [];
+  let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
     try {
       const response = await organizationsApi.invite(uuid, email, role.value);
+      successfulInvitations.push(email);
     } catch (e) {
       console.log(`Invitation of ${email} failed.`);
       failedInvitations.push(email);
     }
   }
-  appStore.addToast({
-    text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
-    color: 'error',
-  });
+
+  if (failedInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
+      color: 'error',
+    });
+  }
+  if (successfulInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen war erfolgreich: ${successfulInvitations.join(', ')}`,
+      color: 'success',
+    });
+  }
   await router.push( { name: 'organizations.organization', params: { uuid: uuid } } );
 }
 </script>
