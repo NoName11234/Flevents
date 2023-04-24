@@ -54,6 +54,12 @@ public class OrganizationControllerService {
         return organizationService.getOrganizationById(organizationId);
     }
 
+    /**
+     * Returns the OrganizationPreview of the specified organization if the given token is valid.
+     * @param organizationId the id of the organization to get the preview from
+     * @param token the token to validate the request
+     * @return the OrganizationPreview with the data of the organization
+     */
     public OrganizationPreview getOrganizationPreview(String organizationId, String token){
         invitationTokenService.validate(token);
         Organization orga = organizationService.getOrganizationById(organizationId);

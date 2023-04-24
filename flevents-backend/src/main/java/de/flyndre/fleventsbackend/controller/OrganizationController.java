@@ -100,6 +100,13 @@ public class OrganizationController {
       return new ResponseEntity<>(organizationControllerService.getEvents(organizationId).stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
    }
 
+   /**
+    * Returns the OrganizationPreview of the specified organization if the given token is valid.
+    * @param organizationId the id of the organization to get the preview from
+    * @param token the token to validate the request
+    * @return ResponseEntity with the OrganizationPreview and the http status code
+    */
+
    @GetMapping("/{organizationId}/preview?token=<token>")
    public ResponseEntity getOrganizationPreview(@PathVariable @NotEmpty String organizationId, @RequestParam @NotEmpty String token){
       return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
