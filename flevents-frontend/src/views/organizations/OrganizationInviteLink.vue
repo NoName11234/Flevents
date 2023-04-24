@@ -86,7 +86,7 @@ async function fu(){
   document.cookie = "";
   security.resetAccount();
   let response;
-  await axios.get("http://localhost:8082/api/accounts/validate",{params: { email: account.value.email, secret: account.value.secret } }).then(
+  await axios.get("http://localhost:8082/api/accounts/login",{params: { username: account.value.email, password: account.value.secret } }).then(
     resp => {
       console.log(resp);
       response = resp.data
