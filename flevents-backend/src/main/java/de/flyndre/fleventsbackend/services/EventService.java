@@ -183,6 +183,16 @@ public class EventService {
     }
 
     /**
+     * Adds a Registration to the given event, to represent an invited user.
+     * @param event the event of the invitation
+     * @param account the invited account may be only an anonymous account.
+     * @return a registration that represent the invitation.
+     */
+    public EventRegistration addInvitationToEvent(Event event, FleventsAccount account){
+        return eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.invited,false));
+    }
+
+    /**
      * Changes if possible the role of a registration.
      * @param event the event where the role of the account has to be changed
      * @param account the account which ones role has to be changed
