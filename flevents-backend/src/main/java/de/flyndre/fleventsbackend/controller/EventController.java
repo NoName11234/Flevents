@@ -145,11 +145,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
-      Event event1 = eventControllerService.getEventById(eventId); //todo: find better way to authorize
-      if(
-              !eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))
-              &&!eventControllerService.getGranted(auth,event1.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))
-      ){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
@@ -205,8 +201,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId,Authentication auth){
-      Event event = eventControllerService.getEventById(eventId);
-      if(!eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.values()))){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
