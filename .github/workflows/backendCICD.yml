@@ -124,7 +124,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@master
       - name: npm install 
-        run: npm install ./flevents-frontend
+        run: npm --prefix ./flevents-frontend install ./flevents-frontend
       - name: npm build
         run: npm run build ./flevents-frontend
       
