@@ -69,7 +69,7 @@ async function submit() {
 
   <v-card>
     <v-form validate-on="submit" @submit.prevent="submit()">
-      <v-container>
+      <v-container class="d-flex flex-column gap-3">
         <v-combobox
           v-model="chips"
           chips
@@ -78,6 +78,7 @@ async function submit() {
           closable-chips
           multiple
           prepend-inner-icon="mdi-account-multiple"
+          hide-details="auto"
         >
           <template v-slot:selection="{ attrs, select, selected }">
             <v-chip
