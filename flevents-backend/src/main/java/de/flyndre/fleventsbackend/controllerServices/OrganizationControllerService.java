@@ -2,12 +2,11 @@ package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
-import jakarta.mail.MessagingException;
 import org.springframework.security.core.Authentication;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
 
 /**
@@ -106,7 +105,7 @@ public class OrganizationControllerService {
      */
     public void sendInvitation(String organizationId, String email,OrganizationRole role)
     {
-        InvitationToken token = invitationTokenService.saveToken(new InvitationToken(role.toString()));
+        InvitationToken token = invitationTokenService.createToken(organizationId,role);
         try {
             eMailService.sendOrganizationInvitation(getOrganizationById(organizationId),email,token.toString());
         } catch (Exception e) {
@@ -121,8 +120,8 @@ public class OrganizationControllerService {
      * @param accountId the id of the account to be added to the organization
      * @param token the token to verify the invitation
      */
-    public void acceptInvitation(String organizationId,String accountId,String token){
-        InvitationToken invitationToken = invitationTokenService.validate(token);
+    public void acceptInvitation(String organizationId,String accountId,String token) throws InvalidAttributesException {
+        InvitationToken invitationToken = invitationTokenService.validate(token,organizationId);
         organizationService.addAccountToOrganization(getOrganizationById(organizationId),fleventsAccountService.getAccountById(accountId),OrganizationRole.valueOf(invitationToken.getRole()));
         invitationTokenService.deleteToken(invitationToken);
     }
