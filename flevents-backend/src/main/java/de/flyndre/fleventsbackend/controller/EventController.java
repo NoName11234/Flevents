@@ -85,8 +85,7 @@ private final ModelMapper mapper;
     */
    @DeleteMapping("/{eventId}")
    public ResponseEntity deleteEvent(@PathVariable String eventId,Authentication auth){
-      Event event = eventControllerService.getEventById(eventId); //todo: find better way to authorize
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))||!eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       eventControllerService.deleteEvent(eventId);
@@ -227,11 +226,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole fromRole, @RequestParam EventRole toRole,Authentication auth){
-      Event event = eventControllerService.getEventById(eventId);
-      if (
-         !eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))
-         && !eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.values()))
-      ) {
+      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       eventControllerService.changeRole(eventId, accountId, fromRole,toRole);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -229,7 +230,9 @@ public class EventControllerService {
      * @return true if the given parameters match, false if not.
      */
     public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
-        return authService.validateRights(auth, roles, uuid);
+        Event event = getEventById(uuid);
+        return authService.validateRights(auth, roles, uuid)
+                || authService.validateRights(auth, List.of(OrganizationRole.admin), event.getOrganization().getUuid());
     }
 
     /**
