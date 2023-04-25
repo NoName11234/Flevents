@@ -165,7 +165,7 @@ async function enroll(){
         errorMessage = 'Netzwerkfehler';
       } else if (e.response) {
         // already enrolled
-        errorMessage = 'Der Account gehört der Organisation bereits an.';
+        errorMessage = 'Der Account gehört der Organisation bereits an oder die Einladung ist ungültig.';
       }
     } else {
       tooltip.value = `Unerwarteter Fehler: ${e}`;

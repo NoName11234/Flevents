@@ -99,7 +99,6 @@ import {login, logout} from "@/service/authService";
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import store from "@/store";
 import {useEventStore} from "@/store/events";
 import {AxiosError} from "axios";
 import {hydrateAll} from "@/service/storesService";
@@ -159,7 +158,7 @@ async function enroll(){
       text: `Sie sind dem Event beigetreten.`,
       color: "success",
     });
-    await router.push({ name: 'events.event', params: { uuid: route.params.uuid } });
+    await router.push({ name: 'home.personal' });
     hydrateAll();
   } catch (e) {
     let errorMessage = '';
@@ -168,7 +167,7 @@ async function enroll(){
         errorMessage = 'Netzwerkfehler';
       } else if (e.response) {
         // already enrolled
-        errorMessage = 'Der Account gehört dem Event bereits an.';
+        errorMessage = 'Der Account gehört dem Event bereits an oder die Einladung ist ungültig.';
       }
     } else {
       tooltip.value = `Unerwarteter Fehler: ${e}`;
