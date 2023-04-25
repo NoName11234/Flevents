@@ -130,7 +130,7 @@ async function leaveOrganization() {
           {{orga.name}}
         </h3>
         <v-btn
-          prepend-icon="mdi-account-remove"
+          prepend-icon="mdi-exit-run"
           color="error"
           variant="tonal"
           @click="selectedOrga = orga; showLeaveDialog = true;"
@@ -208,7 +208,7 @@ async function leaveOrganization() {
       <v-card-actions>
         <v-btn
           color="error"
-          prepend-icon="mdi-account-minus"
+          prepend-icon="mdi-exit-run"
           variant="elevated"
           @click="leaveOrganization"
         >
