@@ -81,10 +81,14 @@ public class EventService {
     }
 
     /**
-     * Deletes the given event in the database.
+     * Deletes the given event and all according registrations in the database.
      * @param event the event to be deleted
      */
     public void deleteEvent(Event event){
+        event.getAttendees().stream().map(registration -> {
+            eventRegistrationRepository.delete(registration);
+            return null;
+        });
         eventRepository.delete(event);
     }
 
@@ -176,6 +180,16 @@ public class EventService {
             throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
         return eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
+    }
+
+    /**
+     * Adds a Registration to the given event, to represent an invited user.
+     * @param event the event of the invitation
+     * @param account the invited account may be only an anonymous account.
+     * @return a registration that represent the invitation.
+     */
+    public EventRegistration addInvitationToEvent(Event event, FleventsAccount account){
+        return eventRegistrationRepository.save(new EventRegistration(null,event,account,EventRole.invited,false));
     }
 
     /**

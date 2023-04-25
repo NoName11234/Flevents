@@ -5,3 +5,8 @@ flevents-backend/src/main/resources/application-local.properties
 /.idea/jpa-buddy.xml
 /.idea/encodings.xml
 /.idea/dataSources/
+/.idea/compiler.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml

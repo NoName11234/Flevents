@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -115,8 +116,8 @@ public class EventControllerService {
         }catch (NoSuchElementException ex) {
             account = fleventsAccountService.createAnonymousAccount(email);
         }
-        EventRegistration registration = eventService.addAccountToEvent(event,account,EventRole.invited);
-        InvitationToken token = invitationTokenService.saveToken(new InvitationToken(role.toString()));
+        EventRegistration registration = eventService.addInvitationToEvent(event,account);
+        InvitationToken token = invitationTokenService.createToken(eventId,role);
         eMailService.sendEventInvitaion(event,email,token.toString());
     }
 
@@ -126,10 +127,10 @@ public class EventControllerService {
      * @param accountId the id of the account to be added
      * @param token the token in the invitation link to verify the invitation
      */
-    public void acceptInvitation(String eventId, String accountId, String token){
+    public void acceptInvitation(String eventId, String accountId, String token) throws InvalidAttributesException {
         Event event = getEventById(eventId);
         FleventsAccount account = accountService.getAccountById(accountId);
-        InvitationToken invitationToken = invitationTokenService.validate(token);
+        InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
         eventService.acceptInvitation(event,account,EventRole.valueOf(invitationToken.getRole()));
         invitationTokenService.deleteToken(invitationToken);
     }
@@ -225,5 +226,14 @@ public class EventControllerService {
      */
     public List<String> getCheckedIn(String eventId){
         return eventService.getCheckedIn(eventId);
+    }
+
+    /**
+     * Ands an account as an attendee to the given event.
+     * @param eventId the event to add the account
+     * @param accountId the account to be added.
+     */
+    public void addAccountToEvent(String eventId, String accountId) {
+        eventService.addAccountToEvent(getEventById(eventId),accountService.getAccountById(accountId),EventRole.attendee);
     }
 }

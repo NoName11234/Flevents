@@ -1,9 +1,11 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.InvitationToken;
+import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.repositories.InvitationTokenRepository;
 import org.springframework.stereotype.Service;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -23,12 +25,13 @@ public class InvitationTokenService {
     }
 
     /**
-     * Saves the given token to the database.
-     * @param token the token to be saved
-     * @return the saved InvitationToken
+     * Creates and saves the given token to the database.
+     * @param invitedToId an uuid of the event or organization the token should be valid for.
+     * @param role the role that an invited account should get when accepting the invitation.
+     * @return the created InvitationToken
      */
-    public InvitationToken saveToken(InvitationToken token){
-        return tokenRepository.save(token);
+    public InvitationToken createToken(String invitedToId,Role role){
+        return tokenRepository.save(new InvitationToken(null,role.toString(),invitedToId));
     }
 
     /**
@@ -36,10 +39,13 @@ public class InvitationTokenService {
      * @param token the token to be validated
      * @return the validated Token
      */
-    public InvitationToken validate(String token){
+    public InvitationToken validate(String token,String invitedToId) throws InvalidAttributesException {
         Optional<InvitationToken> optional = tokenRepository.findById(token);
         if(!optional.isPresent()){
             throw new NoSuchElementException("Token not found");
+        }
+        if(!optional.get().getInvitedToId().equals(invitedToId)){
+            throw new InvalidAttributesException("The given token does belong to the given id");
         }
         return optional.get();
     }

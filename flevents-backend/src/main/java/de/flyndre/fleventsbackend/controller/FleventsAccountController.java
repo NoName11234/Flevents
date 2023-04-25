@@ -12,11 +12,14 @@ import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.beans.Encoder;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -105,7 +108,7 @@ public class FleventsAccountController {
      * @param auth the Authentication generated out of a barer token.
      * @return List<EventInformation> list with events to explore for the specified account
      */
-    @GetMapping("/{accountId}/explore-events")
+    @GetMapping("/explore-events")
     public List<EventInformation> getExploreEvents(Authentication auth){
         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
         return fleventsAccountControllerService.getExploreEvents(details.getId()).stream()

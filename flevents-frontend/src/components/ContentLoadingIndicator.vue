@@ -1,10 +1,12 @@
 <template>
-  <div v-show="loading" class="my-2">
-    <span>
+  <div v-show="loading">
+    <span v-if="text">
       {{ text }}
     </span>
     <v-progress-linear
       indeterminate
+      rounded-bar
+      rounded
     />
   </div>
 </template>
@@ -18,7 +20,7 @@ const props = defineProps({
   },
   text: {
     required: false,
-    default: "Lade...",
+    default: undefined,
     type: String,
   }
 })

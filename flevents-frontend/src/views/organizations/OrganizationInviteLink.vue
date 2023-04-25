@@ -49,7 +49,7 @@
     class="align-center justify-center"
   >
     <v-card>
-      <v-container><h4>Sind sie sicher das sie als {{security.getAccount().firstname}} {{security.getAccount().lastname}} an der Organisation {{organization.name}} teilnehmen wollen?</h4></v-container>
+      <v-container><h4>Sind sie sicher das sie als {{accountStore.currentAccount?.firstname}} {{accountStore.currentAccount?.lastname}} an der Organisation {{organization.name}} teilnehmen wollen?</h4></v-container>
       <v-container v-if="enrollToolTip != ''" class="text-red">{{enrollToolTip}}</v-container>
       <v-container class="d-flex justify-end gap"><v-btn @click="succesfullLogin = false" variant="text">Abbrechen</v-btn><v-btn @click="enroll()" prepend-icon="mdi-check" color="primary">Anmelden</v-btn></v-container>
 
@@ -68,6 +68,11 @@ import {useRoute, useRouter} from "vue-router";
 import CardBanner from "@/components/CardBanner.vue";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {Organization} from "@/models/organization";
+import {login} from "@/service/authService";
+import {useAppStore} from "@/store/app";
+import {useAccountStore} from "@/store/account";
+import OrganizationsApi from "@/api/organizationsApi";
+import accountApi from "@/api/accountApi";
 const route = useRoute();
 const succesfullLogin = ref(false);
 const address = ref("");
@@ -76,6 +81,8 @@ const showPass = ref(false);
 const tooltip = ref("");
 const router = useRouter();
 const enrollToolTip = ref("");
+const appStore = useAppStore();
+const accountStore = useAccountStore();
 const account : Ref<Partial<Account>> = ref({
   email: "",
   secret: ""
@@ -86,33 +93,23 @@ async function fu(){
   document.cookie = "";
   security.resetAccount();
   let response;
-  await axios.get("http://localhost:8082/api/accounts/validate",{params: { email: account.value.email, secret: account.value.secret } }).then(
-    resp => {
-      console.log(resp);
-      response = resp.data
-      if(resp.data === ""){
-        document.cookie = "";
-        security.resetAccount();
-        tooltip.value = "Passwort oder Email ist falsch."
-      }else{
-        document.cookie = `ACCOUNT=${JSON.stringify(resp.data)}`;
-        security.setAccount(resp.data as Account);
-        account.value = resp.data;
-        succesfullLogin.value = true;
-      }
-
-    }
-  ).catch((e) => {
-    tooltip.value = "E-Mail oder Passwort ungültig!";
-  });
+  succesfullLogin.value = false;
+  document.cookie = "";
+  security.resetAccount();
+  await login(account.value.email!, account.value.secret!);
+  if(appStore.loggedIn){
+    console.log("asdasdadasdadsadasd");
+    succesfullLogin.value = true;
+  }
 }
 async function enroll(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    await axios.post(`http://localhost:8082/api/organizations/${address.value}/add-account/${security.getAccount()?.uuid as string}`, {}, {params: {token: route.query.token}})
-    const newAccount = await axios.get(`http://localhost:8082/api/accounts/${account.value.uuid}`);
-    security.setAccount(newAccount.data);
-    await router.push(`/organizations/${address.value}`);
+    await OrganizationsApi.acceptInvitation(route.params.uuid as string,  route.query.token as string)
+    //await axios.post(`http://localhost:8082/api/organizations/${address.value}/add-account/${accountStore.currentAccount!.uuid as string}`, {}, {params: {token: route.query.token}})
+    //const newAccount = await accountApi.getMe();
+    //security.setAccount(newAccount.data);
+    await router.push(`/organizations/${route.params.uuid as string}`);
   } catch (e) {
     // already enrolled
     console.error("Enrollment failed, probably already enrolled.");

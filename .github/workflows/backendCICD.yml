@@ -98,8 +98,8 @@ jobs:
             spring.mail.properties.mail.smtp.auth=true
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
-            server.port=8080
-            application.baseurl=http://flevents.flyndre.de:3000/
+            server.port=8082
+            application.baseurl=http://flevents.flyndre.de:8080/
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
             application.jwtExpirationMs=86400000
           write-mode: overwrite
