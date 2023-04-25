@@ -141,7 +141,10 @@ async function submit() {
             :item-title="item => item.name"
             :item-value="item => item.uuid"
             :rules="[() => selectedOrga !== undefined || 'Events müssen einer Organisation zugehören.']"
+            messages="Existierende Events können nicht zwischen Organisationen verschoben werden."
+            menu-icon="mdi-chevron-down"
             return-object
+            disabled
           />
 
           <v-text-field
