@@ -16,13 +16,14 @@ import {computed} from "vue";
 import {useEventStore} from "@/store/events";
 import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
+import {FleventsEvent} from "@/models/fleventsEvent";
 
 const route = useRoute();
 const eventStore = useEventStore();
 const organizationStore = useOrganizationStore();
 const { managedOrganizations } = storeToRefs(organizationStore);
 
-let preset = undefined;
+let preset = undefined as any;
 const presetId = route.query.preset as string;
 if (presetId) preset = eventStore.getEventGetter(presetId);
 

@@ -4,13 +4,14 @@ import AccountInfo from "@/components/AccountInfo.vue";
 import Heading from "@/components/Heading.vue";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import { onMounted, ref } from "vue";
+import {ref} from "vue";
 import {logout} from "@/service/authService";
 import {useAppStore} from "@/store/app";
 import {AxiosError} from "axios";
 import organizationsApi from "@/api/organizationsApi";
-import {Organization} from "@/models/organization";
 import {useRouter} from "vue-router";
+import {AccountPreview} from "@/models/accountPreview";
+import {OrganizationPreview} from "@/models/organizationPreview";
 
 const router = useRouter();
 const accountStore = useAccountStore();
@@ -18,7 +19,7 @@ const appStore = useAppStore();
 const showDeleteDialog = ref(false);
 const showLeaveDialog = ref(false);
 const { currentAccount: account } = storeToRefs(accountStore);
-const selectedOrga = ref(undefined as undefined|Organization);
+const selectedOrga = ref(undefined as undefined|OrganizationPreview);
 const select = ref(false);
 
 async function deleteAccount() {
@@ -92,7 +93,7 @@ async function leaveOrganization() {
     text="Konto & Info"
     subtext="Ihre Daten und wie wir damit umgehen."
   />
-  <AccountInfo :account="account"/>
+  <AccountInfo :account="account as AccountPreview"/>
   <div class="d-flex flex-row justify-end">
     <v-btn
       class="mt-n8 mr-5"
@@ -122,7 +123,7 @@ async function leaveOrganization() {
     </v-card-title>
     <v-card-text class="d-flex flex-column gap-3">
       <div
-        v-for="orga in account.organizationPreviews"
+        v-for="orga in account?.organizationPreviews"
         class="d-flex justify-space-between align-center gap-2"
       >
         <h3>

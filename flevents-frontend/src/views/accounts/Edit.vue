@@ -72,16 +72,22 @@ async function submit() {
   <Heading text="Konto bearbeiten" />
 
   <v-card :loading="loading" :disabled="loading">
-    <v-form validate-on="submit" @submit.prevent="submit()">
+    <v-form
+      v-if="account"
+      validate-on="submit"
+      @submit.prevent="submit()"
+    >
       <v-container class="d-flex flex-column gap-3">
 
-        <div class="d-flex gap-2">
+        <div
+          class="d-flex gap-2"
+        >
 
           <v-text-field
             v-model="account.firstname"
             label="Vorname"
             prepend-inner-icon="mdi-account"
-            :rules="[() => account.firstname !== '' || 'Dieses Feld wird benötigt.']"
+            :rules="[() => account?.firstname !== '' || 'Dieses Feld wird benötigt.']"
             hide-details="auto"
             required
           />
@@ -89,7 +95,7 @@ async function submit() {
             v-model="account.lastname"
             label="Nachname"
             prepend-inner-icon="mdi-account"
-            :rules="[() => account.lastname !== '' || 'Dieses Feld wird benötigt.']"
+            :rules="[() => account?.lastname !== '' || 'Dieses Feld wird benötigt.']"
             hide-details="auto"
             required
           />
@@ -99,7 +105,7 @@ async function submit() {
           label="Mailadresse"
           v-model="account.email"
           prepend-inner-icon="mdi-email"
-          :rules="[() => account.email !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[() => account?.email !== '' || 'Dieses Feld wird benötigt.']"
           hide-details="auto"
           required
         />
