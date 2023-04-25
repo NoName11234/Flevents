@@ -130,7 +130,6 @@ export async function logout() {
   clearTimeout(refreshTimeout);
 
   // Clear all related data
-  security.resetAccount();
   localStorage.removeItem(AUTH.TOKEN_COOKIE_KEY);
   appStore.loggedIn = false;
   appStore.accessTokenExpiry = -1;

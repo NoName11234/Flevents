@@ -93,7 +93,7 @@ async function leaveOrganization() {
     text="Konto & Info"
     subtext="Ihre Daten und wie wir damit umgehen."
   />
-  <AccountInfo :account="account as AccountPreview"/>
+  <AccountInfo :account="account!"/>
   <div class="d-flex flex-row justify-end">
     <v-btn
       class="mt-n8 mr-5"
@@ -130,7 +130,7 @@ async function leaveOrganization() {
           {{orga.name}}
         </h3>
         <v-btn
-          prepend-icon="mdi-account-remove"
+          prepend-icon="mdi-exit-run"
           color="error"
           variant="tonal"
           @click="selectedOrga = orga; showLeaveDialog = true;"
@@ -208,7 +208,7 @@ async function leaveOrganization() {
       <v-card-actions>
         <v-btn
           color="error"
-          prepend-icon="mdi-account-minus"
+          prepend-icon="mdi-exit-run"
           variant="elevated"
           @click="leaveOrganization"
         >
