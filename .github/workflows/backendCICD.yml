@@ -6,7 +6,6 @@ name: Unittest
 
 on:
   push:
-    branches: [dev,prod]
   workflow_dispatch:
 
 
@@ -69,8 +68,8 @@ jobs:
 
   build:
     name: Build Artifact
+    if: github.ref_name == 'dev'
     needs: test
-    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read
