@@ -203,6 +203,7 @@ const currentAccountRole = computed(() => {
 
 async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationRole) {
   if (updatedAccount.uuid === account.value!.uuid) {
+    // Current user changes own role and possibly removes his access
     const ok = window.confirm(
       `Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newRole}" ändern möchten?`
       + ` Sie verlieren damit alle Rechte, die Sie als ${currentAccountRole.value} besitzen.`
@@ -243,13 +244,15 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
 async function removeAccount(removeAccount: AccountPreview) {
   let ok = false;
   if (removeAccount.uuid === account.value!.uuid) {
+    // Current user removes himself and therefore removes his access to the organization
     ok = window.confirm(
       `Sind Sie sicher, dass Sie Sich aus der Organisation ${organization.value.name} entfernen wollen?`
-      + ` Ihnen werden damit alle Rechte in ihr entzogen und sie haben keinen Zugriff mehr auf deren Events.`
+      + ` Ihnen werden damit alle Rechte in ihr entzogen und Sie haben keinen Zugriff mehr auf deren Events.`
       + ` Der Zugriff auf vergangene Events, an denen Sie teilgenommen haben und zukünftige Events, für die Sie registriert sind, bleibt erhalten.`
       + ` Um erneut Zugriff zu erhalten, müssen Sie erneut zur Organisation eingeladen werden.`
     );
   } else {
+    // Someone else is being removed
     ok = window.confirm(
       `Sind Sie sicher, dass Sie ${removeAccount.firstname} ${removeAccount.lastname} (${removeAccount.email}) aus der Organisation ${organization.value.name} entfernen wollen?`
       + ` Der Person werden damit alle Rechte in ihr entzogen und sie hat keinen Zugriff mehr auf Events der Organisation.`
