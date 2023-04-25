@@ -93,7 +93,7 @@ async function leaveOrganization() {
     text="Konto & Info"
     subtext="Ihre Daten und wie wir damit umgehen."
   />
-  <AccountInfo :account="account as AccountPreview"/>
+  <AccountInfo :account="account!"/>
   <div class="d-flex flex-row justify-end">
     <v-btn
       class="mt-n8 mr-5"
