@@ -1,5 +1,5 @@
 <template>
-  <Heading v-if="event != undefined" :text="`Anmelden zu Event: ${event.name}`"></Heading>
+  <Heading v-if="event != undefined" :text="`Anmelden zu Event`"></Heading>
   <v-card>
     <v-container class="d-flex flex-column gap-3" @keydown.enter="fu()">
       <v-text-field

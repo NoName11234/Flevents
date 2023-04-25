@@ -166,9 +166,6 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/accept-invitation")
    public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-      }
       UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
       eventControllerService.acceptInvitation(eventId, details.getId(), token);
       return new ResponseEntity(HttpStatus.OK);
