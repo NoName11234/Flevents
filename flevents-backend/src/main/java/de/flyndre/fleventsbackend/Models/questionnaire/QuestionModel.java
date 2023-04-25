@@ -21,6 +21,7 @@ public class QuestionModel {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private String question;
+    private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
     @ManyToOne
     private QuestionnaireModel questionnaire;
     @Nullable @OneToMany
