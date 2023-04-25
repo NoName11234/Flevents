@@ -68,7 +68,7 @@ jobs:
 
   build:
     name: Build Artifact
-    if: github.ref_name == 'test/pipeline_testing'
+    if: github.ref_name == 'dev' || github.ref_name == 'prod'
     needs: test
     runs-on: ubuntu-latest
     permissions:
