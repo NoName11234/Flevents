@@ -10,7 +10,9 @@ import {useAppStore} from "@/store/app";
 import {AxiosError} from "axios";
 import organizationsApi from "@/api/organizationsApi";
 import {Organization} from "@/models/organization";
+import {useRouter} from "vue-router";
 
+const router = useRouter();
 const accountStore = useAccountStore();
 const appStore = useAppStore();
 const showDeleteDialog = ref(false);
@@ -60,6 +62,7 @@ async function leaveOrganization() {
       text: `Sie haben die Organisation ${organization.name} erfolgreich verlassen. Zur Sicherheit müssen Sie sich erneut anmelden.`,
       color: "success",
     });
+    await router.push({ name: 'accounts.login' });
     await logout();
   } catch (e) {
     let errorMessage;

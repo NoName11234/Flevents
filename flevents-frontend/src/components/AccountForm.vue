@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {ref} from "vue";
 import {Account} from "@/models/account";
-import {AxiosError} from "axios";
+import {AxiosError, HttpStatusCode} from "axios";
 import {RouteLocationRaw, useRouter} from "vue-router";
 import accountApi from "@/api/accountApi";
+import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 
 const router = useRouter();
 const showPass = ref(false);
@@ -11,6 +13,9 @@ const showCorr = ref(false);
 const correctPassword = ref("");
 const tooltip = ref("");
 const loading = ref(false);
+
+const appStore = useAppStore();
+
 const props = defineProps({
   backRoute: {
     required: true,
@@ -29,35 +34,54 @@ const account = ref({
 } as Account);
 
 async function submit() {
-  // Folgende Zeile niemals entfernen!
+  // Structured Logging
   console.log("ich bin echt jetzt in der post methode drin, wie krass");
-  loading.value = true;
+
+  // Validation
   tooltip.value = '';
-  if (account.value.firstname === "" || account.value.lastname === "" || account.value.email === "" || account.value.secret === "") {
+  if (
+    account.value.firstname === ""
+    || account.value.lastname === ""
+    || account.value.email === ""
+    || account.value.secret === ""
+  ) {
     tooltip.value = "Nicht alle Felder wurden angegeben.";
-    loading.value = false;
     return;
   }
   if (account.value.secret !== correctPassword.value) {
     tooltip.value = "Die Passwörter stimmen nicht überein.";
-    loading.value = false;
     return;
   }
+  if (!account.value.email.match(VALIDATION.EMAIL)) {
+    tooltip.value = "Die angegebene E-Mail-Adresse ist ungültig.";
+    return;
+  }
+
+  // API-Request
+  loading.value = true;
   try {
     await accountApi.create(account.value);
-    tooltip.value = "Anfrage erfolgreich gesendet.";
+    appStore.addToast({
+      text: 'Registrierung erfolgreich. Sie können Sich jetzt anmelden.',
+      color: 'success',
+    });
     await router.push(props.backRoute);
   } catch (e) {
+    let errorMessage = '';
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_BAD_REQUEST) {
-        tooltip.value = 'Nicht authentifiziert';
+        errorMessage = 'Ungültige Anfrage';
       }
       else if (e.code === AxiosError.ERR_NETWORK) {
-        tooltip.value = 'Netzwerkfehler';
+        errorMessage = 'Netzwerkfehler';
+      }
+      else if (e.response && e.response.status === HttpStatusCode.InternalServerError) {
+        errorMessage = `Die angegebene E-Mail-Adresse ist bereits registriert.`;
       }
     } else {
-      tooltip.value = `Unerwarteter Fehler: ${e}`;
+      errorMessage = `Unerwarteter Fehler: ${e}`;
     }
+    tooltip.value = `Registrierung fehlgeschlagen: ${errorMessage}`;
   }
   loading.value = false;
 }

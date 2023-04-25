@@ -1,5 +1,7 @@
 <template>
-  <Heading v-if="organization != undefined" :text="`Anmelden zu Organisation: ${organization.name}`"></Heading>
+  <Heading
+    :text="`Anmelden zu Organisation ${organization.name}`"
+  />
   <v-card>
     <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
@@ -51,7 +53,13 @@
     <v-card>
       <v-container>
         <h4>
-          Sind sie sicher das sie als {{accountStore.currentAccount?.firstname}} {{accountStore.currentAccount?.lastname}} an der Organisation {{organization.name}} teilnehmen wollen?
+          Sind sie sicher das sie als
+          {{currentAccount?.firstname}}
+          {{currentAccount?.lastname}}
+          ({{currentAccount?.email}})
+          an der Organisation
+          {{organization?.name}}
+          teilnehmen wollen?
         </h4>
       </v-container>
       <v-container
@@ -85,13 +93,14 @@ import {ref, Ref} from "vue";
 import {Account} from "@/models/account";
 import Heading from "@/components/Heading.vue";
 import {useRoute, useRouter} from "vue-router";
-import {login} from "@/service/authService";
+import {login, logout} from "@/service/authService";
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 import OrganizationsApi from "@/api/organizationsApi";
 import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
 import {AxiosError} from "axios";
+import {hydrateAll} from "@/service/storesService";
 
 const route = useRoute();
 const router = useRouter();
@@ -100,6 +109,7 @@ const appStore = useAppStore();
 const { loggedIn } = storeToRefs(appStore);
 
 const accountStore = useAccountStore();
+const { currentAccount } = storeToRefs(accountStore);
 const account : Ref<Partial<Account>> = ref({
   email: "",
   secret: ""
@@ -119,6 +129,7 @@ async function performLogin() {
   loading.value = true;
   tooltip.value = '';
   try {
+    await logout();
     await login(account.value.email!, account.value.secret!);
     // Für performLogin als globale Funktion:
     // Hier ist im normalen login-Formular noch router.push nach /home
@@ -135,19 +146,31 @@ async function performLogin() {
     }
   }
   loading.value = false;
+  showDialog.value = true;
 }
 async function enroll(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    await OrganizationsApi.acceptInvitation(route.params.uuid as string,  route.query.token as string)
-    //await axios.post(`http://localhost:8082/api/organizations/${address.value}/add-account/${accountStore.currentAccount!.uuid as string}`, {}, {params: {token: route.query.token}})
-    //const newAccount = await accountApi.getMe();
-    //security.setAccount(newAccount.data);
-    await router.push({ name: 'organizations.organization', params: { uuid: route.params.uuid as string }});
+    await OrganizationsApi.acceptInvitation(route.params.uuid as string,  route.query.token as string);
+    appStore.addToast({
+      text: `Sie sind der Organisation beigetreten.`,
+      color: "success",
+    });
+    await router.push({ name: 'home.account' });
+    hydrateAll()
   } catch (e) {
-    // already enrolled
-    console.error("Enrollment failed, probably already enrolled.");
-    enrollToolTip.value = "Sie sind mit diesem Account schon angemeldet.";
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      } else if (e.response) {
+        // already enrolled
+        errorMessage = 'Der Account gehört der Organisation bereits an.';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
+    enrollToolTip.value = `Beitritt fehlgeschlagen: ${errorMessage}`;
   }
 }
 
