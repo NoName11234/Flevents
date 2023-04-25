@@ -31,6 +31,19 @@ class EventApi {
   }
 
   /**
+   * Retrieves an event if the token is an invitation to it.
+   * @param uuid the uuid of the event
+   * @param token the invitation token
+   */
+  getPreview(uuid: string, token: string) {
+    return api.get(`${base}/${uuid}/preview`, {
+      params: {
+        token: token,
+      }
+    });
+  }
+
+  /**
    * Modifies the event with the given uuid.
    * @param uuid the uuid of the account
    * @param event the event object containing only the attributed to be modified
