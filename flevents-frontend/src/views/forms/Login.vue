@@ -3,7 +3,7 @@
   <Heading text="Login" />
 
   <v-card :loading="loading" :disabled="loading">
-    <v-container class="d-flex flex-column gap-3" @keydown.enter="fu()">
+    <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
         label="Mailadresse"
         prepend-inner-icon="mdi-email"
@@ -36,7 +36,7 @@
         Registrieren
       </v-btn>
       <v-btn
-        @click="fu()"
+        @click="performLogin()"
         color="primary"
         prepend-icon="mdi-login-variant"
       >
@@ -64,7 +64,7 @@ const account : Ref<Partial<Account>> = ref({
   secret: ""
 });
 
-async function fu() {
+async function performLogin() {
   loading.value = true;
   tooltip.value = '';
   try {
@@ -83,26 +83,6 @@ async function fu() {
     }
   }
   loading.value = false;
-  // console.log(response);
-  // if(response.data === ""){
-  //   document.cookie = "";
-  //   security.resetAccount();
-  //   tooltip.value = "Passwort oder Email ist falsch."
-  // }else{
-  //   document.cookie = `TOKEN=${JSON.stringify(response.data.accessToken)}`;
-  //   let account = (await axios.get(`http://localhost:8082/api/accounts/${response.data.id}`, {headers: {'Authorization': `Bearer ${response.data.accessToken}` }})).data as Account
-  //   security.setAccount(account);
-  //   console.log(account);
-  //   const decodedJwt = useJwt()
-  //   console.log(decodedJwt);
-   /* let url = "/";
-    if(route.query.location != null && route.query.location !== "/accounts/login"){
-      url = route.query.location as string
-    }
-    router.push({path: url});
-    setTimeout(() => router.go(0), 100);*/
-  // }
-
 }
 </script>
 

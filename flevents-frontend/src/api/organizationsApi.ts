@@ -31,6 +31,19 @@ class OrganizationApi {
   }
 
   /**
+   * Retrieves an organization if the token is an invitation to it.
+   * @param uuid the uuid of the organization
+   * @param token the invitation token
+   */
+  getPreview(uuid: string, token: string) {
+    return api.get(`${base}/${uuid}/preview`, {
+      params: {
+        token: token,
+      }
+    });
+  }
+
+  /**
    * Modifies an organization.
    * @param uuid the uuid of the organization
    * @param organization the organization object containing only the attributes to be modified

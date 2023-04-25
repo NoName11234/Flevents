@@ -161,13 +161,12 @@ import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {OrganizationRole} from "@/models/organizationRole";
 import {AccountPreview} from "@/models/accountPreview";
-import axios, {AxiosError} from "axios";
+import {AxiosError} from "axios";
 import {useOrganizationStore} from "@/store/organizations";
 import organizationsApi from "@/api/organizationsApi";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import {useAppStore} from "@/store/app";
-import {Account} from "@/models/account";
 
 const route = useRoute();
 const tab = ref(null);
@@ -227,7 +226,7 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
   organizationStore.hydrate();
 }
 
-async function removeAccount(account: Account) {
+async function removeAccount(account: AccountPreview) {
   customLoading.value = true;
   try {
     await organizationsApi.removeMember(route.params.uuid as string, account.uuid);

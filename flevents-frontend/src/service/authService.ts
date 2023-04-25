@@ -136,8 +136,6 @@ export async function logout() {
   appStore.accessTokenExpiry = -1;
   appStore.currentAccountId = undefined;
   await dehydrateAll();
-
-  await router.push({ path: '/' });
 }
 
 /**

@@ -120,12 +120,27 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
         run: mvn -B package -DskipTests --file flevents-backend/pom.xml
+      # Build Frontend
+      - name: change directory
+        run: cd flevents-frontend
+      - name: npm install
+        run: npm install
+      - name: npm build
+        run: npm run build
       
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v2
         with:
           #Set artifact name
-          name: artifact
+          name: Backend
           #From this path
           path: flevents-backend/target/flevents-backend-0.0.1-SNAPSHOT.jar
+      - name: Upload Frontend
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          #Set artifact name
+          name: Frontend
+          #From this path
+          path: flevents-frontend/dist/
