@@ -121,7 +121,14 @@ jobs:
       - name: Build with Maven
         run: mvn -B package -DskipTests --file flevents-backend/pom.xml
       # Build Frontend
-      
+      - name: setup node
+        uses: actions/setup-node@master
+      - name: change directory
+        run: cd flevents-frontend
+      - name: npm install
+        run: npm install
+      - name: npm build
+        run: npm run build
       
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
