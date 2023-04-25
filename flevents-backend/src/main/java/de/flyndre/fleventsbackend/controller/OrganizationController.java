@@ -107,8 +107,8 @@ public class OrganizationController {
     * @return ResponseEntity with the OrganizationPreview and the http status code
     */
 
-   @GetMapping("/{organizationId}/preview?token=<token>")
-   public ResponseEntity getOrganizationPreview(@PathVariable @NotEmpty String organizationId, @RequestParam @NotEmpty String token){
+   @GetMapping("/{organizationId}/preview")
+   public ResponseEntity getOrganizationPreview(@PathVariable String organizationId, @RequestParam String token){
       return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
    }
 

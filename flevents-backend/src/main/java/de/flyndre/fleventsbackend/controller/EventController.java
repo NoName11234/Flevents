@@ -65,7 +65,7 @@ private final ModelMapper mapper;
     * @param token the token to validate the request
     * @return ResponseEntity with the EventPreview and the http status code
     */
-   @GetMapping("/{eventId}/preview?token=<token>")
+   @GetMapping("/{eventId}/preview")
    public ResponseEntity getEventPreview(@PathVariable String eventId, @RequestParam String token){
       return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
    }
