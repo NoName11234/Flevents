@@ -122,7 +122,7 @@ jobs:
         run: mvn -B package -DskipTests --file flevents-backend/pom.xml
       # Build Frontend
       - name: change directory
-        run: cd /flevents-frontend
+        run: cd flevents-frontend
       - name: npm install
         run: npm install
       - name: npm build
