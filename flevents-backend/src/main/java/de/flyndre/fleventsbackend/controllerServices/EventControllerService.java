@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.EventPreview;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -54,6 +55,27 @@ public class EventControllerService {
      */
     public Event getEventById(String eventId){
         return eventService.getEventById(eventId);
+    }
+
+    /**
+     * Returns the EventPreview of the specified organization if the given token is valid.
+     * @param eventId the id of the event to get the preview from
+     * @param token the token to validate the request
+     * @return the EventPreview with the data of the event
+     */
+    public EventPreview getEventPreview(String eventId, String token){
+        invitationTokenService.validate(token);
+        Event eve = eventService.getEventById(eventId);
+        EventPreview preview = new EventPreview();
+        preview.setRole(null);
+        preview.setName(eve.getName());
+        preview.setUuid(eve.getUuid());
+        preview.setDescription(eve.getDescription());
+        preview.setImage(eve.getImage());
+        preview.setEndTime(eve.getEndTime());
+        preview.setLocation(eve.getLocation());
+        preview.setStartTime(eve.getStartTime());
+        return preview;
     }
 
     /**

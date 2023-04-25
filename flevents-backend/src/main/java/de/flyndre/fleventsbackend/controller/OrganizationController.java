@@ -6,6 +6,7 @@ import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -97,6 +98,18 @@ public class OrganizationController {
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity<>(organizationControllerService.getEvents(organizationId).stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+   }
+
+   /**
+    * Returns the OrganizationPreview of the specified organization if the given token is valid.
+    * @param organizationId the id of the organization to get the preview from
+    * @param token the token to validate the request
+    * @return ResponseEntity with the OrganizationPreview and the http status code
+    */
+
+   @GetMapping("/{organizationId}/preview")
+   public ResponseEntity getOrganizationPreview(@PathVariable String organizationId, @RequestParam String token){
+      return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
    }
 
    /**
