@@ -10,6 +10,7 @@ import {useEventStore} from "@/store/events";
 import api from "@/api/api";
 import eventApi from "@/api/eventApi";
 import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
@@ -39,6 +40,10 @@ async function submit() {
   let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
+    }
     try {
       const response = await eventApi.inviteAttendee(uuid, email, role.value);
       successfulInvitations.push(email);

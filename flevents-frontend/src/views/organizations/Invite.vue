@@ -9,6 +9,7 @@ import {OrganizationRole} from "@/models/organizationRole";
 import {useOrganizationStore} from "@/store/organizations";
 import {useAppStore} from "@/store/app";
 import organizationsApi from "@/api/organizationsApi";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
@@ -38,6 +39,10 @@ async function submit() {
   let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
+    }
     try {
       const response = await organizationsApi.invite(uuid, email, role.value);
       successfulInvitations.push(email);
@@ -46,7 +51,6 @@ async function submit() {
       failedInvitations.push(email);
     }
   }
-
   if (failedInvitations.length > 0) {
     appStore.addToast({
       text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
