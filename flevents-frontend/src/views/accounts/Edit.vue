@@ -84,7 +84,7 @@ async function submit() {
       <v-container class="d-flex flex-column gap-3">
 
         <div
-          class="d-flex gap-2"
+          class="d-flex flex-column flex-sm-row gap-3"
         >
 
           <v-text-field
@@ -116,6 +116,9 @@ async function submit() {
       </v-container>
         <v-divider />
       <v-container class="d-flex flex-column gap-3">
+        <small class="text-grey">
+          Um Ihr Passwort zu ändern, geben Sie die folgenden Felder an:
+        </small>
         <v-text-field
           label="Neues Passwort"
           v-model="account.secret"

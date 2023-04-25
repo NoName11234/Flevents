@@ -103,6 +103,7 @@ async function submit() {
           hide-details="auto"
           :items="selectableRoles"
           v-model="role"
+          menu-icon="mdi-chevron-down"
         />
       </v-container>
 
