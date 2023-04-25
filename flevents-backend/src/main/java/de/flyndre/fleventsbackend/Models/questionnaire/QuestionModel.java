@@ -1,9 +1,6 @@
 package de.flyndre.fleventsbackend.Models.questionnaire;
 
-import jakarta.persistence.Basic;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +21,9 @@ public class QuestionModel {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private String question;
-    @Nullable
-    private List<String> choices;
+    @ManyToOne
+    private QuestionnaireModel questionnaire;
+    @Nullable @OneToMany
+    private List<Choice> choices;
     private String type;
 }
