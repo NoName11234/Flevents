@@ -126,8 +126,7 @@ jobs:
       - name: npm install 
         run: npm --prefix ./flevents-frontend install ./flevents-frontend
       - name: npm build
-        run: npm --prefix ./flevents-frontend run build ./flevents-frontend
-      
+        run: npm run --prefix ./flevents-frontend build      
       - name: Upload JAR
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v2
