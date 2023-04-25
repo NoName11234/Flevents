@@ -26,9 +26,7 @@ public class InvitationToken {
     private String id;
     private String role;
 
-    public InvitationToken(String role){
-        this.role=role;
-    }
+    private String invitedToId;
     @Override
     public String toString(){
         return id;
