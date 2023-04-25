@@ -63,8 +63,8 @@ public class EventControllerService {
      * @param token the token to validate the request
      * @return the EventPreview with the data of the event
      */
-    public EventPreview getEventPreview(String eventId, String token){
-        invitationTokenService.validate(token);
+    public EventPreview getEventPreview(String eventId, String token) throws InvalidAttributesException {
+        invitationTokenService.validate(token,eventId);
         Event eve = eventService.getEventById(eventId);
         EventPreview preview = new EventPreview();
         preview.setRole(null);

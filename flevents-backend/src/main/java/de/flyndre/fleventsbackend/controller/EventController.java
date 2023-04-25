@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,7 +68,12 @@ private final ModelMapper mapper;
     */
    @GetMapping("/{eventId}/preview")
    public ResponseEntity getEventPreview(@PathVariable String eventId, @RequestParam String token){
-      return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
+      try{
+         return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
+      }catch (InvalidAttributesException e){
+         return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
+      }
+
    }
 
    /**
@@ -79,7 +85,8 @@ private final ModelMapper mapper;
     */
    @DeleteMapping("/{eventId}")
    public ResponseEntity deleteEvent(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
+      Event event = eventControllerService.getEventById(eventId); //todo: find better way to authorize
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))||!eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       eventControllerService.deleteEvent(eventId);
@@ -139,7 +146,8 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      Event event1 = eventControllerService.getEventById(eventId); //todo: find better way to authorize
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))||!eventControllerService.getGranted(auth,event1.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
