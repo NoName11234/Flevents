@@ -61,13 +61,8 @@ public class OrganizationControllerService {
      * @param token the token to validate the request
      * @return the OrganizationPreview with the data of the organization
      */
-    public OrganizationPreview getOrganizationPreview(String organizationId, String token){
-        try {
-            invitationTokenService.validate(token, organizationId);
-        } catch (InvalidAttributesException e) {
-            // Token is invalid or not meant for given organization
-            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-        }
+    public OrganizationPreview getOrganizationPreview(String organizationId, String token) throws InvalidAttributesException {
+        invitationTokenService.validate(token, organizationId);
         Organization orga = organizationService.getOrganizationById(organizationId);
         OrganizationPreview preview = new OrganizationPreview();
         preview.setName(orga.getName());

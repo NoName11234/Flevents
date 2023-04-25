@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -109,7 +110,11 @@ public class OrganizationController {
 
    @GetMapping("/{organizationId}/preview")
    public ResponseEntity getOrganizationPreview(@PathVariable String organizationId, @RequestParam String token){
-      return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
+      try{
+         return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
+      }catch (InvalidAttributesException e){
+         return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
+      }
    }
 
    /**
