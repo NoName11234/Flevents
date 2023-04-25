@@ -3,9 +3,11 @@ package de.flyndre.fleventsbackend.controllerServices;
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import de.flyndre.fleventsbackend.services.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
@@ -60,7 +62,12 @@ public class OrganizationControllerService {
      * @return the OrganizationPreview with the data of the organization
      */
     public OrganizationPreview getOrganizationPreview(String organizationId, String token){
-        invitationTokenService.validate(token);
+        try {
+            invitationTokenService.validate(token, organizationId);
+        } catch (InvalidAttributesException e) {
+            // Token is invalid or not meant for given organization
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
         Organization orga = organizationService.getOrganizationById(organizationId);
         OrganizationPreview preview = new OrganizationPreview();
         preview.setName(orga.getName());

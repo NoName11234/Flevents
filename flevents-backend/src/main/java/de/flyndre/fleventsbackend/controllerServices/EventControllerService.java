@@ -4,9 +4,11 @@ import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.dtos.EventPreview;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
@@ -64,7 +66,12 @@ public class EventControllerService {
      * @return the EventPreview with the data of the event
      */
     public EventPreview getEventPreview(String eventId, String token){
-        invitationTokenService.validate(token);
+        try {
+            invitationTokenService.validate(token, eventId);
+        } catch (InvalidAttributesException e) {
+            // Token ist invalid or not meant for the given event
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
         Event eve = eventService.getEventById(eventId);
         EventPreview preview = new EventPreview();
         preview.setRole(null);
