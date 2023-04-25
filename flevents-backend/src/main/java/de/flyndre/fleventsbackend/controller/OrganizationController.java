@@ -184,9 +184,13 @@ public class OrganizationController {
     */
    @PostMapping("/{organizationId}/add-account")
    public ResponseEntity acceptInvitation(@PathVariable String organizationId,@RequestParam String token,Authentication auth){
-      UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-      organizationControllerService.acceptInvitation(organizationId, details.getId(), token);
-      return new ResponseEntity(HttpStatus.OK);
+      try {
+         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+         organizationControllerService.acceptInvitation(organizationId, details.getId(), token);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+      }
    }
 
    /**
