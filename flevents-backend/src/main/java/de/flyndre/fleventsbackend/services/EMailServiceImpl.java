@@ -122,7 +122,7 @@ public class EMailServiceImpl implements EMailService{
             || mailConfig.getFeedbackMessage() == null
             || mailConfig.getRegisterMessage() == null
         ) {
-            details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"/organizations/join/" +event.getUuid()+"?token="+token);
+            details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"join/" +event.getUuid()+"?token="+token);
         } else {
             details.setMsgBody(event.getMailConfig().getRegisterMessage());
         }
