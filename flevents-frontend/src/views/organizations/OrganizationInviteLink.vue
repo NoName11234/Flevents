@@ -1,7 +1,7 @@
 <template>
   <Heading v-if="organization != undefined" :text="`Anmelden zu Organisation: ${organization.name}`"></Heading>
   <v-card>
-    <v-container class="d-flex flex-column gap-3" @keydown.enter="fu()">
+    <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
         label="Mailadresse"
         prepend-inner-icon="mdi-email"
@@ -34,7 +34,7 @@
         Registrieren
       </v-btn>
       <v-btn
-        @click="fu()"
+        @click="performLogin()"
         color="primary"
         prepend-icon="mdi-login-variant"
       >
@@ -45,62 +45,96 @@
 
   <v-overlay
     max-width="600"
-    :model-value="succesfullLogin"
+    :model-value="showDialog"
     class="align-center justify-center"
   >
     <v-card>
-      <v-container><h4>Sind sie sicher das sie als {{accountStore.currentAccount?.firstname}} {{accountStore.currentAccount?.lastname}} an der Organisation {{organization.name}} teilnehmen wollen?</h4></v-container>
-      <v-container v-if="enrollToolTip != ''" class="text-red">{{enrollToolTip}}</v-container>
-      <v-container class="d-flex justify-end gap"><v-btn @click="succesfullLogin = false" variant="text">Abbrechen</v-btn><v-btn @click="enroll()" prepend-icon="mdi-check" color="primary">Anmelden</v-btn></v-container>
-
+      <v-container>
+        <h4>
+          Sind sie sicher das sie als {{accountStore.currentAccount?.firstname}} {{accountStore.currentAccount?.lastname}} an der Organisation {{organization.name}} teilnehmen wollen?
+        </h4>
+      </v-container>
+      <v-container
+        v-if="enrollToolTip != ''"
+        class="text-red"
+      >
+        {{enrollToolTip}}
+      </v-container>
+      <v-container class="d-flex justify-end gap">
+        <v-btn
+          @click="showDialog = false"
+          variant="text"
+        >
+          Abbrechen
+        </v-btn>
+        <v-btn
+          @click="enroll()"
+          prepend-icon="mdi-check"
+          color="primary"
+        >
+          Anmelden
+        </v-btn>
+      </v-container>
     </v-card>
   </v-overlay>
 </template>
 
 
 <script setup lang="ts">
-import {onBeforeMount, onMounted, ref, Ref} from "vue";
+import {ref, Ref} from "vue";
 import {Account} from "@/models/account";
-import axios from "axios";
 import Heading from "@/components/Heading.vue";
-import security from "@/service/security";
 import {useRoute, useRouter} from "vue-router";
-import CardBanner from "@/components/CardBanner.vue";
-import {FleventsEvent} from "@/models/fleventsEvent";
-import {Organization} from "@/models/organization";
 import {login} from "@/service/authService";
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 import OrganizationsApi from "@/api/organizationsApi";
-import accountApi from "@/api/accountApi";
+import {useOrganizationStore} from "@/store/organizations";
+import {storeToRefs} from "pinia";
+import {AxiosError} from "axios";
+
 const route = useRoute();
-const succesfullLogin = ref(false);
-const address = ref("");
-const organization = ref({} as Organization);
-const showPass = ref(false);
-const tooltip = ref("");
 const router = useRouter();
-const enrollToolTip = ref("");
+
 const appStore = useAppStore();
+const { loggedIn } = storeToRefs(appStore);
+
 const accountStore = useAccountStore();
 const account : Ref<Partial<Account>> = ref({
   email: "",
   secret: ""
 });
 
-async function fu(){
-  succesfullLogin.value = false;
-  document.cookie = "";
-  security.resetAccount();
-  let response;
-  succesfullLogin.value = false;
-  document.cookie = "";
-  security.resetAccount();
-  await login(account.value.email!, account.value.secret!);
-  if(appStore.loggedIn){
-    console.log("asdasdadasdadsadasd");
-    succesfullLogin.value = true;
+const organizationStore = useOrganizationStore();
+const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
+
+const address = ref("");
+const showDialog = ref(false);
+const loading = ref(false);
+const showPass = ref(false);
+const tooltip = ref("");
+const enrollToolTip = ref("");
+
+async function performLogin() {
+  loading.value = true;
+  tooltip.value = '';
+  try {
+    await login(account.value.email!, account.value.secret!);
+    // Für performLogin als globale Funktion:
+    // Hier ist im normalen login-Formular noch router.push nach /home
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Anmeldedaten';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
   }
+  loading.value = false;
 }
 async function enroll(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
@@ -109,18 +143,13 @@ async function enroll(){
     //await axios.post(`http://localhost:8082/api/organizations/${address.value}/add-account/${accountStore.currentAccount!.uuid as string}`, {}, {params: {token: route.query.token}})
     //const newAccount = await accountApi.getMe();
     //security.setAccount(newAccount.data);
-    await router.push(`/organizations/${route.params.uuid as string}`);
+    await router.push({ name: 'organizations.organization', params: { uuid: route.params.uuid as string }});
   } catch (e) {
     // already enrolled
     console.error("Enrollment failed, probably already enrolled.");
-    enrollToolTip.value = "Sie sind mit diesem Account schon angemeldet."
+    enrollToolTip.value = "Sie sind mit diesem Account schon angemeldet.";
   }
 }
-onMounted(async () => {
-  address.value = route.params.uuid as string;
-  organization.value = (await axios.get(`http://localhost:8082/api/organizations/${address.value}`)).data
-  console.log(organization.value);
-})
 
 </script>
 
