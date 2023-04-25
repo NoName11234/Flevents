@@ -1,12 +1,14 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.EventPreview;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -53,6 +55,27 @@ public class EventControllerService {
      */
     public Event getEventById(String eventId){
         return eventService.getEventById(eventId);
+    }
+
+    /**
+     * Returns the EventPreview of the specified organization if the given token is valid.
+     * @param eventId the id of the event to get the preview from
+     * @param token the token to validate the request
+     * @return the EventPreview with the data of the event
+     */
+    public EventPreview getEventPreview(String eventId, String token){
+        invitationTokenService.validate(token);
+        Event eve = eventService.getEventById(eventId);
+        EventPreview preview = new EventPreview();
+        preview.setRole(null);
+        preview.setName(eve.getName());
+        preview.setUuid(eve.getUuid());
+        preview.setDescription(eve.getDescription());
+        preview.setImage(eve.getImage());
+        preview.setEndTime(eve.getEndTime());
+        preview.setLocation(eve.getLocation());
+        preview.setStartTime(eve.getStartTime());
+        return preview;
     }
 
     /**
@@ -115,8 +138,8 @@ public class EventControllerService {
         }catch (NoSuchElementException ex) {
             account = fleventsAccountService.createAnonymousAccount(email);
         }
-        EventRegistration registration = eventService.addAccountToEvent(event,account,EventRole.invited);
-        InvitationToken token = invitationTokenService.saveToken(new InvitationToken(role.toString()));
+        EventRegistration registration = eventService.addInvitationToEvent(event,account);
+        InvitationToken token = invitationTokenService.createToken(eventId,role);
         eMailService.sendEventInvitaion(event,email,token.toString());
     }
 
@@ -126,10 +149,10 @@ public class EventControllerService {
      * @param accountId the id of the account to be added
      * @param token the token in the invitation link to verify the invitation
      */
-    public void acceptInvitation(String eventId, String accountId, String token){
+    public void acceptInvitation(String eventId, String accountId, String token) throws InvalidAttributesException {
         Event event = getEventById(eventId);
         FleventsAccount account = accountService.getAccountById(accountId);
-        InvitationToken invitationToken = invitationTokenService.validate(token);
+        InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
         eventService.acceptInvitation(event,account,EventRole.valueOf(invitationToken.getRole()));
         invitationTokenService.deleteToken(invitationToken);
     }

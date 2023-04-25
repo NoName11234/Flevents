@@ -60,6 +60,17 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Returns the EventPreview of the specified event if the given token is valid.
+    * @param eventId the id of the event to get the preview from
+    * @param token the token to validate the request
+    * @return ResponseEntity with the EventPreview and the http status code
+    */
+   @GetMapping("/{eventId}/preview")
+   public ResponseEntity getEventPreview(@PathVariable String eventId, @RequestParam String token){
+      return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
+   }
+
+   /**
     * Deletes the event with the given id.
     * Allows access for organizer in the specified event.
     * @param eventId the id of the event to delete
@@ -169,9 +180,13 @@ private final ModelMapper mapper;
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-      eventControllerService.acceptInvitation(eventId, details.getId(), token);
-      return new ResponseEntity(HttpStatus.OK);
+      try{
+         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+         eventControllerService.acceptInvitation(eventId, details.getId(), token);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+      }
    }
 
    /**
