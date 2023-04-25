@@ -89,7 +89,7 @@
 
 
 <script setup lang="ts">
-import {ref, Ref} from "vue";
+import {onMounted, ref, Ref} from "vue";
 import {Account} from "@/models/account";
 import Heading from "@/components/Heading.vue";
 import {useRoute, useRouter} from "vue-router";
@@ -101,9 +101,15 @@ import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
 import {AxiosError} from "axios";
 import {hydrateAll} from "@/service/storesService";
+import {Organization} from "@/models/organization";
+import {OrganizationPreview} from "@/models/organizationPreview";
+import organizationsApi from "@/api/organizationsApi";
 
 const route = useRoute();
 const router = useRouter();
+
+const organizationUuid = route.params.uuid as string;
+const invitationToken = route.query.token as string;
 
 const appStore = useAppStore();
 const { loggedIn } = storeToRefs(appStore);
@@ -115,8 +121,7 @@ const account : Ref<Partial<Account>> = ref({
   secret: ""
 });
 
-const organizationStore = useOrganizationStore();
-const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
+const organization = ref({} as OrganizationPreview);
 
 const address = ref("");
 const showDialog = ref(false);
@@ -124,6 +129,25 @@ const loading = ref(false);
 const showPass = ref(false);
 const tooltip = ref("");
 const enrollToolTip = ref("");
+
+onMounted(async () => {
+  if (!invitationToken) {
+    appStore.addToast({
+      text: "Die URL beinhaltet kein Einladungs-Token. Haben Sie sie richtig eingefügt?",
+      color: "error",
+    });
+    return;
+  }
+  try {
+    const { data } = await organizationsApi.getPreview(organizationUuid, invitationToken);
+    organization.value = data as OrganizationPreview;
+  } catch (e) {
+    appStore.addToast({
+      text: "Die in der URL angegebene Organisation kann nicht gefunden werden. Womöglich ist die Einladung ungültig.",
+      color: "error",
+    });
+  }
+});
 
 async function performLogin() {
   loading.value = true;
@@ -151,7 +175,7 @@ async function performLogin() {
 async function enroll(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    await OrganizationsApi.acceptInvitation(route.params.uuid as string,  route.query.token as string);
+    await OrganizationsApi.acceptInvitation(organizationUuid,  invitationToken);
     appStore.addToast({
       text: `Sie sind der Organisation beigetreten.`,
       color: "success",
