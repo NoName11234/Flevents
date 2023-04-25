@@ -147,7 +147,10 @@ private final ModelMapper mapper;
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
       Event event1 = eventControllerService.getEventById(eventId); //todo: find better way to authorize
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))||!eventControllerService.getGranted(auth,event1.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))){
+      if(
+              !eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))
+              &&!eventControllerService.getGranted(auth,event1.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))
+      ){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
