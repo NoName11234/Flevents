@@ -26,5 +26,4 @@ public class QuestionModel {
     private QuestionnaireModel questionnaire;
     @Nullable @OneToMany
     private List<Choice> choices;
-    private String type;
 }

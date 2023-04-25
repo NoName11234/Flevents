@@ -24,7 +24,6 @@ public class AnsweredQuestionnaire {
     private String uuid;
     @ManyToOne
     private FleventsAccount user;
-    private String questionnaire;
     @OneToMany
     private List<AnsweredQuestion> answers = new ArrayList<>();
     @ManyToOne
