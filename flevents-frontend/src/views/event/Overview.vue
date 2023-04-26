@@ -41,6 +41,8 @@ const posts = computed(() => postStore.getPosts(route.params.uuid as string) as 
 const organizationStore = useOrganizationStore();
 
 const enrollLoading = ref(false);
+const organizersLoading = ref(false);
+const attendeesLoading = ref(false);
 const storesLoading = computed(() =>
   eventStore.specificLoading.get(route.params.uuid as string)
   || surveyStore.loading
@@ -48,7 +50,7 @@ const storesLoading = computed(() =>
 );
 
 const attendees = computed(() => {
-  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor].includes(a.role as EventRole)) as AccountPreview[]
+  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor].includes(a.role as EventRole)) as AccountPreview[];
 });
 const organizers = computed(() => {
   return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole)) as AccountPreview[]
@@ -200,9 +202,31 @@ function isSameDay(a: Date, b: Date) {
   return sameYear && sameMonth && sameDay;
 }
 
-async function removeOrganizer(uuid: string) {
+async function removeOrganizer(deletedOrganizer: AccountPreview) {
+  let ok = false;
+  if (deletedOrganizer.uuid === account.value!.uuid) {
+    // Current user removes himself and possibly removes his access
+    ok = window.confirm(
+      `Sind Sie sicher, dass Sie Sich aus dem Event ${event.value.name} entfernen wollen?`
+      + ` Wenn Sie kein Administrator in ${event.value.organizationPreview.name} sind, werden Ihnen damit alle Verwalterrechte in ihm entzogen.`
+      + ` Sind Sie für das Event als Teilnehmer oder Tutor registriert, bleibt dieser Zugriff erhalten.`
+      + ` Um erneut Verwalterrechte zu erhalten, müssen Sie erneut dazu eingeladen werden.`
+    );
+  } else {
+    // Someone else is being removed
+    ok = window.confirm(
+      `Sind Sie sicher, dass Sie ${deletedOrganizer.firstname} ${deletedOrganizer.lastname} (${deletedOrganizer.email}) aus dem Event ${event.value.name} entfernen wollen?`
+      + ` Wenn die Person kein Administrator in ${event.value.organizationPreview.name} ist, werden ihr damit alle Verwalterrechte in ihm entzogen.`
+      + ` Ist sie für das Event als Teilnehmer oder Tutor registriert, bleibt dieser Zugriff erhalten.`
+      + ` Um erneut Verwalterrechte zu erhalten, muss sie erneut dazu eingeladen werden.`
+    );
+  }
+  if (!ok) {
+    return;
+  }
+  organizersLoading.value = true;
   try {
-    await eventApi.removeAccount(route.params.uuid as string, uuid, EventRole.organizer);
+    await eventApi.removeAccount(route.params.uuid as string, deletedOrganizer.uuid, EventRole.organizer);
     await eventStore.hydrateSpecific(route.params.uuid as string);
     appStore.addToast({
       text: 'Organisator entfernt.',
@@ -225,12 +249,40 @@ async function removeOrganizer(uuid: string) {
       color: 'error',
     });
   }
+  organizersLoading.value = false;
   eventStore.hydrate();
 }
 
-async function removeAccount(uuid: string, role: string) {
+async function removeAttendee(deletedAttendee: AccountPreview) {
+  let ok = false;
+  if (
+    deletedAttendee.uuid === account.value!.uuid
+    && validateRole.value !== EventRole.organizer
+  ) {
+    // Current user removes himself and possibly removes his access
+    ok = window.confirm(
+      `Sind Sie sicher, dass Sie Sich aus dem Event ${event.value.name} entfernen wollen?`
+      + ` Wenn Sie kein Teil von ${event.value.organizationPreview.name} sind, wird Ihnen damit der Zugriff darauf entzogen.`
+      + ` Um erneut Zugriff zu erhalten, müssen Sie erneut dazu eingeladen werden.`
+    );
+  } else if (deletedAttendee.uuid === account.value!.uuid) {
+    // Current user removes himself and is organizer of event or admin of its organization
+    // Therefore he is not in risk of removing his access
+    ok = true;
+  } else {
+    // Someone else is being removed
+    ok = window.confirm(
+      `Sind Sie sicher, dass Sie ${deletedAttendee.firstname} ${deletedAttendee.lastname} (${deletedAttendee.email}) aus dem Event ${event.value.name} entfernen wollen?`
+      + ` Wenn die Person kein Teil von ${event.value.organizationPreview.name} sind, wird ihr damit der Zugriff darauf entzogen.`
+      + ` Um erneut Zugriff zu erhalten, muss sie erneut dazu eingeladen werden.`
+    );
+  }
+  if (!ok) {
+    return;
+  }
+  attendeesLoading.value = true;
   try {
-    await eventApi.removeAccount(route.params.uuid as string, uuid, role as EventRole);
+    await eventApi.removeAccount(route.params.uuid as string, deletedAttendee.uuid, deletedAttendee.role as EventRole);
     await eventStore.hydrateSpecific(route.params.uuid as string);
     appStore.addToast({
       text: 'Account entfernt.',
@@ -253,12 +305,27 @@ async function removeAccount(uuid: string, role: string) {
       color: 'error',
     });
   }
+  attendeesLoading.value = false;
   eventStore.hydrate();
 }
 
-async function updateRole(account: AccountPreview, newRole: EventRole) {
+async function updateRole(updatedAttendee: AccountPreview, newRole: EventRole) {
+  if (
+    updatedAttendee.uuid === account.value!.uuid
+    && validateRole.value !== EventRole.organizer
+  ) {
+    // Current changes own role and possibly removes his access
+    const ok = window.confirm(
+      `Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newRole}" ändern möchten?`
+      + ` Sie verlieren damit alle Rechte, die Sie als ${updatedAttendee.role} besitzen.`
+    );
+    if (!ok) {
+      return;
+    }
+  }
+  attendeesLoading.value = true;
   try {
-    await eventApi.changeRole(route.params.uuid as string, account.uuid, account.role as EventRole, newRole);
+    await eventApi.changeRole(route.params.uuid as string, updatedAttendee.uuid, updatedAttendee.role as EventRole, newRole);
     await eventStore.hydrateSpecific(route.params.uuid as string);
     appStore.addToast({
       text: 'Rolle aktualisiert.',
@@ -281,6 +348,7 @@ async function updateRole(account: AccountPreview, newRole: EventRole) {
       color: 'error',
     });
   }
+  attendeesLoading.value = false;
   eventStore.hydrate();
 }
 
@@ -500,7 +568,15 @@ async function deleteEvent() {
         </v-expansion-panels>
       </v-window-item>
 
-      <v-window-item value="attendees">
+      <v-window-item value="attendees" :disabled="attendeesLoading">
+        <v-progress-linear
+          :active="attendeesLoading"
+          color="grey-lighten-1"
+          indeterminate
+          rounded-bar
+          rounded
+          absolute
+        />
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
             :to="{ name: 'events.invite', params: { uuid: event.uuid } }"
@@ -523,13 +599,15 @@ async function deleteEvent() {
               <th>
                 E-Mail
               </th>
-              <th v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
+              <th v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer">
                 Rolle
               </th>
 <!--              <th>-->
 <!--                Bestätigt-->
 <!--              </th>-->
-              <th v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">Entfernen</th>
+              <th v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer">
+                Entfernen
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -537,12 +615,18 @@ async function deleteEvent() {
              v-for="(item, index) in attendees"
              :key="index"
             >
-              <td>{{item.firstname}} {{item.lastname}}</td>
-              <td>{{item.email}}</td>
+              <td>
+                {{item.firstname}}&nbsp;{{item.lastname}}
+              </td>
+              <td>
+                {{item.email}}
+              </td>
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
                 <v-btn
                   append-icon="mdi-chevron-down"
-                  variant="outlined"
+                  variant="text"
+                  class="d-flex flex-row justify-space-between"
+                  block
                 >
                   {{ item.role }}
 
@@ -577,7 +661,7 @@ async function deleteEvent() {
                   size="small"
                   icon="mdi-delete"
                   v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
-                  @click="removeAccount(item.uuid, item.role)"
+                  @click="removeAttendee(item)"
                 />
               </td>
             </tr>
@@ -628,7 +712,16 @@ async function deleteEvent() {
           </tbody>
         </v-table>
       </v-window-item>
-      <v-window-item value="organizers">
+
+      <v-window-item value="organizers" :disabled="organizersLoading">
+        <v-progress-linear
+          :active="organizersLoading"
+          color="grey-lighten-1"
+          indeterminate
+          rounded-bar
+          rounded
+          absolute
+        />
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
             :to="{ name: 'events.organizer', params: { uuid: event.uuid } }"
@@ -665,7 +758,7 @@ async function deleteEvent() {
               variant="text"
               size="small"
               icon="mdi-delete"
-              @click="removeOrganizer(item.uuid)"
+              @click="removeOrganizer(item)"
             >
             </v-btn></td>
           </tr>

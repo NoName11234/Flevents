@@ -164,6 +164,7 @@ async function submit() {
           :item-title="item => item.name"
           :item-value="item => item.uuid"
           :rules="[() => selectedOrga !== undefined || 'Events müssen einer Organisation zugehören.']"
+          menu-icon="mdi-chevron-down"
           return-object
         />
 

@@ -9,6 +9,7 @@ import {EventRole} from "@/models/eventRole";
 import {useEventStore} from "@/store/events";
 import eventApi from "@/api/eventApi";
 import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
@@ -29,19 +30,33 @@ function remove(item: any){
 // submit
 async function submit() {
   let failedInvitations = [];
+  let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
+    }
     try {
       const response = await eventApi.inviteOrganizer(uuid, email);
+      successfulInvitations.push(email);
     } catch (e) {
       console.log(`Invitation of ${email} failed.`);
       failedInvitations.push(email);
     }
   }
-  appStore.addToast({
-    text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
-    color: 'error',
-  });
+  if (failedInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
+      color: 'error',
+    });
+  }
+  if (successfulInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen war erfolgreich: ${successfulInvitations.join(', ')}`,
+      color: 'success',
+    });
+  }
   await router.push( { name: 'events.event', params: { uuid: uuid } } );
 }
 </script>
@@ -52,7 +67,7 @@ async function submit() {
 
   <v-card>
     <v-form validate-on="submit" @submit.prevent="submit()">
-      <v-container>
+      <v-container class="d-flex flex-column gap-3">
         <v-combobox
           v-model="chips"
           chips
@@ -61,6 +76,7 @@ async function submit() {
           closable-chips
           multiple
           prepend-inner-icon="mdi-account-multiple"
+          hide-details="auto"
         >
           <template v-slot:selection="{ attrs, select, selected }">
             <v-chip

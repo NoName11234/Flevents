@@ -156,7 +156,9 @@ public class FleventsAccountService {
             }
         }
         FleventsAccount srcAccount = existingAcc.get();
-        account.setSecret(encoder.encode(account.getSecret()));
+        if (account.getSecret() != null) {
+            account.setSecret(encoder.encode(account.getSecret()));
+        }
         srcAccount.merge(account);
         return fleventsAccountRepository.save(srcAccount);
     }
