@@ -3,11 +3,8 @@ package de.flyndre.fleventsbackend.controllerServices;
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import de.flyndre.fleventsbackend.services.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
@@ -92,23 +89,6 @@ public class OrganizationControllerService {
      */
     public List<FleventsAccount> getAccounts(String organizationId){
         return organizationService.getAccounts(getOrganizationById(organizationId));
-    }
-
-    /**
-     * Creates a new organization out of the given organization object, not all values have to be set.
-     * @param organisation organization object to be created
-     * @param email the email address to send an invitation to become the first admin
-     * @return Organization that has been created
-     */
-    public Organization createOrganisation(Organization organisation, String email) {
-        Organization organization = organizationService.createOrganisation(organisation);
-        try {
-            sendInvitation(organization.getUuid(), email, OrganizationRole.admin);
-        }catch (RuntimeException e){
-            organizationService.deleteOrganization(organization);
-            throw e;
-        }
-        return organisation;
     }
 
     /**

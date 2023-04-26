@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrganizationService {
-    private OrganizationRepository organizationRepository;
-    private OrganizationAccountRepository organizationAccountRepository;
+    private final OrganizationRepository organizationRepository;
+    private final OrganizationAccountRepository organizationAccountRepository;
     public OrganizationService(OrganizationRepository organizationRepository, OrganizationAccountRepository organizationAccountRepository){
         this.organizationRepository = organizationRepository;
         this.organizationAccountRepository = organizationAccountRepository;
@@ -35,9 +35,10 @@ public class OrganizationService {
     }
 
     /**
-     * Returns the organization specified by its id. Throws an Exception if there is no organization with the given id.
+     * Returns the organization specified by its id.
      * @param organizationId the id of the organization
      * @return Organization with the given id
+     * @throws NoSuchElementException if for the given id there's no organization.
      */
     public Organization getOrganizationById(String organizationId){
         Optional<Organization> optional = organizationRepository.findById(organizationId);
@@ -142,6 +143,9 @@ public class OrganizationService {
      * @param organization the organization object to be deleted
      */
     public void deleteOrganization(Organization organization){
+        for(OrganizationAccount organizationAccount:organization.getAccounts()){
+            organizationAccountRepository.delete(organizationAccount);
+        }
         organizationRepository.delete(organization);
     }
 

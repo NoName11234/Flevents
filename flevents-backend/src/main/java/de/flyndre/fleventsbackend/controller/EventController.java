@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/events")
 public class EventController {
 
-private EventControllerService eventControllerService;
+private final EventControllerService eventControllerService;
 private final ModelMapper mapper;
    public EventController(EventControllerService eventControllerService, ModelMapper mapper){
       this.eventControllerService = eventControllerService;
@@ -156,7 +156,7 @@ private final ModelMapper mapper;
     * Allows access for tutor and above of the specified event.
     * @param eventId the id of the event to send an invitation to
     * @param email the email to send the invitation link to
-    * @param role the role which gets assigend to the invited person
+    * @param role the role which gets assigned to the invited person
     * @param auth the Authentication generated out of a barer token.
     * @return ResponseEntity with the http status code and an optional error message
     */

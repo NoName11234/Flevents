@@ -1,50 +1,55 @@
 package de.flyndre.fleventsbackend;
 
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import de.flyndre.fleventsbackend.Models.Organization;
-import de.flyndre.fleventsbackend.controller.FleventsAccountController;
-import de.flyndre.fleventsbackend.controller.OrganizationController;
-import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
-import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.repositories.OrganizationRepository;
+import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @TestPropertySource("classpath:application-local.properties")
 public class FullApiTest {
+
     @Autowired
-    private OrganizationController organizationController;
-    @Autowired
-    private OrganizationRepository organizationRepository;
-    @Autowired
-    private FleventsAccountController fleventsAccountController;
+    private MockMvc mockMvc;
+
+    private final ObjectMapper mapper = new JsonMapper();
+
 
 
     @Test
-    void createOrganization(){
-        Organization organization = new Organization();
-        organization.setName("TestOrganization");
-        organization.setDescription("This is an Organization");
-        organization.setAddress("93389 Horb");
-        organization.setPhoneContact("74888930384");
-        organization.setIcon("This should be an icon");
-        OrganizationInformation information = (OrganizationInformation) organizationController.createOrganisation(organization,"test@test").getBody();
-        compare(information,organization);
-        assertNotNull(information.getUuid());
-        FleventsAccount account = new FleventsAccount(null,"Lukas","Burkhardt",true,"test@test.com","icon","geheim",null,null);
-        List list = organizationRepository.findAll();
+    @WithMockUser(authorities = {"platformAdmin"})
+    void apiTest() throws Exception {
+        OrganizationPreview organizationPreview = new OrganizationPreview();
+        organizationPreview.setName("Test Orga");
+        organizationPreview.setDescription("Test description");
+        var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/platform/organizations")
+                        .param("email","test@flyndre.de")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(organizationPreview)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        OrganizationInformation testOrga = mapper.readValue(result.getResponse().getContentAsString(),OrganizationInformation.class);
+
+
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/platform/organizations/"+testOrga.getUuid()))
+                .andExpect(status().isOk());
     }
 
     public void compare(OrganizationInformation information, Organization organization){

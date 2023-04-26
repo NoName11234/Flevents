@@ -1,13 +1,13 @@
 package de.flyndre.fleventsbackend.controller;
 
-import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.Event;
+import de.flyndre.fleventsbackend.Models.Organization;
+import de.flyndre.fleventsbackend.Models.OrganizationRole;
+import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @CrossOrigin   //TODO: Brauchts das wirklich?
 @RequestMapping("/api/organizations")
 public class OrganizationController {
-   private OrganizationControllerService organizationControllerService;
+   private final OrganizationControllerService organizationControllerService;
    private final ModelMapper mapper;
 
    public OrganizationController(OrganizationControllerService organizationControllerService, ModelMapper mapper){
@@ -130,29 +130,6 @@ public class OrganizationController {
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity(organizationControllerService.getAccounts(organizationId).stream().map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
-   }
-
-   /**
-    * Creates a new organization out of the given organization object, not all values have to be set.
-    * @param organisation the organization to be created
-    * @param email an email address to which an invitation to become the first admin is sent
-    * @return ResponseEntity with the organization object and the http status code
-    */
-   @PostMapping
-   public ResponseEntity createOrganisation(@RequestBody Organization organisation, @RequestParam @NotNull String email){
-      //todo: implement authorization for platform admin
-      if(!email.matches(".*@.*\\..*")){
-         return new ResponseEntity<>("Please provide a valid email address.",HttpStatus.BAD_REQUEST);
-      }
-      if(organisation.getName()==null||organisation.getName().isBlank()){
-         return new ResponseEntity("Please provide a name for the organization.",HttpStatus.BAD_REQUEST);
-      }
-      try {
-         Organization organization = organizationControllerService.createOrganisation(organisation, email);
-         return new ResponseEntity(mapper.map(organization, OrganizationInformation.class), HttpStatus.OK);
-      }catch (Exception ex){
-         return new ResponseEntity<>(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-      }
    }
 
    /**
