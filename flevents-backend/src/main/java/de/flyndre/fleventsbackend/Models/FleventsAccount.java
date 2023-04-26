@@ -1,16 +1,12 @@
 package de.flyndre.fleventsbackend.Models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.UniqueElements;
 
-import java.net.URI;
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -31,6 +27,7 @@ public class FleventsAccount {
     private String firstname;
     private String lastname;
     private Boolean isActive;
+    private Boolean isPlatformAdmin = false;
     @Column(unique = true)
     private String email;
     @Lob
@@ -66,6 +63,9 @@ public class FleventsAccount {
         }
         if(account.getIsActive()!=null){
             this.isActive=account.getIsActive();
+        }
+        if(account.getIsPlatformAdmin()!=null){
+            this.isPlatformAdmin=account.getIsPlatformAdmin();
         }
     }
 

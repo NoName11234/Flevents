@@ -1,12 +1,12 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.PlatformAdminRole;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.security.jwt.JwtUtils;
 import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 /**
@@ -63,8 +62,11 @@ public class AuthService {
      */
     public boolean validateRights(Authentication auth, List<Role> roles, String allowedUuid){
         for(GrantedAuthority authorization : auth.getAuthorities()){
+            if(authorization.getAuthority().equals(PlatformAdminRole.platformAdmin.toString())){
+                return true;
+            }
             for(Role role : roles){
-                if(authorization.getAuthority().equals(allowedUuid+"."+role) || authorization.getAuthority().equals(allowedUuid+"."+role)){
+                if(authorization.getAuthority().equals(allowedUuid+"."+role)){
                     return true;
                 }
             }
