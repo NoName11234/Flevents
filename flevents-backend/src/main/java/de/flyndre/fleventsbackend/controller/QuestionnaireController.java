@@ -4,24 +4,28 @@ import de.flyndre.fleventsbackend.Models.EventRole;
 import de.flyndre.fleventsbackend.controllerServices.QuestionnaireControllerService;
 import de.flyndre.fleventsbackend.dtos.questionaire.AnsweredQuestionnaire;
 import de.flyndre.fleventsbackend.dtos.questionaire.Questionnaire;
+import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 //todo: implement authorization
 @RestController
 @CrossOrigin
 @RequestMapping("/api/questionnaires")
 public class QuestionnaireController {
-    private List<Questionnaire> questionnaireList = new ArrayList<Questionnaire>();
-    private List<AnsweredQuestionnaire> answeredQuestionnaires = new ArrayList<>();
-    private final QuestionnaireControllerService questionnaireControllerService;
 
-    public QuestionnaireController(QuestionnaireControllerService questionnaireControllerService) {
+    private final QuestionnaireControllerService questionnaireControllerService;
+    private final ModelMapper mapper;
+
+    public QuestionnaireController(QuestionnaireControllerService questionnaireControllerService, ModelMapper mapper) {
         this.questionnaireControllerService = questionnaireControllerService;
+        this.mapper = mapper;
     }
 
     @GetMapping
@@ -29,33 +33,20 @@ public class QuestionnaireController {
         if(!questionnaireControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        ArrayList questionnaires = new ArrayList<Questionnaire>();
-        for(Questionnaire questionnaire:questionnaireList){
-            if(questionnaire.getEventId().equals(eventId)){
-                questionnaires.add(questionnaire);
-            }
-        }
-        return new ResponseEntity<>(questionnaires,HttpStatus.OK);
+        return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId).stream().map(questionnaire -> mapper.map(questionnaire, Questionnaire.class)).collect(Collectors.toList()), HttpStatus.OK);
     }
+
     @GetMapping("/{questionnaireId}")
     public ResponseEntity getQuestionnaire(@PathVariable String questionnaireId, Authentication auth){
-
-       for(Questionnaire questionnaire:questionnaireList){
-           if(questionnaire.getUuid().equals(questionnaireId)){
-               return new ResponseEntity(questionnaire,HttpStatus.OK);
-           }
-       }
-       return new ResponseEntity<>("Could not found this",HttpStatus.NOT_FOUND);
+        //TODO: hier fehlt auth
+       return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
     }
 
     @GetMapping("/{questionnaireId}/answers/{userId}")
     public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId, Authentication auth){
-        for(AnsweredQuestionnaire questionnaire:answeredQuestionnaires){
-            if(questionnaire.getQuestionnaire().equals(questionnaireId)&&questionnaire.getUserId().equals(userId)){
-                return new ResponseEntity<>(questionnaire,HttpStatus.OK);
-            }
-        }
-        return new ResponseEntity("Could not found this",HttpStatus.NOT_FOUND);
+        //TODO: hier fehlt auth
+
+        return new ResponseEntity<>(,HttpStatus.OK);
     }
 
     @PostMapping
