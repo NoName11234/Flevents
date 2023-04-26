@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
 @Service
 public class PlatformControllerService {
     private final OrganizationService organizationService;
@@ -48,7 +50,7 @@ public class PlatformControllerService {
     /**
      * Deletes the organization including all associated data.
      * @param organizationId the id of the organization to delete.
-     * @throws NoSuchElementExceptionException if there's no organization to the given id.
+     * @throws NoSuchElementException if there's no organization to the given id.
      */
     public void deleteOrganization(String organizationId) {
         organizationService.deleteOrganization(organizationService.getOrganizationById(organizationId));
