@@ -2,6 +2,7 @@
   <v-app-bar>
     <v-container style="max-width: 800px;" class="d-flex flex-row align-center">
       <v-tooltip
+        v-if="showBack"
         text="Zurück"
         open-delay="500"
         location="bottom"
@@ -9,6 +10,7 @@
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
+            :disabled="!loggedIn"
             icon="mdi-arrow-left"
             @click="$router.options.history.state.back === null ? null : $router.go(-1);"
           />
@@ -23,6 +25,7 @@
       />
 
       <v-tooltip
+        v-if="showLogout"
         text="Abmelden"
         open-delay="500"
         location="bottom"
@@ -54,6 +57,19 @@ import security from "@/service/security";
 import {useAppStore} from "@/store/app";
 import {storeToRefs} from "pinia";
 import {logout as authLogout} from "@/service/authService";
+
+const props = defineProps({
+  showLogout: {
+    required: false,
+    type: Boolean,
+    default: true,
+  },
+  showBack: {
+    required: false,
+    type: Boolean,
+    default: true,
+  }
+});
 
 const account : any = ref(security.getAccount());
 const appStore = useAppStore();

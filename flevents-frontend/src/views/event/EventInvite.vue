@@ -2,6 +2,34 @@
   <Heading
     :text="`Anmelden zu Event ${event.name}`"
   />
+
+  <v-card>
+    <v-img
+      height="250"
+      class="bg-gradient"
+      cover
+      :src="event?.image ?? ''"
+    />
+    <v-container>
+      {{event?.description}}
+    </v-container>
+    <v-divider />
+    <v-list>
+      <v-list-item
+        v-if="event?.startTime && event?.endTime"
+        prepend-icon="mdi-clock"
+      >
+        {{ DatetimeService.formatDateRange(event?.startTime, event?.endTime)}}
+      </v-list-item>
+      <v-list-item
+        v-if="event?.location"
+        prepend-icon="mdi-map-marker"
+      >
+        {{event?.location}}
+      </v-list-item>
+    </v-list>
+  </v-card>
+
   <v-card>
     <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
@@ -94,7 +122,7 @@ import {onMounted, ref, Ref} from "vue";
 import {Account} from "@/models/account";
 import Heading from "@/components/Heading.vue";
 import {useRoute, useRouter} from "vue-router";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 import {login, logout} from "@/service/authService";
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
@@ -105,6 +133,9 @@ import {hydrateAll} from "@/service/storesService";
 import organizationsApi from "@/api/organizationsApi";
 import {OrganizationPreview} from "@/models/organizationPreview";
 import {FleventsEventPreview} from "@/models/fleventsEventPreview";
+import EventCard from "@/components/EventCard.vue";
+import {FleventsEvent} from "@/models/fleventsEvent";
+import DatetimeService from "../../service/datetimeService";
 
 const route = useRoute();
 const router = useRouter();
