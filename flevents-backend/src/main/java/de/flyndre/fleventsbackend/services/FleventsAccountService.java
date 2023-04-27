@@ -108,7 +108,6 @@ public class FleventsAccountService {
      * @return FleventsAccount the saved account
      */
     public FleventsAccount createAccount(FleventsAccount account){
-        //TODO: Implement
         if(account.getEmail()==null){
             throw new IllegalArgumentException("No email provided");
         }
@@ -120,6 +119,7 @@ public class FleventsAccountService {
         }
         account.setUuid(null);
         account.setIsActive(true);
+        account.setIsPlatformAdmin(false);
         account.setSecret(encoder.encode(account.getSecret()));
         return fleventsAccountRepository.save(account);
     }
