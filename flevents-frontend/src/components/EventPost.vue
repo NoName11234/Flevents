@@ -43,7 +43,7 @@ const props = defineProps({
       <div class="d-flex flex-column gap-3 mt-3">
 
         <p>
-          {{ post.text }}
+            {{ post.content }}
         </p>
 
         <v-divider/>

@@ -6,13 +6,16 @@ import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
 import de.flyndre.fleventsbackend.controllerServices.PostControllerService;
 import de.flyndre.fleventsbackend.dtos.PostInformation;
+import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -71,17 +74,24 @@ public class PostController {
      * Creates a post in the specified id by the specified account.
      * Allows access for tutor and above.
      * @param eventId the id of the event to create the post in
-     * @param accountId the id of the account which is the author of the post
      * @param post the post to be created
      * @param auth the Authentication generated out of a barer token.
      * @return ResponseEntity with the created post and the http status code
      */
     @PostMapping
-    public ResponseEntity createPost(@PathVariable String eventId,@RequestParam String accountId,@RequestBody Post post,Authentication auth){
+    public ResponseEntity createPost(
+            @PathVariable String eventId,
+            @RequestPart Post post,
+            @RequestPart List<MultipartFile> attachments,
+            Authentication auth
+    ){
         if(!postControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity(mapper.map(postControllerService.createPost(eventId,accountId,post), PostInformation.class),HttpStatus.OK);
+        // TODO: store attachments
+        attachments.forEach(a -> System.out.println(a.getOriginalFilename()));
+        UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
+        return new ResponseEntity(mapper.map(postControllerService.createPost(eventId,authUser.getId(),post), PostInformation.class),HttpStatus.OK);
     }
 
     /**

@@ -5,7 +5,7 @@ export interface Post {
   uuid: string,
   author: Account,
   title: string,
-  text: string,
+  content: string,
   date: Date,
   attachments: Array<string>,
 
