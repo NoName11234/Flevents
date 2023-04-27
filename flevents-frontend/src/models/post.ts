@@ -6,7 +6,9 @@ export interface Post {
   author: Account,
   title: string,
   content: string,
-  date: Date,
+  event: FleventsEventPreview,
+  creationDate: Date,
   attachments: Array<string>,
+  comments: Array<Comment>,
 
 }
