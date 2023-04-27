@@ -254,7 +254,6 @@ private final ModelMapper mapper;
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       eventControllerService.addAnonymousAccountToEvent(eventId, email);
-      auth.setAuthenticated(false);
       return new ResponseEntity(HttpStatus.OK);
    }
 
