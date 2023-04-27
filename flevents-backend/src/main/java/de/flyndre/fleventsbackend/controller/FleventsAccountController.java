@@ -141,27 +141,12 @@ public class FleventsAccountController {
     }
 
     /**
-     * Creates a new anonymous account.
-     * @param email the E-Mail to create an anonymous account
-     * @param auth the Authentication generated out of a barer token.
-     * @return ResponseEntity with the created account and the http status code
-     */
-    @PostMapping("/anonym")
-    public ResponseEntity createAnonymousAccount(@RequestParam String email, Authentication auth){
-        try {
-            return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAnonymousAccount(email), AccountInformation.class), HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
      * Sends a mail with a link to reset the password for the account with the specified mail.
      * @param email the email of the account where to reset the password
      * @return ResponseEntity with the http status code and an optional error message.
      */
     @PostMapping("/reset-password")
-    public ResponseEntity resetPassword(@RequestBody String email, Authentication auth){
+    public ResponseEntity resetPassword(@RequestBody String email){
         try{
             fleventsAccountControllerService.resetPassword(email);
             return new ResponseEntity(HttpStatus.OK);

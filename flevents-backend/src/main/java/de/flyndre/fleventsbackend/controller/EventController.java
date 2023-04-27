@@ -250,11 +250,11 @@ private final ModelMapper mapper;
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/add-account/add-anonymous")
-   public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody String email,Authentication auth, @RequestParam(required = false) String token){
-      try{
-         if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.guest))){
+   public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody String email,Authentication auth, @RequestParam(required = true) String token){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.guest))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-         }
+      }
+      try{
          eventControllerService.addAnonymousAccountToEvent(eventId, email, token);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
