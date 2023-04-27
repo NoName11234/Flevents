@@ -25,5 +25,8 @@ public class EventInformation extends EventPreview{
     @Getter
     @Setter
     private List<AccountPreview> accountPreviews;
+    @Getter
+    @Setter
+    private List<PostInformation> posts;
 
 }

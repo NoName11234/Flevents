@@ -101,6 +101,13 @@ public class AppConfiguration {
         };
         modelMapper.typeMap(Post.class, PostInformation.class).addMappings(mapper -> mapper.using(convertAttachmentToAttachmentPreview).map(Post::getAttachments,PostInformation::setAttachments));
 
+        Converter<List<Post>,List<PostInformation>> convertPostToPostinformation = new AbstractConverter<List<Post>, List<PostInformation>>() {
+            protected List<PostInformation> convert(List<Post> posts) {
+                return posts.stream().map(post -> modelMapper.map(post, PostInformation.class)).collect(Collectors.toList());
+            }
+        };
+        modelMapper.typeMap(Event.class,EventInformation.class).addMappings(mapper -> mapper.using(convertPostToPostinformation).map(Event::getPosts,EventInformation::setPosts));
+
         return modelMapper;
     }
     public static String[] getNullPropertyNames (Object source) {
