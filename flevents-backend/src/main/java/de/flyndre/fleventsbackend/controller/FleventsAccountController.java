@@ -134,7 +134,7 @@ public class FleventsAccountController {
     @PostMapping()
     public ResponseEntity createAccount(@RequestBody FleventsAccount account){
         try {
-            return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAccount(account), AccountInformation.class), HttpStatus.OK);
+            return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAccount(account), AccountInformation.class), HttpStatus.CREATED);
         }catch (Exception e){
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
