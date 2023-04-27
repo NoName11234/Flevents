@@ -3,7 +3,6 @@ import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {AxiosError} from "axios";
-import {Post} from "@/models/post";
 import router from "@/router";
 import EventPost from "@/components/EventPost.vue";
 import {Account} from "@/models/account";
@@ -12,31 +11,33 @@ import {Questionnaire} from "@/models/questionnaire";
 import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
 import {useEventStore} from "@/store/events";
 import {useSurveyStore} from "@/store/surveys";
-import {usePostStore} from "@/store/posts";
 import {AccountPreview} from "@/models/accountPreview";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
 import {useOrganizationStore} from "@/store/organizations";
 
 const openContext = ref(false);
-const tab = ref(null);
 const address = ref("");
 const route = useRoute();
+const eventUuid = route.params.uuid as string;
+
+const tab = computed({
+  get: () => route.query.tab ?? 'info',
+  set: (tabValue) => router.replace({ query: { ...route.query, tab: tabValue }}),
+});
+
 const accountStore = useAccountStore();
 const { currentAccount: account } = storeToRefs(accountStore);
 
 const appStore = useAppStore();
 
 const eventStore = useEventStore();
-const event = eventStore.getEventGetter(route.params.uuid as string);
+const event = eventStore.getEventGetter(eventUuid);
 
 const surveyStore = useSurveyStore();
-const questionnaires = computed(() => surveyStore.getSurveys(route.params.uuid as string) as Questionnaire[]);
-
-const postStore = usePostStore();
-const posts = computed(() => postStore.getPosts(route.params.uuid as string) as Post[]);
+const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
 
 const organizationStore = useOrganizationStore();
 
@@ -44,9 +45,7 @@ const enrollLoading = ref(false);
 const organizersLoading = ref(false);
 const attendeesLoading = ref(false);
 const storesLoading = computed(() =>
-  eventStore.specificLoading.get(route.params.uuid as string)
-  || surveyStore.loading
-  || postStore.loading
+  eventStore.specificLoading.get(eventUuid)
 );
 
 const attendees = computed(() => {
@@ -77,61 +76,7 @@ const validateRole = computed(() => {
     return EventRole.tutor;
   }
   return EventRole.attendee;
-})
-
-const debugPosts = ref([
-  {
-    uuid: '0',
-    title: "Ankündigung des Sprechers",
-    content: "Nach langem Warten können wir Ihnen endlich unseren Sprecher vorstellen! Peter Korstens hat begeistert zugesagt und wird Sie durch den Termin begleiten. Anbei finden Sie das Handout zum Vortrag. Wir freuen uns auf Ihr Kommen!",
-    creationDate: new Date(),
-    author: {
-      firstname: "Peter Maria",
-      lastname: "Korstens",
-      email: 'pk@web.de',
-    },
-    attachments: [
-      "Handout Vortrag.pdf"
-    ],
-    comments: [
-      {
-        uuid: '0',
-        author: {
-          firstname: 'Anneliese',
-          lastname: 'Reutinger',
-          email: 'ar@ar.de',
-        },
-        content: 'Neiiiin, wie schön! Ich wollte schon so lange mal wieder was von Herr Korstens hören! Jetzt bin ich richtig aufgeregt!!',
-        creationDate: new Date(),
-      },
-      {
-        uuid: '0',
-        author: {
-          firstname: 'Peter',
-          lastname: 'Korstens',
-          email: 'pk@web.de',
-        },
-        content: 'Vielen Dank für das Lob! Ich hoffe, Sie werden zufrieden sein :)',
-        creationDate: new Date(),
-      }
-    ]
-  },
-  {
-    uuid: '0',
-    title: "Vorabinfos",
-    content: "Voller Vorfreude planen wir unseren gemeinsamen Workshop. Damit auch Sie bestens vorbereitet sind, möchten wir Ihnen hiermit noch einmal den Flyer und für den Veranstaltungstag Lageplan und Parkplatzplan bereitstellen. Wir freuen uns auf Ihr Kommen!",
-    creationDate: new Date(),
-    author: {
-      firstname: "Sabine",
-      lastname: "Meier",
-      email: 'pk@web.de',
-    },
-    attachments: [
-      "Flyer.pdf",
-      "Lageplan und Parkplätze.pdf"
-    ],
-  }
-] as Post[]);
+});
 
 const eventStatus = computed(() => {
   let start = new Date(event?.value?.startTime);
@@ -152,9 +97,8 @@ const eventStatus = computed(() => {
 async function enroll(){
   enrollLoading.value = true;
   try {
-    // const response = await api.post(`http://localhost:8082/api/events/${route.params.uuid as string}/add-account/${account.value!.uuid as string}`);
-    const response = await eventApi.addAccount(route.params.uuid as string);
-    await eventStore.hydrateSpecific(route.params.uuid as string);
+    const response = await eventApi.addAccount(eventUuid);
+    await eventStore.hydrateSpecific(eventUuid);
     appStore.addToast({
       text: 'Erfolgreich angemeldet.',
       color: 'success',
@@ -180,11 +124,10 @@ async function disEnroll(){
     }
   }
   try {
-    // const response = await axios.post(`http://localhost:8082/api/events/${route.params.uuid as string}/remove-account/${account.value!.uuid as string}`, {}, {params: {role: "attendee"}});
     const role = attendees.value.find(a => a.uuid === account.value!.uuid) as Account|undefined;
     if (role === undefined) throw new Error('Not in attendee list');
-    const response = await eventApi.removeAccount(route.params.uuid as string, account.value!.uuid, role.role as EventRole);
-    await eventStore.hydrateSpecific(route.params.uuid as string);
+    const response = await eventApi.removeAccount(eventUuid, account.value!.uuid, role.role as EventRole);
+    await eventStore.hydrateSpecific(eventUuid);
     appStore.addToast({
       text: 'Erfolgreich abgemeldet.',
       color: 'success',
@@ -252,8 +195,8 @@ async function removeOrganizer(deletedOrganizer: AccountPreview) {
   }
   organizersLoading.value = true;
   try {
-    await eventApi.removeAccount(route.params.uuid as string, deletedOrganizer.uuid, EventRole.organizer);
-    await eventStore.hydrateSpecific(route.params.uuid as string);
+    await eventApi.removeAccount(eventUuid, deletedOrganizer.uuid, EventRole.organizer);
+    await eventStore.hydrateSpecific(eventUuid);
     appStore.addToast({
       text: 'Organisator entfernt.',
       color: 'success',
@@ -308,8 +251,8 @@ async function removeAttendee(deletedAttendee: AccountPreview) {
   }
   attendeesLoading.value = true;
   try {
-    await eventApi.removeAccount(route.params.uuid as string, deletedAttendee.uuid, deletedAttendee.role as EventRole);
-    await eventStore.hydrateSpecific(route.params.uuid as string);
+    await eventApi.removeAccount(eventUuid, deletedAttendee.uuid, deletedAttendee.role as EventRole);
+    await eventStore.hydrateSpecific(eventUuid);
     appStore.addToast({
       text: 'Account entfernt.',
       color: 'success',
@@ -351,8 +294,8 @@ async function updateRole(updatedAttendee: AccountPreview, newRole: EventRole) {
   }
   attendeesLoading.value = true;
   try {
-    await eventApi.changeRole(route.params.uuid as string, updatedAttendee.uuid, updatedAttendee.role as EventRole, newRole);
-    await eventStore.hydrateSpecific(route.params.uuid as string);
+    await eventApi.changeRole(eventUuid, updatedAttendee.uuid, updatedAttendee.role as EventRole, newRole);
+    await eventStore.hydrateSpecific(eventUuid);
     appStore.addToast({
       text: 'Rolle aktualisiert.',
       color: 'success',
@@ -380,7 +323,7 @@ async function updateRole(updatedAttendee: AccountPreview, newRole: EventRole) {
 
 async function deleteEvent() {
   try {
-    const response = await eventApi.delete(route.params.uuid as string);
+    const response = await eventApi.delete(eventUuid);
     openContext.value = false;
     await router.push({ name: 'home.manage', force: true });
   } catch (e) {
@@ -422,12 +365,12 @@ async function deleteEvent() {
       >
         Informationen
       </v-tab>
-<!--      <v-tab-->
-<!--        value="posts"-->
-<!--        :disabled="storesLoading"-->
-<!--      >-->
-<!--        Posts-->
-<!--      </v-tab>-->
+      <v-tab
+        value="posts"
+        :disabled="storesLoading"
+      >
+        Posts
+      </v-tab>
 <!--      <v-tab-->
 <!--        value="polls"-->
 <!--        :disabled="storesLoading"-->
@@ -490,7 +433,7 @@ async function deleteEvent() {
             v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
             variant="text"
             prepend-icon="mdi-pencil"
-            :to="{ name: 'events.edit', params: { uuid: route.params.uuid }}"
+            :to="{ name: 'events.edit', params: { uuid: eventUuid }}"
           >
             Bearbeiten
           </v-btn>
@@ -549,7 +492,7 @@ async function deleteEvent() {
             prepend-icon="mdi-chat-plus"
             color="primary"
             variant="tonal"
-            :to="{ name: 'events.posts.create', params: { uuid: event.uuid } }"
+            :to="{ name: 'events.posts.create', params: { uuid: eventUuid } }"
           >
             Update posten
           </v-btn>
@@ -562,8 +505,10 @@ async function deleteEvent() {
           multiple
         >
           <EventPost
-            v-for="(post, pIndex) in posts"
+            v-for="(post, pIndex) in event.posts"
+            :event-uuid="eventUuid"
             :post="post"
+            :admin-view="validateRole === EventRole.organizer"
             :key="pIndex"
           />
         </v-expansion-panels>
@@ -576,7 +521,7 @@ async function deleteEvent() {
             color="primary"
             variant="tonal"
             v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
-            :to="{ name: 'events.questionnaires.create', params: { uuid: event.uuid } }"
+            :to="{ name: 'events.questionnaires.create', params: { uuid: eventUuid } }"
           >
             Fragebogen erstellen
           </v-btn>
@@ -608,7 +553,7 @@ async function deleteEvent() {
         />
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
-            :to="{ name: 'events.invite', params: { uuid: event.uuid } }"
+            :to="{ name: 'events.invite', params: { uuid: eventUuid } }"
             prepend-icon="mdi-account-plus"
             color="primary"
             variant="tonal"
@@ -753,7 +698,7 @@ async function deleteEvent() {
         />
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
-            :to="{ name: 'events.organizer', params: { uuid: event.uuid } }"
+            :to="{ name: 'events.organizer', params: { uuid: eventUuid } }"
             prepend-icon="mdi-account-plus"
             color="primary"
             variant="tonal"

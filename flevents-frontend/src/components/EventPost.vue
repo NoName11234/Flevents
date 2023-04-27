@@ -4,16 +4,72 @@ import Comment from "@/components/Comment.vue";
 import AccountAvatar from "@/components/AccountAvatar.vue";
 import {useRoute} from "vue-router";
 import CommentForm from "@/components/CommentForm.vue";
-import security from "@/service/security";
+import {computed, ref} from "vue";
+import postApi from "@/api/postsApi";
+import {useAppStore} from "@/store/app";
+import {AxiosError} from "axios";
+import {storeToRefs} from "pinia";
+import {useAccountStore} from "@/store/account";
 
-const route = useRoute();
+const appStore = useAppStore();
+
+const loading = ref(false);
 
 const props = defineProps({
   post: {
     required: true,
     type: Object as () => Post,
+  },
+  eventUuid: {
+    required: true,
+    type: String,
+  },
+  adminView: {
+    required: false,
+    type: Boolean,
+    default: false,
   }
 });
+
+const canDeleteAndEdit = computed(() => {
+  if (props.adminView) return true;
+  const { currentAccount } = storeToRefs(useAccountStore());
+  if (currentAccount.value?.uuid === props.post?.author.uuid) {
+    return true;
+  }
+});
+
+async function deletePost() {
+  loading.value = true;
+  try {
+    await postApi.delete(props.post?.uuid, props.eventUuid);
+    appStore.addToast({
+      text: 'Post gelöscht.',
+      color: 'success',
+    });
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Post konnte nicht gelöscht werden: ${errorMessage}`,
+      color: 'error',
+    });
+  }
+  loading.value = false;
+}
+
+async function downloadAttachment(url: string) {
+  window.location.href = url;
+}
 
 </script>
 
@@ -31,7 +87,7 @@ const props = defineProps({
         </strong>
 
         <span class="text-grey">
-          {{ post.creationDate.toLocaleDateString("DE-de") }}
+          {{ new Date(post.creationDate).toLocaleDateString("DE-de") }}
         </span>
 
       </div>
@@ -66,6 +122,7 @@ const props = defineProps({
               <v-spacer />
 
               <v-btn
+                v-if="canDeleteAndEdit"
                 icon=""
                 size="small"
                 variant="text"
@@ -78,11 +135,12 @@ const props = defineProps({
                     <v-list-item
                       prepend-icon="mdi-pencil"
                       title="Bearbeiten"
-                      :to="{ name: 'events.posts.edit', params: { uuid: route.params.uuid, postUuid: 1 } }"
+                      :to="{ name: 'events.posts.edit', params: { uuid: props.eventUuid, postUuid: 1 } }"
                     />
                     <v-list-item
                       prepend-icon="mdi-delete"
                       title="Löschen"
+                      @click="deletePost"
                     />
                   </v-list>
                 </v-menu>
@@ -93,16 +151,17 @@ const props = defineProps({
             </span>
 
             <v-chip-group
+              v-if="post.attachments"
               column
             >
               <v-chip
                 v-for="(attachment, index) in post.attachments"
                 :key="index"
-                :text="attachment"
+                :text="attachment.filename"
                 prepend-icon="mdi-file"
                 variant="tonal"
                 link
-                @click=""
+                @click="downloadAttachment(attachment.url)"
               >
               </v-chip>
             </v-chip-group>
@@ -117,12 +176,15 @@ const props = defineProps({
           density="compact"
         >
           <CommentForm
-            :account="security.getAccount()"
+            :event-uuid="eventUuid"
+            :post-uuid="post.uuid"
           />
           <Comment
+            v-if="post.comments?.length > 0"
             v-for="(comment, cIndex) in post.comments"
             :key="cIndex"
             :comment="comment"
+            :admin-view="adminView"
           />
         </v-timeline>
 

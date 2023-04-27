@@ -5,21 +5,21 @@ import {useRoute, useRouter} from "vue-router";
 import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
+import postsApi from "@/api/postsApi";
+import {usePostStore} from "@/store/posts";
 
 const router = useRouter();
 const route = useRoute();
 
+const postsStore = usePostStore();
+
 const tooltip = ref("");
 const loading = ref(false);
 const eventUuid = route.params.uuid as string;
+const postUuid = route.params.postUuid as string;
 const inputFiles = ref([] as File[]);
 const files = ref([] as File[]);
-const post = ref({
-  title: '',
-  content: '',
-} as Post);
-
-const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
+const post = postsStore.getPostGetter(postUuid);
 
 async function removeAttachment(index: number) {
   files.value.splice(index, 1);
@@ -49,7 +49,7 @@ async function submit() {
   loading.value = true;
   try {
     await postApi.create(post.value, eventUuid, files.value);
-    await router.push(backRoute);
+    await router.push({ name: 'events.event', params: { uuid: eventUuid }});
   } catch (e) {
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_BAD_REQUEST) {
@@ -185,7 +185,7 @@ async function submit() {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="text"
-          :to="backRoute"
+          :to="{ name: 'events.event', params: { uuid: eventUuid } }"
         >
           Verwerfen
         </v-btn>

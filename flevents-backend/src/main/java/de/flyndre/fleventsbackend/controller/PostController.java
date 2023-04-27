@@ -97,17 +97,23 @@ public class PostController {
      * Allows access for tutor and above.
      * @param eventId the id of the event with the post to create the comment under
      * @param postId the id of the post in the event to create the comment under
-     * @param accountId the id of the account which is the author of the comment
      * @param comment the comment to be created
      * @param auth the Authentication generated out of a barer token.
      * @return ResponseEntity with the commented post and the http status code
      */
     @PostMapping("/{postId}/comments")
-    public ResponseEntity createComment(@PathVariable String eventId, @PathVariable String postId, @RequestParam String accountId,@RequestBody PostComment comment,Authentication auth){
-        if(!postControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
+    public ResponseEntity createComment(@PathVariable String eventId, @PathVariable String postId,@RequestBody PostComment comment,Authentication auth){
+        if(!postControllerService.getGranted(auth, eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity(mapper.map(postControllerService.createComment(postId,eventId,accountId,comment), PostInformation.class),HttpStatus.OK);
+        UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
+        return new ResponseEntity(
+                mapper.map(
+                        postControllerService.createComment(postId,eventId, authUser.getId(), comment),
+                        PostInformation.class
+                ),
+                HttpStatus.OK
+        );
     }
 
     /**
