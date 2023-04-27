@@ -25,5 +25,5 @@ public class QuestionModel {
     @ManyToOne
     private QuestionnaireModel questionnaire;
     @Nullable @OneToMany
-    private List<Choice> choices;
+    private List<ChoiceModel> choiceModels;
 }

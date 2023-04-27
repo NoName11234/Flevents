@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface QuestionnaireRepository extends JpaRepository<QuestionnaireModel,String> {
-    public List<QuestionnaireModel> findByEvent_Uuid(String eventUuid);
+    public List<QuestionnaireModel> findByEvent_Uuid(String uuid);
 }

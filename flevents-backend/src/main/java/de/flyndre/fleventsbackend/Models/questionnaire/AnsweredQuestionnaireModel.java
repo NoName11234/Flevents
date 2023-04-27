@@ -1,12 +1,15 @@
 package de.flyndre.fleventsbackend.Models.questionnaire;
 
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.lang.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -14,16 +17,15 @@ import org.springframework.lang.Nullable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AnsweredQuestion {
+public class AnsweredQuestionnaireModel {
     @Id
     @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
-    private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
-    @Nullable @OneToOne
-    private Choice choice;
-    @Nullable
-    private String answer;
     @ManyToOne
-    private AnsweredQuestionnaire answeredQuestionnaire;
+    private FleventsAccount user;
+    @OneToMany
+    private List<AnsweredQuestionModel> answers = new ArrayList<>();
+    @ManyToOne
+    private QuestionnaireModel questionnaireModel;
 }

@@ -1,7 +1,8 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
-import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaire;
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
 import de.flyndre.fleventsbackend.repositories.AnsweredQuestionnaireRepository;
 import de.flyndre.fleventsbackend.repositories.QuestionnaireRepository;
@@ -39,7 +40,11 @@ public class QuestionnaireService {
         return optional.get();
     }
 
-    public AnsweredQuestionnaire getAnswerFromUser(String questionnaireId, String userId){
+    public AnsweredQuestionnaireModel getAnswerFromUser(FleventsAccount user, QuestionnaireModel questionnaireModel){
+        return answeredQuestionnaireRepository.findByUserAndQuestionnaireModel(user, questionnaireModel);
+    }
 
+    public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
+        return questionnaireRepository.save(questionnaireModel);
     }
 }

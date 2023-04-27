@@ -12,7 +12,7 @@ import org.hibernate.annotations.GenericGenerator;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Choice {
+public class ChoiceModel {
     @Id
     @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
@@ -21,5 +21,5 @@ public class Choice {
     @ManyToOne
     private QuestionModel question;
     @OneToOne
-    private AnsweredQuestion answer;
+    private AnsweredQuestionModel answer;
 }

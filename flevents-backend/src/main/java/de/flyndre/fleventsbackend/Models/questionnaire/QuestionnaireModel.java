@@ -29,5 +29,5 @@ public class QuestionnaireModel {
     @OneToMany
     private List<QuestionModel> questions = new ArrayList<>();
     @OneToMany
-    private List<AnsweredQuestionnaire> answeredQuestionnaires = new ArrayList<>();
+    private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
 }
