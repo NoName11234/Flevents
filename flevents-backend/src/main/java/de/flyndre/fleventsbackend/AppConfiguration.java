@@ -101,12 +101,19 @@ public class AppConfiguration {
         };
         modelMapper.typeMap(Post.class, PostInformation.class).addMappings(mapper -> mapper.using(convertAttachmentToAttachmentPreview).map(Post::getAttachments,PostInformation::setAttachments));
 
-        Converter<List<Post>,List<PostInformation>> convertPostToPostinformation = new AbstractConverter<List<Post>, List<PostInformation>>() {
+        Converter<List<Post>,List<PostInformation>> convertPostToPostInformation = new AbstractConverter<List<Post>, List<PostInformation>>() {
             protected List<PostInformation> convert(List<Post> posts) {
                 return posts.stream().map(post -> modelMapper.map(post, PostInformation.class)).collect(Collectors.toList());
             }
         };
-        modelMapper.typeMap(Event.class,EventInformation.class).addMappings(mapper -> mapper.using(convertPostToPostinformation).map(Event::getPosts,EventInformation::setPosts));
+        modelMapper.typeMap(Event.class,EventInformation.class).addMappings(mapper -> mapper.using(convertPostToPostInformation).map(Event::getPosts,EventInformation::setPosts));
+
+        Converter<List<PostComment>,List<PostCommentInformation>> convertPostCommentToPostCommentInformation = new AbstractConverter<List<PostComment>, List<PostCommentInformation>>() {
+            protected List<PostCommentInformation> convert(List<PostComment> postComments) {
+                return postComments.stream().map(comment -> modelMapper.map(comment,PostCommentInformation.class)).collect(Collectors.toList());
+            }
+        };
+        modelMapper.typeMap(Post.class,PostInformation.class).addMappings(mapper -> mapper.using(convertPostCommentToPostCommentInformation).map(Post::getComments,PostInformation::setComments));
 
         return modelMapper;
     }

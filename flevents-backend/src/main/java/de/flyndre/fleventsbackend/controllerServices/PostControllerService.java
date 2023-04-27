@@ -111,7 +111,8 @@ public class PostControllerService {
         comment.setAuthor(accountService.getAccountById(accountId));
         comment.setCreationDate(LocalDateTime.now());
         comment.setUuid(null);
-        return postService.createComment(postService.getPostById(postId),comment);
+        comment = postService.createComment(comment);
+        return comment.getPost();
     }
     /**
      * Validate if the given Authentication matches to the given roles for the given event id.

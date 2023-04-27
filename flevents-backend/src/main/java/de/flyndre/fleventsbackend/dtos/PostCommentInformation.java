@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PostCommentInformation {
     private String uuid;
-    private FleventsAccount author;
-    private Post post;
+    private AccountPreview author;
+    private PostPreview post;
     private LocalDateTime creationDate;
     private String content;
 }

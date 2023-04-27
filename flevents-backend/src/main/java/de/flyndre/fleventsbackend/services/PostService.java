@@ -3,6 +3,7 @@ package de.flyndre.fleventsbackend.services;
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
+import de.flyndre.fleventsbackend.repositories.PostCommentRepository;
 import de.flyndre.fleventsbackend.repositories.PostRepository;
 
 import java.util.*;
@@ -18,9 +19,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostService {
     private final PostRepository postRepository;
+    private final PostCommentRepository commentRepository;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, PostCommentRepository commentRepository) {
         this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
     }
 
     /**
@@ -72,13 +75,11 @@ public class PostService {
 
     /**
      * Creates a comment in the specified post.
-     * @param post the post to create the comment in
      * @param comment the comment to be created
      * @return the post in which the comment was created
      */
-    public Post createComment(Post post,PostComment comment){
-        post.getComments().add(comment);
-        return postRepository.save(post);
+    public PostComment createComment(PostComment comment){
+        return commentRepository.save(comment);
     }
 
     public Post savePost(Post post) {

@@ -58,7 +58,7 @@ public class PostController {
      * @param eventId the id of the event to get the post from
      * @param postId the id of the post
      * @param auth the Authentication generated out of a barer token.
-     * @return ReponseEntity with the post and the http status code
+     * @return ResponseEntity with the post and the http status code
      */
     @GetMapping("/{postId}")
     public ResponseEntity getPost(@PathVariable String eventId, @PathVariable String postId,Authentication auth){
