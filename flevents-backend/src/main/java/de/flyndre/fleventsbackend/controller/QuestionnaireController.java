@@ -2,8 +2,6 @@ package de.flyndre.fleventsbackend.controller;
 
 import de.flyndre.fleventsbackend.Models.EventRole;
 import de.flyndre.fleventsbackend.controllerServices.QuestionnaireControllerService;
-import de.flyndre.fleventsbackend.dtos.questionaire.AnsweredQuestionnaire;
-import de.flyndre.fleventsbackend.dtos.questionaire.Questionnaire;
 import de.flyndre.fleventsbackend.dtos.questionnaire.AnsweredQuestionnaire;
 import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
 import org.modelmapper.ModelMapper;
