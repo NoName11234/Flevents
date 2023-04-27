@@ -46,9 +46,15 @@ class PostsApi {
    * @param uuid the uuid of the post
    * @param eventUuid the uuid of the post's event
    * @param post a post object containing only the attributes to be modified
+   * @param addedAttachments list of files to be appended to the post additionally to existing ones
    */
-  edit(uuid: string, eventUuid: string, post: Post) {
-    return api.post(`/events/${eventUuid}/posts/${uuid}`, post);
+  edit(uuid: string, eventUuid: string, post: Post, addedAttachments: File[]) {
+    let data = new FormData();
+    addedAttachments.forEach(v => data.append('attachments', v));
+    data.append('post', new Blob([JSON.stringify(post)], {type: 'application/json'}));
+    return api.post(`/events/${eventUuid}/posts/${uuid}`, data, {
+      headers: { "Content-Type": undefined }
+    });
   }
 
   /**

@@ -10,6 +10,7 @@ import {useAppStore} from "@/store/app";
 import {AxiosError} from "axios";
 import {storeToRefs} from "pinia";
 import {useAccountStore} from "@/store/account";
+import DatetimeService from "../service/datetimeService";
 
 const appStore = useAppStore();
 
@@ -87,7 +88,7 @@ async function downloadAttachment(url: string) {
         </strong>
 
         <span class="text-grey">
-          {{ new Date(post.creationDate).toLocaleDateString("DE-de") }}
+          {{ DatetimeService.getDateTime(new Date(post.creationDate)) }}
         </span>
 
       </div>
@@ -98,6 +99,8 @@ async function downloadAttachment(url: string) {
       <div class="d-flex flex-column my-1 mx-n3">
         <v-card
           elevation="0"
+          :loading="loading"
+          :disabled="loading"
           border
         >
 
@@ -135,7 +138,7 @@ async function downloadAttachment(url: string) {
                     <v-list-item
                       prepend-icon="mdi-pencil"
                       title="Bearbeiten"
-                      :to="{ name: 'events.posts.edit', params: { uuid: props.eventUuid, postUuid: 1 } }"
+                      :to="{ name: 'events.posts.edit', params: { uuid: props.eventUuid, postUuid: post.uuid } }"
                     />
                     <v-list-item
                       prepend-icon="mdi-delete"
@@ -184,6 +187,8 @@ async function downloadAttachment(url: string) {
             v-for="(comment, cIndex) in post.comments"
             :key="cIndex"
             :comment="comment"
+            :eventUuid="eventUuid"
+            :postUuid="post.uuid"
             :admin-view="adminView"
           />
         </v-timeline>

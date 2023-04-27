@@ -1,29 +1,41 @@
 <script setup lang="ts">
 import Heading from "@/components/Heading.vue";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
-import postsApi from "@/api/postsApi";
-import {usePostStore} from "@/store/posts";
+import {useEventStore} from "@/store/events";
 
 const router = useRouter();
 const route = useRoute();
 
-const postsStore = usePostStore();
+const eventUuid = route.params.uuid as string;
+const postUuid = route.params.postUuid as string;
+
+const eventStore = useEventStore();
+const event = eventStore.getEventGetter(eventUuid);
+
+const post = computed({
+  get: () => event.value.posts.find(p => p.uuid === postUuid) as Post,
+  set: v => event.value.posts[event.value.posts!.findIndex(p => p.uuid)] = v as Post,
+});
 
 const tooltip = ref("");
 const loading = ref(false);
-const eventUuid = route.params.uuid as string;
-const postUuid = route.params.postUuid as string;
 const inputFiles = ref([] as File[]);
 const files = ref([] as File[]);
-const post = postsStore.getPostGetter(postUuid);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
 
 async function removeAttachment(index: number) {
   files.value.splice(index, 1);
 }
+
+async function removeExistingAttachment(index: number) {
+  post.value.attachments?.splice(index, 1);
+}
+
 
 async function addAttachment() {
   tooltip.value = '';
@@ -48,8 +60,8 @@ async function submit() {
   }
   loading.value = true;
   try {
-    await postApi.create(post.value, eventUuid, files.value);
-    await router.push({ name: 'events.event', params: { uuid: eventUuid }});
+    await postApi.edit(postUuid, eventUuid, post.value, files.value);
+    await router.push(backRoute);
   } catch (e) {
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_BAD_REQUEST) {
@@ -68,7 +80,7 @@ async function submit() {
 </script>
 
 <template>
-  <Heading text="Post erstellen" />
+  <Heading text="Post bearbeiten" />
 
   <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
@@ -111,9 +123,47 @@ async function submit() {
 
       </v-container>
 
-      <v-divider/>
+      <template v-if="post.attachments?.length > 0">
+        <v-divider />
+        <v-container class="d-flex flex-column gap-3">
+          <small class="text-grey">Existierende Anhänge</small>
+          <div
+            v-for="(attachment, aIndex) in post.attachments"
+            :key="aIndex"
+          >
+            <v-card
+              border
+              elevation="0"
+            >
+              <div
+                class="d-flex flex-row align-center"
+              >
+                <v-avatar
+                  icon="mdi-file"
+                />
+                <span
+                  class="flex-grow-1"
+                >
+                    {{ attachment.fileName }}
+                  </span>
+                <v-btn
+                  icon="mdi-delete"
+                  size="small"
+                  variant="text"
+                  color="error"
+                  @click="removeExistingAttachment(aIndex)"
+                />
+              </div>
+            </v-card>
+          </div>
+        </v-container>
+      </template>
+
+      <v-divider />
 
       <v-container class="d-flex flex-column gap-3">
+
+        <small class="text-grey">Neue Anhänge</small>
 
         <div
           v-for="(attachment, aIndex) in files"
@@ -185,7 +235,7 @@ async function submit() {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="text"
-          :to="{ name: 'events.event', params: { uuid: eventUuid } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>
