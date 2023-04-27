@@ -19,12 +19,8 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class PostInformation {
-    private String uuid;
-    private AccountPreview author;
-    private String title;
-    private String content;
-    private LocalDateTime creationDate;
+public class PostInformation extends PostPreview{
+
     private EventPreview event;
     private List<PostComment> comments;
     private List<AttachmentPreview> attachments;
