@@ -2,7 +2,6 @@
 import {Post} from "@/models/post";
 import Comment from "@/components/Comment.vue";
 import AccountAvatar from "@/components/AccountAvatar.vue";
-import {useRoute} from "vue-router";
 import CommentForm from "@/components/CommentForm.vue";
 import {computed, ref} from "vue";
 import postApi from "@/api/postsApi";
