@@ -90,7 +90,9 @@ public class PostController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         // TODO: store attachments
-        attachments.forEach(a -> System.out.println(a.getOriginalFilename()));
+        if (attachments != null) {
+            attachments.forEach(a -> System.out.println(a.getOriginalFilename()));
+        }
         UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
         return new ResponseEntity(mapper.map(postControllerService.createPost(eventId,authUser.getId(),post), PostInformation.class),HttpStatus.OK);
     }
