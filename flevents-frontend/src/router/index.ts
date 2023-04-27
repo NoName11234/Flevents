@@ -2,8 +2,6 @@
 import {createRouter, createWebHistory, RouteLocationRaw} from 'vue-router'
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
-import security, {setAccount} from "@/service/security";
-import {Account} from "@/models/account";
 import {logout, tryRestoreSession} from "@/service/authService";
 
 const routes = [
@@ -191,14 +189,6 @@ const routes = [
       },
     ],
   },
-
-  // TODO: REMOVE!!
-  {
-    path: '/example-request',
-    name: 'example-request',
-    component: () => import('@/views/[remove]ExampleRequest.vue'),
-  },
-
   {
     path: '/:pathMatch(.*)*',
     redirect: '/errors/404',
