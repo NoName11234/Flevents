@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import accountApi from "@/api/accountApi";
+import accountApi from "@/api/accountsApi";
 import AccountInfo from "@/components/AccountInfo.vue";
 import Heading from "@/components/Heading.vue";
 import {useAccountStore} from "@/store/account";

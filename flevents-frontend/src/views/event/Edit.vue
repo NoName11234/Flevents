@@ -11,11 +11,14 @@ import Heading from "@/components/Heading.vue";
 import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
 import {useEventStore} from "@/store/events";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 const router = useRouter()
+const route = useRoute();
+
+const eventUuid = route.params.uuid as string;
+
 const selectedOrga = ref();
 const files = ref([new Array<any>()]);
-const route = useRoute();
 const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
@@ -30,6 +33,8 @@ const { managedOrganizations: organizations } = storeToRefs(organizationStore);
 
 const formLoading = ref(false);
 const loading = computed(() => formLoading.value||storeLoading.value);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
 
 const imageFile: Ref<Array<File>> = ref([]);
 // image

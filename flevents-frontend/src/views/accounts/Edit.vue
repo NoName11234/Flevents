@@ -7,7 +7,7 @@ import {useRouter} from "vue-router";
 import security from "@/service/security";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import accountApi from "@/api/accountApi";
+import accountApi from "@/api/accountsApi";
 import api from "@/api/api";
 import {VALIDATION} from "@/constants";
 
