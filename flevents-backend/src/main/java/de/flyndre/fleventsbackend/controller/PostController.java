@@ -1,13 +1,11 @@
 package de.flyndre.fleventsbackend.controller;
 
-import de.flyndre.fleventsbackend.Models.Event;
-import de.flyndre.fleventsbackend.Models.EventRole;
-import de.flyndre.fleventsbackend.Models.Post;
-import de.flyndre.fleventsbackend.Models.PostComment;
+import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.controllerServices.PostControllerService;
 import de.flyndre.fleventsbackend.dtos.PostInformation;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -76,6 +74,7 @@ public class PostController {
      * @param eventId the id of the event to create the post in
      * @param post the post to be created
      * @param auth the Authentication generated out of a barer token.
+     * @param attachments some files to add as an attachment.
      * @return ResponseEntity with the created post and the http status code
      */
     @PostMapping
@@ -88,10 +87,8 @@ public class PostController {
         if(!postControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        // TODO: store attachments
-        attachments.forEach(a -> System.out.println(a.getOriginalFilename()));
         UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
-        return new ResponseEntity(mapper.map(postControllerService.createPost(eventId,authUser.getId(),post), PostInformation.class),HttpStatus.OK);
+        return new ResponseEntity(mapper.map(postControllerService.createPost(eventId,authUser.getId(),post,attachments), PostInformation.class),HttpStatus.OK);
     }
 
     /**
@@ -110,5 +107,25 @@ public class PostController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity(mapper.map(postControllerService.createComment(postId,eventId,accountId,comment), PostInformation.class),HttpStatus.OK);
+    }
+
+    /**
+     * Returns the file that is represented by the attachment id.
+     * @param eventId id of the event of the post to which the attachment is binded
+     * @param attachmentId the id of the attachment
+     * @param auth the Authentication generated out of a barer token.
+     * @return the raw file or an error if something went wrong.
+     */
+    @GetMapping("/attachment/{attachmentId}")
+    public ResponseEntity getAttachment(@PathVariable String eventId,@PathVariable String attachmentId,Authentication auth){
+        if(!postControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
+        try{
+            Attachment attachment = postControllerService.getAttachment(attachmentId);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+attachment.getFilename()+"\"").body(attachment.getData());
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -80,4 +80,8 @@ public class PostService {
         post.getComments().add(comment);
         return postRepository.save(post);
     }
+
+    public Post savePost(Post post) {
+        return postRepository.save(post);
+    }
 }

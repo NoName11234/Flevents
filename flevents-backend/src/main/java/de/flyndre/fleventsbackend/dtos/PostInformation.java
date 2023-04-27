@@ -27,4 +27,5 @@ public class PostInformation {
     private LocalDateTime creationDate;
     private EventPreview event;
     private List<PostComment> comments;
+    private List<AttachmentPreview> attachments;
 }
