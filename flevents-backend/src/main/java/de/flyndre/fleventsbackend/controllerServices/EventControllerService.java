@@ -179,9 +179,11 @@ public class EventControllerService {
      * @param eventId the id of the event to add the anonymous account to
      * @param email the email of the anonymous account to be added
      */
-    public void addAnonymousAccountToEvent(String eventId, String email){
+    public void addAnonymousAccountToEvent(String eventId, String email, String token) throws  InvalidAttributesException{
         FleventsAccount account = accountService.createAnonymousAccount(email);
+        InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
         eventService.addAccountToEvent(getEventById(eventId),account,EventRole.guest);
+        invitationTokenService.deleteToken(invitationToken);
     }
 
     /**

@@ -246,15 +246,20 @@ private final ModelMapper mapper;
     * @param eventId the id of the event to add the anonymous account to
     * @param email the E-Mail of the anonymous account to be added
     * @param auth the Authentication generated out of a barer token.
+    * @param token the token in the invitation link to verify the invitation
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/add-account/add-anonymous")
-   public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody String email,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+   public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody String email,Authentication auth, @RequestParam(required = false) String token){
+      try{
+         if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.guest))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+         }
+         eventControllerService.addAnonymousAccountToEvent(eventId, email, token);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
-      eventControllerService.addAnonymousAccountToEvent(eventId, email);
-      return new ResponseEntity(HttpStatus.OK);
    }
 
    /**
