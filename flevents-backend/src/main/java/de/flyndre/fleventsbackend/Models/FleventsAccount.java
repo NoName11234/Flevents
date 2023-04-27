@@ -67,9 +67,6 @@ public class FleventsAccount {
         if(account.getIsActive()!=null){
             this.isActive=account.getIsActive();
         }
-        if(account.getIsPlatformAdmin()!=null){
-            this.isPlatformAdmin=account.getIsPlatformAdmin();
-        }
     }
 
 
