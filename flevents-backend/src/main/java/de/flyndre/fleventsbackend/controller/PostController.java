@@ -10,6 +10,7 @@ import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,14 +83,16 @@ public class PostController {
     public ResponseEntity createPost(
             @PathVariable String eventId,
             @RequestPart Post post,
-            @RequestPart List<MultipartFile> attachments,
+            @Nullable @RequestPart List<MultipartFile> attachments,
             Authentication auth
     ){
         if(!postControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         // TODO: store attachments
-        attachments.forEach(a -> System.out.println(a.getOriginalFilename()));
+        if (attachments != null) {
+            attachments.forEach(a -> System.out.println(a.getOriginalFilename()));
+        }
         UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
         return new ResponseEntity(mapper.map(postControllerService.createPost(eventId,authUser.getId(),post), PostInformation.class),HttpStatus.OK);
     }
