@@ -244,16 +244,17 @@ private final ModelMapper mapper;
     * Adds an anonymous account to an event.
     * Allows access for tutor and above of the specified event.
     * @param eventId the id of the event to add the anonymous account to
-    * @param account the anonymous account to be added
+    * @param email the E-Mail of the anonymous account to be added
     * @param auth the Authentication generated out of a barer token.
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/add-account/add-anonymous")
-   public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody FleventsAccount account,Authentication auth){
+   public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody String email,Authentication auth){
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      eventControllerService.addAnonymousAccountToEvent(eventId, account);
+      eventControllerService.addAnonymousAccountToEvent(eventId, email);
+      auth.setAuthenticated(false);
       return new ResponseEntity(HttpStatus.OK);
    }
 
