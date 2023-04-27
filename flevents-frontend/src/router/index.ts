@@ -133,7 +133,7 @@ const routes = [
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "join" */ '@/views/event/EventInvite.vue')
+        component: () => import(/* webpackChunkName: "join" */ '@/views/event/AcceptInvitation.vue')
       }
     ]
   },
@@ -148,7 +148,7 @@ const routes = [
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "join" */ '@/views/organizations/OrganizationInviteLink.vue'),
+        component: () => import(/* webpackChunkName: "join" */ '@/views/organizations/AcceptInvitation.vue'),
       },
     ]
   },
