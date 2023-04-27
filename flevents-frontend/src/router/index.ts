@@ -185,13 +185,19 @@ const routes = [
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "events" */ '@/views/error/404.vue')
+        component: () => import(/* webpackChunkName: "errors" */ '@/views/error/404.vue')
       },
     ],
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/errors/404',
+    component: () => import('@/layouts/default/BaseLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import(/* webpackChunkName: "errors" */ '@/views/error/404.vue')
+      },
+    ],
   },
 ]
 
