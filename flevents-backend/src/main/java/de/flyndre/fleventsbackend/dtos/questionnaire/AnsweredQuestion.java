@@ -11,7 +11,7 @@ public class AnsweredQuestion {
     private String uuid;
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
     @Nullable
-    private ChoiceModel choiceModel;
+    private Choice choice;
     @Nullable
     private String answer;
 }

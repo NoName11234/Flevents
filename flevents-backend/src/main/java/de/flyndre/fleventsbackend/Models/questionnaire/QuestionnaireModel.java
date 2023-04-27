@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.Models.questionnaire;
 
 import de.flyndre.fleventsbackend.Models.Event;
+import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +31,16 @@ public class QuestionnaireModel {
     private List<QuestionModel> questions = new ArrayList<>();
     @OneToMany
     private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
+
+    public void merge(QuestionnaireModel questionnaireModel){
+        if(questionnaireModel.title != null){
+            this.title = questionnaireModel.getTitle();
+        }
+        if(questionnaireModel.creationDate != null){
+            this.creationDate = questionnaireModel.getCreationDate();
+        }
+        if(questionnaireModel.closingDate != null){
+            this.closingDate = questionnaireModel.getClosingDate();
+        }
+    }
 }

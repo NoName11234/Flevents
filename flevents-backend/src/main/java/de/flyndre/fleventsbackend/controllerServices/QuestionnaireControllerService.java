@@ -1,13 +1,9 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.Role;
-import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
-import de.flyndre.fleventsbackend.Models.questionnaire.ChoiceModel;
-import de.flyndre.fleventsbackend.Models.questionnaire.QuestionModel;
-import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
-import de.flyndre.fleventsbackend.dtos.questionnaire.Choice;
-import de.flyndre.fleventsbackend.dtos.questionnaire.Question;
-import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
+import de.flyndre.fleventsbackend.Models.questionnaire.*;
+import de.flyndre.fleventsbackend.dtos.questionnaire.*;
 import de.flyndre.fleventsbackend.services.AuthService;
 import de.flyndre.fleventsbackend.services.EventService;
 import de.flyndre.fleventsbackend.services.FleventsAccountService;
@@ -68,8 +64,32 @@ public class QuestionnaireControllerService {
     }
 
     public QuestionnaireModel editQuestionnaire(String questionnaireId, Questionnaire questionnaire){
-        QuestionnaireModel qm = questionnaireService.getQuestionnaire(questionnaireId);
         QuestionnaireModel newQm = convertQuestionnaireToQuestionnaireModel(questionnaire);
+        return questionnaireService.editQuestionnaire(questionnaireId,newQm);
+    }
+
+    public void deleteQuestionnaire(String questionnaireId){
+        QuestionnaireModel qm = questionnaireService.getQuestionnaire(questionnaireId);
+        eventService.deleteQuestionnaireFromEvent(questionnaireId, qm.getEvent().getUuid());
+        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = qm.getAnsweredQuestionnaireModels();
+
+        for(int i=0;i<answeredQuestionnaireModels.size();i++){
+            deleteAnsweredQuestionnaire(answeredQuestionnaireModels.get(i).getUuid());
+        }
+
+        questionnaireService.deleteQuestionnaire(questionnaireId);
+    }
+
+    public void deleteAnsweredQuestionnaire(String answeredQuestionnaireId){
+        AnsweredQuestionnaireModel aqm = questionnaireService.getAnsweredQuestionnaireById(answeredQuestionnaireId);
+        fleventsAccountService.deleteAnsweredQuestionnaireFromAccount(answeredQuestionnaireId, aqm.getUser().getUuid());
+        questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaireId);
+    }
+
+    public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){
+        answeredQuestionnaire.setQuestionnaireId(questionnaireId);
+        AnsweredQuestionnaireModel newAqm = convertAnsweredQuestionnaireToAnsweredQuestionnaireModel(answeredQuestionnaire);
+        return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
     }
 
     private QuestionnaireModel convertQuestionnaireToQuestionnaireModel(Questionnaire questionnaire){
@@ -77,7 +97,7 @@ public class QuestionnaireControllerService {
         questionnaireModel.setUuid(questionnaire.getUuid());
         questionnaireModel.setAnsweredQuestionnaireModels(null);
         questionnaireModel.setCreationDate(questionnaire.getCreationDate());
-        questionnaireModel.setEvent(null);
+        questionnaireModel.setEvent(eventService.getEventById(questionnaire.getEventId()));
         questionnaireModel.setTitle(questionnaire.getTitle());
         questionnaireModel.setClosingDate(questionnaire.getClosingDate());
 
@@ -89,7 +109,7 @@ public class QuestionnaireControllerService {
             List<ChoiceModel> choiceModels = new ArrayList<>();
             for(int a=0; a<q.getChoices().size();a++){
                 Choice dto = q.getChoices().get(a);
-                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice(),qm,null);
+                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice());
                 choiceModels.add(m);
             }
             qm.setUuid(q.getUuid());
@@ -103,5 +123,22 @@ public class QuestionnaireControllerService {
         return questionnaireModel;
     }
 
-    private QuestionnaireModel
+    private AnsweredQuestionnaireModel convertAnsweredQuestionnaireToAnsweredQuestionnaireModel(AnsweredQuestionnaire answeredQuestionnaire){
+        AnsweredQuestionnaireModel answeredQuestionnaireModel = new AnsweredQuestionnaireModel();
+        answeredQuestionnaireModel.setUuid(answeredQuestionnaire.getUuid());
+        answeredQuestionnaireModel.setUser(fleventsAccountService.getAccountById(answeredQuestionnaire.getUserId()));
+        answeredQuestionnaireModel.setQuestionnaireModel(getQuestionnaire(answeredQuestionnaire.getQuestionnaireId()));
+
+        List<AnsweredQuestionModel> answerModels = new ArrayList<>();
+
+        for(int i=0;i<answeredQuestionnaire.getAnswers().size();i++){
+            AnsweredQuestion aq = answeredQuestionnaire.getAnswers().get(i);
+            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
+            AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(),cm, aq.getAnswer(),answeredQuestionnaireModel);
+            answerModels.add(aqm);
+        }
+
+        answeredQuestionnaireModel.setAnswers(answerModels);
+        return answeredQuestionnaireModel;
+    }
 }

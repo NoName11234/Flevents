@@ -2,6 +2,7 @@ package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EmailDetails;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
@@ -169,6 +170,21 @@ public class FleventsAccountService {
      */
     public void deleteAccount(FleventsAccount account){
         account.setIsActive(false);
+        fleventsAccountRepository.save(account);
+    }
+
+    public void deleteAnsweredQuestionnaireFromAccount(String answeredQuestionnaireId, String accountId){
+        FleventsAccount account = getAccountById(accountId);
+        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = account.getAnsweredQuestionnaireModels();
+
+        for(int i = 0;i<answeredQuestionnaireModels.size(); i++){
+            if(answeredQuestionnaireModels.get(i).getUuid().equals(answeredQuestionnaireId)){
+                answeredQuestionnaireModels.remove(i);
+                break;
+            }
+        }
+
+        account.setAnsweredQuestionnaireModels(answeredQuestionnaireModels);
         fleventsAccountRepository.save(account);
     }
 }

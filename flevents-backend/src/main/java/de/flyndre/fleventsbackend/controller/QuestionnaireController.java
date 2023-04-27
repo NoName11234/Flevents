@@ -58,31 +58,21 @@ public class QuestionnaireController {
     }
     @PostMapping("/{questionnaireId}")
     public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
-
-        return new ResponseEntity<>(questionnaire, HttpStatus.OK);
+        //TODO: hier fehlt auth
+        return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{questionnaireId}")
     public ResponseEntity deleteQuestionnaire(@PathVariable String questionnaireId, Authentication auth) {
-        Optional<Questionnaire> questionnaire = questionnaireList.stream()
-                .filter((q) -> q.getUuid().equals(questionnaireId))
-                .findFirst();
-        if (questionnaire.isEmpty()) {
-            return new ResponseEntity<>("No matching questionnaireId.", HttpStatus.NOT_FOUND);
-        }
-        questionnaireList.remove(questionnaire.get());
+        //TODO: hier fehlt auth
+        questionnaireControllerService.deleteQuestionnaire(questionnaireId);
         return new ResponseEntity<>("Deleted.", HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/{questionnaireId}/answers")
     public ResponseEntity addAnswer(@PathVariable String questionnaireId,@RequestBody AnsweredQuestionnaire answeredQuestionnaire, Authentication auth){
-        for(AnsweredQuestionnaire questionnaire:answeredQuestionnaires){
-            if(questionnaire.getQuestionnaire().equals(questionnaireId)&&questionnaire.getUserId().equals(answeredQuestionnaire.getUserId())){
-                return new ResponseEntity<>("Already answered",HttpStatus.BAD_REQUEST);
-            }
-        }
-        answeredQuestionnaire.setQuestionnaire(questionnaireId);
-        answeredQuestionnaires.add(answeredQuestionnaire);
+        //TODO: hier fehlt auth
+        questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

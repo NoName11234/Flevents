@@ -4,6 +4,7 @@ import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
+import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
 import de.flyndre.fleventsbackend.repositories.AnsweredQuestionnaireRepository;
 import de.flyndre.fleventsbackend.repositories.QuestionnaireRepository;
 import org.springframework.stereotype.Service;
@@ -46,5 +47,27 @@ public class QuestionnaireService {
 
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
         return questionnaireRepository.save(questionnaireModel);
+    }
+
+    public AnsweredQuestionnaireModel saveNewAnsweredQuestionnaireModel(AnsweredQuestionnaireModel answeredQuestionnaireModel){
+        return answeredQuestionnaireRepository.save(answeredQuestionnaireModel);
+    }
+
+    public QuestionnaireModel editQuestionnaire(String questionnaireId, QuestionnaireModel questionnaireModel){
+        QuestionnaireModel oldQuestionnaireModel = getQuestionnaire(questionnaireId);
+        oldQuestionnaireModel.merge(questionnaireModel);
+        return questionnaireRepository.save(oldQuestionnaireModel);
+    }
+
+    public AnsweredQuestionnaireModel getAnsweredQuestionnaireById(String answeredQuestionnaireId){
+        return answeredQuestionnaireRepository.findById(answeredQuestionnaireId).get();
+    }
+
+    public void deleteAnsweredQuestionnaire(String answeredQuestionnaireId){
+        answeredQuestionnaireRepository.delete(getAnsweredQuestionnaireById(answeredQuestionnaireId));
+    }
+
+    public void deleteQuestionnaire(String questionnaireId){
+        questionnaireRepository.delete(getQuestionnaire(questionnaireId));
     }
 }
