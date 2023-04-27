@@ -1,15 +1,20 @@
 package de.flyndre.fleventsbackend.dtos;
 
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.PostComment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * This Class is the Data Transfer Object for the Information of Posts.
+ * It provides getter as well as setter.
+ * @implNote This DTO should only be returned in the Controller
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -19,7 +24,7 @@ public class PostInformation {
     private AccountPreview author;
     private String title;
     private String content;
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
     private EventPreview event;
     private List<PostComment> comments;
 }

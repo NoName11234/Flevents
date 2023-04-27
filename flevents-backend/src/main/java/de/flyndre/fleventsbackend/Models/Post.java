@@ -10,8 +10,15 @@ import org.hibernate.SessionEventListener;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
-
+/**
+ * This Class is the Modelclass for Posts.
+ * It provides getter as well as setter and a Merge-Method.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter
@@ -32,7 +39,7 @@ public class Post {
     @ManyToOne
     private Event event;
 
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
     @OneToMany(mappedBy = "post")
     private List<PostComment> comments = new ArrayList<>();
 

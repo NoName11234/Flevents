@@ -8,7 +8,14 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Timestamp;
-
+import java.time.LocalDateTime;
+/**
+ * This Class is the Modelclass for PostComments.
+ * It provides getter as well as setter.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter
@@ -23,7 +30,7 @@ public class PostComment {
     private FleventsAccount author;
     @ManyToOne
     private Post post;
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
     @Lob
     private String content;
 

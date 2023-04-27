@@ -8,7 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-
+/**
+ * This Class is the Modelclass for InvitationToken wich is used for the Invite-Mail.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter
@@ -21,10 +26,9 @@ public class InvitationToken {
     private String id;
     private String role;
 
-    public InvitationToken(String role){
-        this.role=role;
-    }
-    public String getToken(){
-        return id+role;
+    private String invitedToId;
+    @Override
+    public String toString(){
+        return id;
     }
 }

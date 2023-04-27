@@ -1,75 +1,70 @@
 <script setup lang="ts">
 
-import {onBeforeMount, ref} from "vue";
+import {onBeforeMount, Ref, ref} from "vue";
 import {useRoute, useRouter} from 'vue-router';
 import axios from "axios"
 import Heading from "@/components/Heading.vue";
 import {Organization} from "@/models/organization";
 import {OrganizationRole} from "@/models/organizationRole";
+import {useOrganizationStore} from "@/store/organizations";
+import {useAppStore} from "@/store/app";
+import organizationsApi from "@/api/organizationsApi";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
+
+const uuid = route.params.uuid as string;
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
-const role = ref(OrganizationRole.member);
-// TODO: obtain from database
-const organization = ref({
-  uuid: route.params.uuid ?? '0',
-  name: 'Team Flyndre',
-} as Organization);
+const role = ref(OrganizationRole.member) as Ref<OrganizationRole>;
 
+const appStore = useAppStore();
+
+const organizationStore = useOrganizationStore();
+const organization = organizationStore.getOrganizationGetter(uuid);
+
+const selectableRoles = [
+  OrganizationRole.admin,
+  OrganizationRole.organizer,
+  OrganizationRole.member,
+];
 
 function remove(item: any){
   chips.value.splice(chips.value.indexOf(item), 1)
 }
 
-// submit
-async function submit_old() {
-  try {
-    console.log(chips.value);
-
-    const tos = [chips.value.pop()];
-
-    while(chips.value.length != 0){
-      tos.push(chips.value.pop());
-    }
-
-    const mailinfo = { to: tos, cc: [], bcc: [], subject: `Anmeldung zu ${organization.value.name} - TEST`, msgBody: `Sie wurden zu ${organization.value.name} angemeldet.`, attachment: ""};
-    console.log(mailinfo);
-    await axios.post("http://localhost:8082/api/mail/sendMail", mailinfo);
-    await router.push( {name: 'organizations.organization', params: { uuid: organization.value.uuid }} );
-  } catch (e) {
-    tooltip.value = "Die Teilnehmer konnten nicht eingeladen werden.";
-  }
-}
 async function submit() {
-  try {
-    console.log(chips.value);
-    for (let i in chips.value) {
-      await axios.post(`http://localhost:8082/api/organizations/${address.value}/invite`, {}, {
-        params: {
-          email: chips.value[i],
-          role: role.value
-        }
-      });
+  let failedInvitations = [];
+  let successfulInvitations = [];
+  for (let i in chips.value) {
+    let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
     }
-    await router.push( {name: 'organizations.organization', params: { uuid: organization.value.uuid }} );
-  } catch (e) {
-    tooltip.value = "Einer oder mehrere Mitgleider konnten nicht eingeladen werden.";
-    console.error("Invitation failed", e);
+    try {
+      const response = await organizationsApi.invite(uuid, email, role.value);
+      successfulInvitations.push(email);
+    } catch (e) {
+      console.log(`Invitation of ${email} failed.`);
+      failedInvitations.push(email);
+    }
   }
+  if (failedInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
+      color: 'error',
+    });
+  }
+  if (successfulInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen war erfolgreich: ${successfulInvitations.join(', ')}`,
+      color: 'success',
+    });
+  }
+  await router.push( { name: 'organizations.organization', params: { uuid: uuid } } );
 }
-
-onBeforeMount(async () => {
-  address.value = route.params.uuid as string;
-  try {
-    const response = await axios.get(`http://localhost:8082/api/organizations/${address.value}`);
-    console.log(response);
-    response.status == 200 ? organization.value = response.data : organization.value = {} as Organization;
-  } catch (e) {
-    console.error("Failed to load organization data", e);
-  }
-})
 </script>
 
 <template>
@@ -105,19 +100,16 @@ onBeforeMount(async () => {
         <v-select
           label="Zugewiesene Rolle"
           hide-details="auto"
-          :items="[
-            OrganizationRole.admin,
-            OrganizationRole.organizer,
-            OrganizationRole.member,
-          ]"
+          :items="selectableRoles"
           v-model="role"
+          menu-icon="mdi-chevron-down"
         />
       </v-container>
       <v-divider />
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="flat"
-          :to="{ name: 'organizations.organization', params: { uuid: organization.uuid } }"
+          :to="{ name: 'organizations.organization', params: { uuid: uuid } }"
         >
           Verwerfen
         </v-btn>

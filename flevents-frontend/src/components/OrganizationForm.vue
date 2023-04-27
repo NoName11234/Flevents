@@ -2,7 +2,9 @@
 import {onMounted, Ref, ref} from "vue";
 import {Organization} from "@/models/organization";
 import {RouteLocationRaw, useRoute, useRouter} from "vue-router";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
+import {useOrganizationStore} from "@/store/organizations";
+import organizationsApi from "@/api/organizationsApi";
 const props = defineProps({
   backRoute: {
     required: true,
@@ -14,22 +16,14 @@ const props = defineProps({
   },
 });
 
-const tooltip = ref("");
 const route = useRoute();
-const imageFile: Ref<Array<File>> = ref([]);
 const router = useRouter();
-const organization = ref({
-  uuid: '0',
-} as Organization);
+const tooltip = ref("");
+const imageFile: Ref<Array<File>> = ref([]);
+const loading = ref(false);
 
-onMounted(async () => {
-  try {
-    let response = await axios.get(`http://localhost:8082/api/organizations/${route.params?.uuid}`);
-    organization.value = response.data;
-  } catch (e) {
-    console.error("Failed to load organization.");
-  }
-})
+const organizationStore = useOrganizationStore()
+const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
 
 const initialIcon = organization.value.icon;
 function previewImage(e: any) {
@@ -49,22 +43,33 @@ function getBase64(file : any) {
 }
 async function submit() {
   try {
-    console.log(imageFile.value);
-    if(imageFile.value.length != 0) {
+    loading.value = true;
+    if (imageFile.value.length != 0) {
       const file = imageFile.value[0]
       organization.value.icon = await getBase64(file) as string;
     }
-    await axios.post(`http://localhost:8082/api/organizations/${organization.value.uuid}`, organization.value);
+    const response = organizationsApi.edit(route.params.uuid as string, organization.value);
     await router.push(props.submitRoute);
   } catch (e) {
-    tooltip.value = "Speichern fehlgeschlagen.";
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
     console.error(e);
+  } finally {
+    loading.value = false;
   }
 }
 
 </script>
 <template>
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form
       validate-on="submit"
       @submit.prevent="submit()"

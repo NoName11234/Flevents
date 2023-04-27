@@ -1,6 +1,4 @@
 import {Account} from "@/models/account";
-import {FleventsEventPreview} from "@/models/fleventsEventPreview";
-import {Comment} from "@/models/comment";
 
 export interface Post {
 

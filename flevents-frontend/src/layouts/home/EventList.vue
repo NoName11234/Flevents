@@ -1,13 +1,25 @@
 <script setup lang="ts">
 import {FleventsEvent} from "@/models/fleventsEvent";
-import {onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 import EventListFilters from "@/components/EventListFilters.vue";
 import EventCard from "@/components/EventCard.vue";
+import ContentLoadingIndicator from "@/components/ContentLoadingIndicator.vue";
+import CardBanner from "@/components/CardBanner.vue";
 
 const props = defineProps({
   events: {
     required: true,
     type: Array<FleventsEvent>
+  },
+  loading: {
+    required: true,
+    type: Boolean,
+    default: false,
+  },
+  error: {
+    required: true,
+    type: Boolean,
+    default: false,
   },
   showManageTools: {
     required: false,
@@ -16,22 +28,39 @@ const props = defineProps({
   }
 });
 
-const eventList = ref(Array.from(props.events));
+//TODO: Filtermöglichkeiten (Organisation, Suche, Datumsauswahl, Sortierung), Liste aller verfügbaren Events (die ersten 20 oder so)
 
-function updateList(newList: Array<FleventsEvent>) {
-  eventList.value = newList;
+const term = ref('');
+const eventList = computed(() => {
+  return props.events?.filter((event) => (
+      event.description?.toLowerCase().includes(term.value)
+      || event.name?.toLowerCase().includes(term.value)
+      || event.location?.toLowerCase().includes(term.value)
+      || event.organizationPreview?.name.toLowerCase().includes(term.value)
+      || event.organizationPreview?.description.toLowerCase().includes(term.value)
+    )
+  ).sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
+});
+
+function updateList(newTerm: string) {
+  term.value = newTerm;
 }
-onMounted(() => {
-  console.log(eventList.value);
-})
 </script>
 
 <template>
   <EventListFilters
-    :event-list="eventList"
     @update="updateList"
   />
-  <div class="d-flex flex-column gap">
+  <div
+    class="d-flex flex-column gap"
+  >
+    <ContentLoadingIndicator
+      :loading="loading"
+    />
+    <CardBanner
+      v-show="!loading && error"
+      message="Error: Es konnten keine Events abgerufen werden."
+    />
     <EventCard
       v-for="(e, i) in eventList"
       :key="i"
