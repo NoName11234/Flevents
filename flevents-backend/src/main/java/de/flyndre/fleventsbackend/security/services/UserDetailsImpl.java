@@ -49,7 +49,7 @@ public class UserDetailsImpl implements UserDetails {
         for(int i = 0; i < user.getOrganisations().size(); i++){
             authorities.add(new SimpleGrantedAuthority(user.getOrganisations().get(i).getOrganization().getUuid().toLowerCase() + "." + user.getOrganisations().get(i).getRole().toString().toLowerCase()));
         }
-        if(user.getIsPlatformAdmin()){
+        if(user.getIsPlatformAdmin()!=null&&user.getIsPlatformAdmin()){
             authorities.add(new SimpleGrantedAuthority(PlatformAdminRole.platformAdmin.toString()));
         }
 

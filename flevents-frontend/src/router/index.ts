@@ -182,6 +182,14 @@ const routes = [
       },
     ],
   },
+
+  // TODO: REMOVE!!
+  {
+    path: '/example-request',
+    name: 'example-request',
+    component: () => import('@/views/[remove]ExampleRequest.vue'),
+  },
+
   {
     path: '/:pathMatch(.*)*',
     redirect: '/errors/404',
