@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
-import AccountApi from "@/api/accountApi";
+import AccountApi from "@/api/accountsApi";
 import {Organization} from "@/models/organization";
 import {useAccountStore} from "@/store/account";
 import {FleventsEvent} from "@/models/fleventsEvent";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 import organizationsApi from "@/api/organizationsApi";
 import {computed} from "vue";
 import {STORES} from "@/constants";

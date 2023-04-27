@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 // import surveyApi from "@/api/surveyApi";
 import {Questionnaire} from "@/models/questionnaire";
+import {STORES} from "@/constants";
 
 export const useSurveyStore = defineStore('surveys', {
   state: () => ({
@@ -15,7 +16,7 @@ export const useSurveyStore = defineStore('surveys', {
      * Hydrates the store by requesting the posts of the given event uuid from the api.
      * @param eventUuid the uuid of the event associated with requested posts
      */
-    async hydrate(eventUuid: string) {
+    async hydrateSpecific(eventUuid: string) {
       this.loading = true;
       this.error = false;
       // TODO: create and use posts store
@@ -41,9 +42,9 @@ export const useSurveyStore = defineStore('surveys', {
       const lastUpdate = this.lastSuccessfulHydration.get(eventUuid);
       if (
         requestedSurveys === undefined
-        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > 60000
+        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
       ) {
-        this.hydrate(eventUuid);
+        this.hydrateSpecific(eventUuid);
       }
       return requestedSurveys || [] as Questionnaire[];
     },

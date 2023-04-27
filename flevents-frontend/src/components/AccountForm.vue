@@ -3,7 +3,7 @@ import {ref} from "vue";
 import {Account} from "@/models/account";
 import {AxiosError, HttpStatusCode} from "axios";
 import {RouteLocationRaw, useRouter} from "vue-router";
-import accountApi from "@/api/accountApi";
+import accountApi from "@/api/accountsApi";
 import {useAppStore} from "@/store/app";
 import {VALIDATION} from "@/constants";
 
