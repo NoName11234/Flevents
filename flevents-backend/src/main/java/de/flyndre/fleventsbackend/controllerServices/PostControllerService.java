@@ -5,6 +5,7 @@ import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.services.*;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,22 +66,25 @@ public class PostControllerService {
      * @param attachments files to add as attachment.
      * @return the created post
      */
-    public Post createPost(String eventId, String accountId, Post post, List<MultipartFile> attachments){
+    public Post createPost(String eventId, String accountId, Post post,@Nullable List<MultipartFile> attachments){
         post.setEvent(eventService.getEventById(eventId));
         post.setAuthor(accountService.getAccountById(accountId));
         post.setCreationDate(LocalDateTime.now());
         post.setUuid(null);
-        Post finalPost = postService.createPost(post);
-        attachments.forEach(file -> {
-            try {
-                Attachment attachment = attachmentService.createAttachment(file);
-                attachment.setPost(finalPost);
-                finalPost.getAttachments().add(attachment);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        post = postService.savePost(finalPost);
+        post = postService.createPost(post);
+        if(attachments!=null) {
+            Post finalPost = post;
+            attachments.forEach(file -> {
+                try {
+                    Attachment attachment = attachmentService.createAttachment(file);
+                    attachment.setPost(finalPost);
+                    finalPost.getAttachments().add(attachment);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            post = postService.savePost(finalPost);
+        }
         return post;
     }
 

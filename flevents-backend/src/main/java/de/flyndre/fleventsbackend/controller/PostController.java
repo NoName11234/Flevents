@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -81,7 +82,7 @@ public class PostController {
     public ResponseEntity createPost(
             @PathVariable String eventId,
             @RequestPart Post post,
-            @RequestPart List<MultipartFile> attachments,
+            @Nullable @RequestPart List<MultipartFile> attachments,
             Authentication auth
     ){
         if(!postControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
