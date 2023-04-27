@@ -34,5 +34,5 @@ build/
 !/flevents-backend.iml
 !/.idea/
 !/src/main/resources/application-local.properties
-!/src/main/resources/application-integration.properties
+!/src/main/resources/application-test.properties
 /src/main/resources/application-local.properties

@@ -6,7 +6,6 @@ import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.InvitationToken;
 import de.flyndre.fleventsbackend.Models.OrganizationRole;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
-import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import de.flyndre.fleventsbackend.repositories.InvitationTokenRepository;
@@ -25,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource("classpath:application-integration.properties")
+@TestPropertySource("classpath:application-test.properties")
 public class FullApiTest {
 
     @Autowired
