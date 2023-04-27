@@ -26,7 +26,7 @@ jobs:
       - name: Set Config
         uses: DamianReeves/write-file-action@master
         with: 
-          path: flevents-backend/src/main/resources/application.properties
+          path: flevents-backend/src/main/resources/application-test.properties
           contents: |
             spring.datasource.url=jdbc:h2:mem:test
             spring.datasource.username=postgres
