@@ -63,7 +63,7 @@ class PostsApi {
    * @param eventUuid the uuid of the post's event
    */
   delete(uuid: string, eventUuid: string) {
-    return api.post(`/events/${eventUuid}/posts/${uuid}`);
+    return api.delete(`/events/${eventUuid}/posts/${uuid}`);
   }
 }
 

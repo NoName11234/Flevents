@@ -10,8 +10,10 @@ import {AxiosError} from "axios";
 import {storeToRefs} from "pinia";
 import {useAccountStore} from "@/store/account";
 import DatetimeService from "../service/datetimeService";
+import {useEventStore} from "@/store/events";
 
 const appStore = useAppStore();
+const eventStore = useEventStore();
 
 const loading = ref(false);
 
@@ -65,6 +67,7 @@ async function deletePost() {
     });
   }
   loading.value = false;
+  eventStore.hydrateSpecific(props.eventUuid);
 }
 
 async function downloadAttachment(url: string) {

@@ -25,7 +25,7 @@ const eventUuid = route.params.uuid as string;
 
 const tab = computed({
   get: () => route.query.tab ?? 'info',
-  set: (tabValue) => router.replace({ query: { ...route.query, tab: tabValue }}),
+  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
 const accountStore = useAccountStore();
@@ -330,6 +330,7 @@ async function deleteEvent() {
     console.error('Failed to delete event.', e);
     openContext.value = false;
   }
+  eventStore.hydrate();
 }
 
 </script>

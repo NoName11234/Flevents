@@ -13,7 +13,10 @@ import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
-const uuid = route.params.uuid as string;
+const organizationUuid = route.params.uuid as string;
+
+const backRoute = { name: 'organizations.organization', params: { uuid: organizationUuid }, query: { tab: 'members' } };
+
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
@@ -22,7 +25,7 @@ const role = ref(OrganizationRole.member) as Ref<OrganizationRole>;
 const appStore = useAppStore();
 
 const organizationStore = useOrganizationStore();
-const organization = organizationStore.getOrganizationGetter(uuid);
+const organization = organizationStore.getOrganizationGetter(organizationUuid);
 
 const selectableRoles = [
   OrganizationRole.admin,
@@ -44,7 +47,7 @@ async function submit() {
       continue;
     }
     try {
-      const response = await organizationsApi.invite(uuid, email, role.value);
+      const response = await organizationsApi.invite(organizationUuid, email, role.value);
       successfulInvitations.push(email);
     } catch (e) {
       console.log(`Invitation of ${email} failed.`);
@@ -63,7 +66,7 @@ async function submit() {
       color: 'success',
     });
   }
-  await router.push( { name: 'organizations.organization', params: { uuid: uuid } } );
+  await router.push(backRoute);
 }
 </script>
 
@@ -109,7 +112,7 @@ async function submit() {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="flat"
-          :to="{ name: 'organizations.organization', params: { uuid: uuid } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>

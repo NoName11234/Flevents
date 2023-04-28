@@ -75,6 +75,7 @@ async function submit() {
     }
   }
   loading.value = false;
+  eventStore.hydrateSpecific(eventUuid);
 }
 
 </script>
@@ -144,7 +145,7 @@ async function submit() {
                 <span
                   class="flex-grow-1"
                 >
-                    {{ attachment.fileName }}
+                    {{ attachment.filename }}
                   </span>
                 <v-btn
                   icon="mdi-delete"
