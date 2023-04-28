@@ -22,14 +22,14 @@ public class QuestionnaireModel {
     @Id @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Event event;
     private String title;
     private Timestamp creationDate;
     private Timestamp closingDate;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<QuestionModel> questions = new ArrayList<>();
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
 
     public void merge(QuestionnaireModel questionnaireModel){

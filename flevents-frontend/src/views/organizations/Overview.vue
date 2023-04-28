@@ -174,9 +174,13 @@ import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import {useAppStore} from "@/store/app";
 import {EventRole} from "@/models/eventRole";
+import router from "@/router";
 
 const route = useRoute();
-const tab = ref(null);
+const tab = computed({
+  get: () => route.query.tab ?? 'info',
+  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
+});
 
 const appStore = useAppStore();
 
