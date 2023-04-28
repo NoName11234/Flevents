@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
@@ -271,5 +272,20 @@ public class EventService {
             }
         }
         return checkedIns;
+    }
+
+    public void deleteQuestionnaireFromEvent(String questionnaireId, String eventId){
+        Event event = getEventById(eventId);
+        List<QuestionnaireModel> questions = event.getQuestionnaires();
+
+        for(int i=0;i< questions.size();i++){
+            if(questions.get(i).getUuid().equals(questionnaireId)){
+                questions.remove(i);
+                break;
+            }
+        }
+
+        event.setQuestionnaires(questions);
+        eventRepository.save(event);
     }
 }

@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.Models;
 
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,6 +41,8 @@ public class FleventsAccount {
     private List<EventRegistration> events = new ArrayList<>();
     @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)
     private List<OrganizationAccount> organisations = new ArrayList<>();
+    @OneToMany
+    private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
 
     public FleventsAccount(String uuid){
         this.uuid=uuid;
