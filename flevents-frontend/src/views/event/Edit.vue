@@ -115,9 +115,9 @@ async function submit() {
     await router.push({ name: 'events.event', params: { uuid: route.params.uuid } });
   } catch (e) {
     tooltip.value = "Das Event konnte nicht bearbeitet werden.";
-  } finally {
-    formLoading.value = false;
   }
+  formLoading.value = false;
+  eventStore.hydrateSpecific(eventUuid);
 }
 </script>
 

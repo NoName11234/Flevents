@@ -33,17 +33,8 @@
           />
         </v-card-title>
 
-        <v-card-text class="text-break pb-0">
-          {{
-            fleventsEvent.description.length <= 120 ?
-              fleventsEvent.description
-              : fleventsEvent.description
-                .substring(0, 120)
-                .split(' ')
-                .slice(0, -1)
-                .join(' ')
-                .concat('...')
-          }}
+        <v-card-text v-if="fleventsEvent.description" class="text-break pb-0">
+          {{ shortenText(fleventsEvent.description) }}
         </v-card-text>
 
         <v-spacer/>
@@ -74,7 +65,6 @@
 
 <script setup lang="ts">
 import { FleventsEvent } from '@/models/fleventsEvent';
-import {EventRole} from "@/models/eventRole";
 
 defineProps({
   fleventsEvent: {
@@ -87,6 +77,16 @@ defineProps({
     default: false,
   }
 });
+
+function shortenText(text: string) {
+  return text.length <= 120 ? text : text
+      .substring(0, 120)
+      .split(' ')
+      .slice(0, -1)
+      .join(' ')
+      .concat('...');
+}
+
 </script>
 
 <style scoped>
