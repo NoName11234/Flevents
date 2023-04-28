@@ -18,4 +18,6 @@ public class ChoiceModel {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private String choice;
+    @ManyToOne
+    private QuestionModel questionModel;
 }
