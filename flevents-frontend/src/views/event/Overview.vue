@@ -371,12 +371,12 @@ async function deleteEvent() {
       >
         Posts
       </v-tab>
-<!--      <v-tab-->
-<!--        value="polls"-->
-<!--        :disabled="storesLoading"-->
-<!--        >-->
-<!--        Umfragen-->
-<!--      </v-tab>-->
+     <v-tab
+       value="polls"
+      :disabled="storesLoading"
+        >
+       Umfragen
+      </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendees"
