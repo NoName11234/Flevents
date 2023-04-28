@@ -1,5 +1,6 @@
 import {OrganizationPreview} from "@/models/organizationPreview";
 import {AccountPreview} from "@/models/accountPreview";
+import {Post} from "@/models/post";
 
 export interface FleventsEvent {
   uuid?: string;
@@ -9,7 +10,8 @@ export interface FleventsEvent {
   image: string;
   startTime: string;
   endTime: string;
-  mailConfig : string;
+  mailConfig : Object;
   organizationPreview: OrganizationPreview;
   accountPreviews: AccountPreview[];
+  posts: Post[];
 }

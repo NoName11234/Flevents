@@ -1,27 +1,33 @@
 <script setup lang="ts">
 
-import {onMounted, Ref, ref} from "vue";
+import {computed, onMounted, Ref, ref} from "vue";
 import {FleventsEvent} from "@/models/fleventsEvent";
-import { useRouter } from 'vue-router';
-import axios from "axios"
+import {RouteLocationRaw, useRouter} from 'vue-router';
+import axios, {AxiosError} from "axios"
 import {Organization} from "@/models/organization";
 import security from "@/service/security";
 import {Account} from "@/models/account";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import eventApi from "@/api/eventsApi";
+import {useEventStore} from "@/store/events";
+import {load} from "webfontloader";
+import {useOrganizationStore} from "@/store/organizations";
 
 const props = defineProps({
   backRoute: {
     required: true,
-    type: String,
+    type: Object as () => RouteLocationRaw,
   },
   submitRoute: {
     required: true,
-    type: String,
+    type: Object as () => RouteLocationRaw,
   },
   presetEvent: {
     required: false,
-    type: Object as () => FleventsEvent,
-    default: null,
-  }
+    type: Object as () => FleventsEvent|undefined,
+    default: undefined,
+  },
 });
 
 const router = useRouter()
@@ -30,7 +36,8 @@ const files = ref(new Array<any>());
 const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
-const fleventsEvent = ref({ ...props.presetEvent, uuid: '' } || {
+const loading = ref(false);
+const fleventsEvent = ref( { ...props.presetEvent } as FleventsEvent || {
   name: "",
   description: "",
   location: "",
@@ -38,7 +45,14 @@ const fleventsEvent = ref({ ...props.presetEvent, uuid: '' } || {
   startTime: "",
   endTime: "",
 } as FleventsEvent);
-const organizations = ref([] as Organization[]);
+
+const eventStore = useEventStore();
+
+const organizationStore = useOrganizationStore();
+const { managedOrganizations } = storeToRefs(organizationStore);
+
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
 
 const imageFile: Ref<Array<File>> = ref([]);
 
@@ -58,10 +72,9 @@ function remove(item: any){
 }
 
 onMounted(async () =>{
-  organizations.value = (await axios.get(`http://localhost:8082/api/accounts/${security.getAccount()!.uuid}/managed-organizations`)).data;
   if (props.presetEvent) {
     imgUrl.value = props.presetEvent.image;
-    selectedOrga.value = organizations.value.find(o => o.uuid === props.presetEvent.organizationPreview.uuid);
+    selectedOrga.value = managedOrganizations.value.find(o => o.uuid === props.presetEvent?.organizationPreview.uuid);
   }
 });
 function getBase64(file : any) {
@@ -79,17 +92,6 @@ function convertTZ(date : any, tzString: any) {
 // submit
 // TODO: properly post to backend (including image file)
 async function submit() {
-  if(imageFile.value.length != 0) {
-    const file = imageFile.value[0]
-    fleventsEvent.value.image = await getBase64(file) as string;
-    console.log(fleventsEvent.value);
-  }
-  let start =   convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
-  let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
-  fleventsEvent.value.startTime = start.toISOString();
-  fleventsEvent.value.endTime = end.toISOString();
-  console.log(fleventsEvent.value.startTime);
-  console.log(fleventsEvent.value.endTime);
   if (
     fleventsEvent.value.name === ''
     || fleventsEvent.value.location === ''
@@ -98,49 +100,67 @@ async function submit() {
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
+  loading.value = true;
+  if(imageFile.value.length != 0) {
+    const file = imageFile.value[0]
+    fleventsEvent.value.image = await getBase64(file) as string;
+    console.log(fleventsEvent.value);
+  }
+  let start = convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
+  let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
+  fleventsEvent.value.startTime = start.toISOString();
+  fleventsEvent.value.endTime = end.toISOString();
+  console.log(fleventsEvent.value.startTime);
+  console.log(fleventsEvent.value.endTime);
   try {
-    console.log(selectedOrga.value.uuid);
-    const account = security.getAccount() as Account;
-    // await axios.post(`http://h3005487.stratoserver.net:8082/api/organizations/${selectedOrga.value.uuid}/create-event`, fleventsEvent.value, {params: {accountId: JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid}});
-    await axios.post(`http://localhost:8082/api/organizations/${selectedOrga.value.uuid}/create-event`, fleventsEvent.value, {params: {accountId: account.uuid}});
-    await router.back();
+    fleventsEvent.value.uuid = undefined;
+    // TODO: Use real mailconfig
+    fleventsEvent.value.mailConfig = fleventsEvent.value.mailConfig ?? {};
+    const response = await eventApi.create(fleventsEvent.value, selectedOrga.value.uuid);
+    await router.push(props.submitRoute);
+    eventStore.hydrate();
   } catch (e) {
-    tooltip.value = "Das Event konnte nicht erstellt werden.";
+    console.log(e);
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
+  } finally {
+    loading.value = false;
   }
 }
 </script>
 
 <template>
 <div>
-  <v-card>
-
-  <v-img
-    cover
-    height="200"
-    :src="imgUrl"
-    class="bg-gradient"
-  />
+  <v-card :loading="loading" :disabled="loading">
+    <v-img
+      cover
+      height="200"
+      :src="imgUrl"
+      class="bg-gradient"
+    />
     <v-form
       validate-on="submit"
       @submit.prevent="submit()"
     >
       <v-container class="d-flex flex-column gap-3">
 
-<!--        <v-select-->
-<!--          label="Event als Vorlage verwenden"-->
-<!--          messages="Hier kann später optional ein existierendes Event als Grundlage für das neue Event ausgewählt werden."-->
-<!--          hide-details="auto"-->
-<!--          disabled-->
-<!--        />-->
-
         <v-select
           label="Organisation"
           hide-details="auto"
           v-model="selectedOrga"
-          :items="organizations"
+          :items="managedOrganizations"
           :item-title="item => item.name"
           :item-value="item => item.uuid"
           :rules="[() => selectedOrga !== undefined || 'Events müssen einer Organisation zugehören.']"
+          menu-icon="mdi-chevron-down"
           return-object
         />
 
@@ -187,6 +207,7 @@ async function submit() {
           no-resize
           v-model="fleventsEvent.description"
         ></v-textarea>
+
         <v-file-input
           label="Vorschaubild"
           variant="filled"
@@ -198,6 +219,7 @@ async function submit() {
           v-model="imageFile"
           accept="image/png, image/jpeg, image/bmp"
         />
+
         <div
           v-if="tooltip !== ''"
           class="text-error">
@@ -208,7 +230,7 @@ async function submit() {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="text"
-          @click="router.back()"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>

@@ -176,7 +176,7 @@ async function submit(){
               </div>
             </v-container>
 
-            <!-- TYPE = SINGLE CHOICE -->
+            <!-- TYPE = FREE-TEXT -->
             <v-container
               v-else-if="question.type === QuestionType.FreeText"
               class="d-flex flex-column gap-3"

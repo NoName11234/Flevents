@@ -1,18 +1,21 @@
 package de.flyndre.fleventsbackend.Models;
 
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.UniqueElements;
 
-import java.net.URI;
-import java.sql.Blob;
+import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * This Class is the Modelclass for the FleventsAccount.
+ * It provides getter as well as setter and a Merge-Method.
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter
@@ -24,6 +27,8 @@ public class FleventsAccount {
     private String uuid;
     private String firstname;
     private String lastname;
+    private Boolean isActive;
+    private Boolean isPlatformAdmin = false;
     @Column(unique = true)
     private String email;
     @Lob
@@ -33,9 +38,11 @@ public class FleventsAccount {
     private String secret;
 
     @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)
-    private List<EventRegistration> events;
+    private List<EventRegistration> events = new ArrayList<>();
     @OneToMany(mappedBy = "account",fetch = FetchType.LAZY)
-    private List<OrganizationAccount> organisations;
+    private List<OrganizationAccount> organisations = new ArrayList<>();
+    @OneToMany
+    private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
 
     public FleventsAccount(String uuid){
         this.uuid=uuid;
@@ -56,6 +63,9 @@ public class FleventsAccount {
         }
         if(account.secret!=null){
             this.secret=account.getSecret();
+        }
+        if(account.getIsActive()!=null){
+            this.isActive=account.getIsActive();
         }
     }
 

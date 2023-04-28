@@ -6,7 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-
+/**
+ * This Class is the Modelclass for OrganizationAccounts.
+ * It provides getter as well as setter.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter
@@ -22,6 +28,7 @@ public class OrganizationAccount {
     private Organization organization;
     @ManyToOne(fetch = FetchType.EAGER)
     private FleventsAccount account;
+
 
     private OrganizationRole role;
 

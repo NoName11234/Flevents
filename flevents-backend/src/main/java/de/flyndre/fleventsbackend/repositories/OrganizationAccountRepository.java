@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface OrganizationAccountRepository extends JpaRepository<OrganizationAccount,String> {
     public List<OrganizationAccount> findByAccount_UuidAndRole(String accountUuid, OrganizationRole role);
+    public List<OrganizationAccount> findByAccount_Uuid(String accountUuid);
     public Optional<OrganizationAccount> findByAccount_UuidAndOrganization_Uuid(String accountUuid,String organizationUuid);
     public List<OrganizationAccount> findByOrganization_UuidAndRole(String organizationId, OrganizationRole role);
 }

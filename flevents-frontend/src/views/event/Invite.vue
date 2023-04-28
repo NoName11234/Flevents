@@ -1,24 +1,36 @@
 <script setup lang="ts">
 
-import {onBeforeMount, ref} from "vue";
+import {onBeforeMount, Ref, ref} from "vue";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {useRoute, useRouter} from 'vue-router';
 import axios from "axios"
 import Heading from "@/components/Heading.vue";
 import {EventRole} from "@/models/eventRole";
+import {useEventStore} from "@/store/events";
+import api from "@/api/api";
+import eventApi from "@/api/eventsApi";
+import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
+
+const eventUuid = route.params.uuid as string;
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
-const role = ref(EventRole.attendee);
-// TODO: obtain from backend
-const event = ref({
-  uuid: route.params.uuid as string,
-  name: 'Beispielevent',
-  description: 'Beispielbeschreibung'
-} as FleventsEvent)
+const role = ref(EventRole.attendee) as Ref<EventRole.attendee|EventRole.tutor>;
 
+const appStore = useAppStore();
+
+const eventStore = useEventStore();
+const event = eventStore.getEventGetter(eventUuid);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'attendees' } };
+
+const selectableRoles = [
+  EventRole.attendee,
+  EventRole.tutor,
+];
 
 function remove(item: any){
   chips.value.splice(chips.value.indexOf(item), 1)
@@ -26,33 +38,36 @@ function remove(item: any){
 
 // submit
 async function submit() {
-  try {
-    console.log(chips.value);
-    for (let i in chips.value) {
-      await axios.post(`http://localhost:8082/api/events/${address.value}/invite`, {}, {
-        params: {
-          email: chips.value[i],
-          role: role.value
-        }
-      });
+  let failedInvitations = [];
+  let successfulInvitations = [];
+  for (let i in chips.value) {
+    let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
     }
-    await router.push( {name: 'events.event', params: { uuid: event.value.uuid }} );
-  } catch (e) {
-    tooltip.value = "Einer oder mehrere Teilnehmer konnten nicht eingeladen werden.";
-    console.error("Invitation failed", e);
+    try {
+      const response = await eventApi.inviteAttendee(eventUuid, email, role.value);
+      successfulInvitations.push(email);
+    } catch (e) {
+      console.log(`Invitation of ${email} failed.`);
+      failedInvitations.push(email);
+    }
   }
+  if (failedInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
+      color: 'error',
+    });
+  }
+  if (successfulInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen war erfolgreich: ${successfulInvitations.join(', ')}`,
+      color: 'success',
+    });
+  }
+  await router.push(backRoute);
 }
-
-onBeforeMount(async () => {
-  address.value = route.params.uuid as string;
-  try {
-    const response = await axios.get(`http://localhost:8082/api/events/${address.value}`);
-    console.log(response);
-    response.status == 200 ? event.value = response.data : event.value = {} as FleventsEvent;
-  } catch (e) {
-    console.error("Failed to load event data", e);
-  }
-})
 </script>
 
 <template>
@@ -61,7 +76,7 @@ onBeforeMount(async () => {
 
   <v-card>
     <v-form validate-on="submit" @submit.prevent="submit()">
-      <v-container>
+      <v-container class="d-flex flex-column gap-3">
         <v-combobox
           v-model="chips"
           chips
@@ -70,6 +85,7 @@ onBeforeMount(async () => {
           closable-chips
           multiple
           prepend-inner-icon="mdi-account-multiple"
+          hide-details="auto"
         >
           <template v-slot:selection="{ attrs, select, selected }">
             <v-chip
@@ -87,11 +103,9 @@ onBeforeMount(async () => {
         <v-select
           label="Zugewiesene Rolle"
           hide-details="auto"
-          :items="[
-            EventRole.attendee,
-            EventRole.tutor,
-          ]"
+          :items="selectableRoles"
           v-model="role"
+          menu-icon="mdi-chevron-down"
         />
       </v-container>
 
@@ -100,7 +114,7 @@ onBeforeMount(async () => {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="flat"
-          :to="{ name: 'events.event', params: { uuid: event.uuid } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>

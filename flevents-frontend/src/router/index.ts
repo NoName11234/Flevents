@@ -1,6 +1,8 @@
 // Composables
-import { createRouter, createWebHistory } from 'vue-router'
-import security from "@/service/security";
+import {createRouter, createWebHistory, RouteLocationRaw} from 'vue-router'
+import {useAppStore} from "@/store/app";
+import {useAccountStore} from "@/store/account";
+import {logout, tryRestoreSession} from "@/service/authService";
 
 const routes = [
   {
@@ -32,6 +34,11 @@ const routes = [
         path: 'account',
         name: 'home.account',
         component: () => import(/* webpackChunkName: "home" */ '@/views/home/Account.vue'),
+      },
+      {
+        path: 'console',
+        name: 'home.console',
+        component: () => import(/* webpackChunkName: "home" */ '@/views/home/Console.vue'),
       },
     ],
   },
@@ -66,11 +73,20 @@ const routes = [
         name: 'events.invite',
         component: () => import(/* webpackChunkName: "events" */ '@/views/event/Invite.vue')
       },
-      // {
-      //   path: ':uuid/edit',
-      //   name: 'events.edit',
-      //   component: () => import(/* webpackChunkName: "events" */ '@/views/event/Overview.vue'),
-      // },
+
+      // POSTS
+      {
+        path: ':uuid/posts/create',
+        name: 'events.posts.create',
+        component: () => import(/* webpackChunkName: "posts" */ '@/views/event/posts/Create.vue'),
+      },
+      {
+        path: ':uuid/posts/:postUuid/edit',
+        name: 'events.posts.edit',
+        component: () => import(/* webpackChunkName: "posts" */ '@/views/event/posts/Edit.vue'),
+      },
+
+      // SURVEYS
       {
         path: ':uuid/questionnaires/create',
         name: 'events.questionnaires.create',
@@ -91,6 +107,9 @@ const routes = [
       {
         path: 'create',
         name: 'accounts.create',
+        meta: {
+          public: true,
+        },
         component: () => import(/* webpackChunkName: "accounts" */ '@/views/accounts/Create.vue'),
       },
       {
@@ -101,6 +120,9 @@ const routes = [
       {
         path: 'login',
         name: 'accounts.login',
+        meta: {
+          public: true,
+        },
         component: () => import(/* webpackChunkName: "accounts" */ '@/views/forms/Login.vue'),
       }
     ],
@@ -113,7 +135,10 @@ const routes = [
       {
         path: '/join/:uuid',
         name: 'join.uuid',
-        component: () => import(/* webpackChunkName: "join" */ '@/views/event/EventInvite.vue')
+        meta: {
+          public: true,
+        },
+        component: () => import(/* webpackChunkName: "join" */ '@/views/event/AcceptInvitation.vue')
       }
     ]
   },
@@ -125,7 +150,10 @@ const routes = [
       {
         path: ':uuid',
         name: 'organizations.inviteLink',
-        component: () => import(/* webpackChunkName: "join" */ '@/views/organizations/OrganizationInviteLink.vue'),
+        meta: {
+          public: true,
+        },
+        component: () => import(/* webpackChunkName: "join" */ '@/views/organizations/AcceptInvitation.vue'),
       },
     ]
   },
@@ -157,34 +185,76 @@ const routes = [
     component: () => import('@/layouts/default/BaseLayout.vue'),
     children: [
       {
-        path: '/errors/404',
+        path: '404',
         name: 'errors.404',
-        component: () => import(/* webpackChunkName: "events" */ '@/views/error/404.vue')
+        meta: {
+          public: true,
+        },
+        component: () => import(/* webpackChunkName: "errors" */ '@/views/error/404.vue')
       },
     ],
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/errors/404',
+    component: () => import('@/layouts/default/BaseLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import(/* webpackChunkName: "errors" */ '@/views/error/404.vue')
+      },
+    ],
   },
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-})
+});
+
+let firstLoad = true;
+
+/**
+ * Navigation guard to check for logged-in status and redirect to /login.
+ */
 router.beforeEach(async (to, from) => {
-    // console.log(document.cookie);
-    // console.log(router.currentRoute.value);
-  if (security.getAccount() != null || to.path === "/accounts/login" || to.path === "/accounts/create" || to.path.includes("/join")){
+  // console.log(document.cookie);
+  // console.log(router.currentRoute.value);
+  const loginRoute = {
+    name: 'accounts.login',
+    query: { location: encodeURIComponent(to.fullPath) }
+  } as RouteLocationRaw;
+
+  // If target route is public do not intercept
+  if (to.meta?.public === true) {
     return true;
-  } else {
-    if(to.path.includes("/create") || from.path.includes("/create")){
-      await router.push({path: '/accounts/login', query: {location: "/"}});
-    }else{
-      await router.push({path: '/accounts/login', query: {location: from.path}});
-    }
   }
-  return false;
+
+  const appStore = useAppStore();
+  const accountStore = useAccountStore();
+
+  if (firstLoad) {
+    firstLoad = false;
+    // On first load, try to restore an eventually present previous session
+    await tryRestoreSession();
+  }
+
+  if (!appStore.loggedIn) {
+    // Not logged-in
+    return loginRoute;
+  }
+
+  if (!accountStore.currentAccount) {
+    // Logged-in but no account is loaded
+    // Try to load an account:
+    await accountStore.hydrate();
+    if (accountStore.error) {
+      // Logged-in but cannot load account
+      // Log-out and get new re-login:
+      await logout();
+      return loginRoute;
+    }
+    // Logged-in and account loaded (previous session restored)
+    return true;
+  }
 })
 export default router

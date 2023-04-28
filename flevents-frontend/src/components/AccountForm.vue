@@ -1,55 +1,94 @@
 <script setup lang="ts">
-import {Ref, ref} from "vue";
+import {ref} from "vue";
 import {Account} from "@/models/account";
-import axios from "axios";
-import {useRouter} from "vue-router";
+import {AxiosError, HttpStatusCode} from "axios";
+import {RouteLocationRaw, useRouter} from "vue-router";
+import accountApi from "@/api/accountsApi";
+import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 
 const router = useRouter();
 const showPass = ref(false);
 const showCorr = ref(false);
 const correctPassword = ref("");
 const tooltip = ref("");
+const loading = ref(false);
+
+const appStore = useAppStore();
+
 const props = defineProps({
   backRoute: {
     required: true,
-    type: String,
+    type: Object as () => RouteLocationRaw,
   },
   submitRoute: {
     required: true,
-    type: String,
+    type: Object as () => RouteLocationRaw,
   },
 })
-const account : Ref<Partial<Account>> = ref({
+const account = ref({
   firstname: "",
   lastname: "",
   email: "",
   secret: ""
-})
+} as Account);
 
-async function submit(){
-  // Folgende Zeile niemals entfernen!
+async function submit() {
+  // Structured Logging
   console.log("ich bin echt jetzt in der post methode drin, wie krass");
+
+  // Validation
   tooltip.value = '';
-  if(account.value.firstname === "" || account.value.lastname === "" || account.value.email === "" || account.value.secret === "") {
+  if (
+    account.value.firstname === ""
+    || account.value.lastname === ""
+    || account.value.email === ""
+    || account.value.secret === ""
+  ) {
     tooltip.value = "Nicht alle Felder wurden angegeben.";
     return;
   }
-  if(account.value.secret !== correctPassword.value) {
+  if (account.value.secret !== correctPassword.value) {
     tooltip.value = "Die Passwörter stimmen nicht überein.";
     return;
   }
-  try {
-    await axios.post("http://localhost:8082/api/accounts", account.value);
-  } catch (e) {
-    tooltip.value = "Die angegebene E-Mail-Adresse ist bereits registriert.";
+  if (!account.value.email.match(VALIDATION.EMAIL)) {
+    tooltip.value = "Die angegebene E-Mail-Adresse ist ungültig.";
     return;
   }
-  tooltip.value = "Anfrage erfolgreich gesendet.";
-  await router.push(props.backRoute);
+
+  // API-Request
+  loading.value = true;
+  try {
+    await accountApi.create(account.value);
+    appStore.addToast({
+      text: 'Registrierung erfolgreich. Sie können Sich jetzt anmelden.',
+      color: 'success',
+    });
+    await router.push(props.backRoute);
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+      else if (e.response && e.response.status === HttpStatusCode.InternalServerError) {
+        errorMessage = `Die angegebene E-Mail-Adresse ist bereits registriert.`;
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    tooltip.value = `Registrierung fehlgeschlagen: ${errorMessage}`;
+  }
+  loading.value = false;
 }
 </script>
+
 <template>
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
       <v-container class="d-flex flex-column gap-3">
         <div class="d-flex flex-column flex-sm-row gap-3">

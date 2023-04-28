@@ -6,7 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-
+/**
+ * This Class is the Modelclass for EventRegistration.
+ * It provides getter as well as setter and a Merge-Method.
+ * @implNote This Model is O/R-Mapped to a Database
+ * @author Lukas Burkhardt
+ * @version $I$
+ */
 @Entity
 @Getter
 @Setter
@@ -21,4 +27,5 @@ public class EventRegistration {
     @ManyToOne(fetch = FetchType.EAGER)
     private FleventsAccount account;
     private EventRole role;
+    private boolean checkedIn;
 }

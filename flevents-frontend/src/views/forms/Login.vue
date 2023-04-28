@@ -2,8 +2,8 @@
 
   <Heading text="Login" />
 
-  <v-card>
-    <v-container class="d-flex flex-column gap-3" @keydown.enter="fu()">
+  <v-card :loading="loading" :disabled="loading">
+    <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
         label="Mailadresse"
         prepend-inner-icon="mdi-email"
@@ -30,13 +30,13 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
-        :to="{ name: 'accounts.create' }"
+        :to="{ name: 'accounts.create', query: route.query }"
         variant="text"
       >
         Registrieren
       </v-btn>
       <v-btn
-        @click="fu()"
+        @click="performLogin()"
         color="primary"
         prepend-icon="mdi-login-variant"
       >
@@ -47,14 +47,16 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, Ref} from "vue";
+import {ref, Ref} from "vue";
 import {Account} from "@/models/account";
-import axios from "axios";
+import {AxiosError} from "axios";
 import Heading from "@/components/Heading.vue";
-import security from "@/service/security";
 import {useRoute, useRouter} from "vue-router";
+import {login} from "@/service/authService";
+import {load} from "webfontloader";
 const route = useRoute();
 const showPass = ref(false);
+const loading = ref(false);
 const tooltip = ref("");
 const router = useRouter();
 const account : Ref<Partial<Account>> = ref({
@@ -62,37 +64,26 @@ const account : Ref<Partial<Account>> = ref({
   secret: ""
 });
 
-async function fu(){
-  document.cookie = "";
-  security.resetAccount();
-  let response;
-  await axios.get("http://localhost:8082/api/accounts/validate",{params: { email: account.value.email, secret: account.value.secret } }).then(
-    resp => {
-      console.log(resp);
-      response = resp.data
-      if(resp.data === ""){
-        document.cookie = "";
-        security.resetAccount();
-        tooltip.value = "Passwort oder Email ist falsch."
-      }else{
-        document.cookie = `ACCOUNT=${JSON.stringify(resp.data)}`;
-        security.setAccount(resp.data as Account);
-        let url = "/";
-        if(route.query.location != null && route.query.location !== "/accounts/login"){
-          url = route.query.location as string
-        }
-        router.push({path: url});
-        setTimeout(() => router.go(0), 100);
+async function performLogin() {
+  loading.value = true;
+  tooltip.value = '';
+  try {
+    await login(account.value.email!, account.value.secret!);
+    await router.push(decodeURIComponent(route.query.location as string || '/'));
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Anmeldedaten';
       }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
     }
-  ).catch((e) => {
-    tooltip.value = "E-Mail oder Passwort ungültig!";
-  });
+  }
+  loading.value = false;
 }
-
-onMounted(() => {
-  console.log();
-})
 </script>
 
 <style scoped>
