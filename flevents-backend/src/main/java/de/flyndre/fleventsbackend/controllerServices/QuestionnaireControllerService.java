@@ -59,7 +59,7 @@ public class QuestionnaireControllerService {
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
         QuestionnaireModel questionnaireModel = convertQuestionnaireToQuestionnaireModel(questionnaire);
         questionnaireModel.setEvent(eventService.getEventById(eventId));
-
+        eventService.registerNewQuestionnaire(questionnaireModel, eventId);
         return questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
     }
 
@@ -89,6 +89,7 @@ public class QuestionnaireControllerService {
     public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){
         answeredQuestionnaire.setQuestionnaireId(questionnaireId);
         AnsweredQuestionnaireModel newAqm = convertAnsweredQuestionnaireToAnsweredQuestionnaireModel(answeredQuestionnaire);
+        fleventsAccountService.saveAnsweredQuestionnaire(newAqm, answeredQuestionnaire.getUserId());
         return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
     }
 
