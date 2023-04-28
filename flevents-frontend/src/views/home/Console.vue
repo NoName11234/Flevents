@@ -59,9 +59,16 @@ async function createOrganization() {
   platformStore.hydrate();
 }
 
-async function deleteOrganization(uuid: string) {
+async function deleteOrganization(organization: Organization) {
+  let ok = false;
+  ok = confirm(
+    `Sind Sie sicher, dass Sie die Organisation ${organization.name} löschen wollen?`
+    + ` Damit löschen Sie ${organization.eventPreviews.length} zugehörige Events und deren zugehörige Daten wie Posts und Umfragen.`
+    + ` Diese Daten sind danach verloren und können nicht wiederhergestellt werden.`
+  );
+  if (!ok) return;
   try {
-    const response = await ConsoleApi.deleteOrganization(uuid);
+    const response = await ConsoleApi.deleteOrganization(organization.uuid);
     appStore.addToast({
       text: 'Organisation erfolgreich gelöscht.',
       color: 'success',
@@ -175,7 +182,7 @@ async function deleteOrganization(uuid: string) {
             size="small"
             variant="text"
             color="error"
-            @click="deleteOrganization(oI)"
+            @click="deleteOrganization(o)"
           />
         </v-container>
       </v-card>
