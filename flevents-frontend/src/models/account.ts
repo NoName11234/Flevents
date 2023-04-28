@@ -12,5 +12,6 @@ export interface Account {
   role : Role;
   eventPreviews: FleventsEventPreview[];
   organizationPreviews: OrganizationPreview[];
+  platformAdmin: boolean;
 
 }

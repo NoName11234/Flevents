@@ -11,7 +11,7 @@
       value="personal"
       :to="{ name: 'home.personal' }"
     >
-      <v-icon>mdi-calendar-heart</v-icon>
+      <v-icon>mdi-heart</v-icon>
 
       Mein Bereich
     </v-btn>
@@ -44,6 +44,16 @@
 
       Konto & Info
     </v-btn>
+
+    <v-btn
+      v-if="showConsole"
+      value="console"
+      :to="{ name: 'home.console' }"
+    >
+      <v-icon>mdi-wrench</v-icon>
+
+      Plattformkonsole
+    </v-btn>
   </v-bottom-navigation>
 </template>
 
@@ -59,6 +69,7 @@ const { currentAccount: account } = storeToRefs(accountStore);
 
 const showManaged = computed( () => {return validateManaged()});
 const showExplore = computed( () => {return validateExplore()});
+const showConsole = computed(() => {return validateConsole()});
 
 function validateManaged(){
   if (account.value === null) return false;
@@ -78,16 +89,18 @@ function validateManaged(){
       return true;
     }
   }
+  return false;
 }
 
 function validateExplore(){
   if (account.value === null) return false;
-  if (
-    account.value.organizationPreviews
-    && account.value.organizationPreviews.length > 0
-  ) {
-    return true;
-  }
+  return account.value.organizationPreviews
+    && account.value.organizationPreviews.length > 0;
+}
+
+function validateConsole() {
+  if (account.value === null) return false;
+  return account.value.platformAdmin === true;
 }
 </script>
 
