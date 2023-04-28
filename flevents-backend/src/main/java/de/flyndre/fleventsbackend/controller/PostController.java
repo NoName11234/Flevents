@@ -204,14 +204,10 @@ public class PostController {
      * Returns the file that is represented by the attachment id.
      * @param eventId id of the event of the post to which the attachment is binded
      * @param attachmentId the id of the attachment
-     * @param auth the Authentication generated out of a barer token.
      * @return the raw file or an error if something went wrong.
      */
     @GetMapping("/attachments/{attachmentId}")
-    public ResponseEntity getAttachment(@PathVariable String eventId,@PathVariable String attachmentId,Authentication auth){
-        if(!postControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity getAttachment(@PathVariable String eventId,@PathVariable String attachmentId){
         try{
             Attachment attachment = postControllerService.getAttachment(attachmentId);
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+attachment.getFilename()+"\"").body(attachment.getData());
