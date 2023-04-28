@@ -24,25 +24,29 @@
 
     <v-window v-model="tab">
       <v-window-item value="info">
-        <v-container>
-          {{ organization?.description }}
-        </v-container>
-        <v-divider></v-divider>
-        <v-list>
-          <v-list-item
-            v-if="organization?.phoneContact"
-            prepend-icon="mdi-phone"
-          >
-            {{ organization?.phoneContact }}
-          </v-list-item>
-          <v-list-item
-            v-if="organization?.address"
-            prepend-icon="mdi-map-marker"
-          >
-            {{ organization?.address }}
-          </v-list-item>
-        </v-list>
-        <v-divider/>
+        <template v-if="organization?.description">
+          <v-container>
+            {{ organization?.description }}
+          </v-container>
+          <v-divider />
+        </template>
+        <template v-if="organization.address || organization.phoneContact">
+          <v-list>
+            <v-list-item
+              v-if="organization?.phoneContact"
+              prepend-icon="mdi-phone"
+            >
+              {{ organization?.phoneContact}}
+            </v-list-item>
+            <v-list-item
+              v-if="organization?.address"
+              prepend-icon="mdi-map-marker"
+            >
+              {{ organization?.address }}
+            </v-list-item>
+          </v-list>
+          <v-divider/>
+        </template>
         <v-container
           v-if="currentAccountRole === OrganizationRole.admin"
           class="d-flex flex-column flex-sm-row justify-end gap"

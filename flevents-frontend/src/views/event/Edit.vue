@@ -89,8 +89,7 @@ function getBase64(file : any) {
 async function submit() {
   if (
     fleventsEvent.value.name === ''
-    || fleventsEvent.value.description === ''
-    || selectedOrga.value == undefined
+    || fleventsEvent.value.location === ''
   ) {
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
@@ -145,8 +144,7 @@ async function submit() {
             :items="organizations"
             :item-title="item => item.name"
             :item-value="item => item.uuid"
-            :rules="[() => selectedOrga !== undefined || 'Events müssen einer Organisation zugehören.']"
-            messages="Existierende Events können nicht zwischen Organisationen verschoben werden."
+            messages="Die Organisation existierender Events kann nicht verändert werden."
             menu-icon="mdi-chevron-down"
             return-object
             disabled
@@ -195,6 +193,7 @@ async function submit() {
             no-resize
             v-model="fleventsEvent.description"
           ></v-textarea>
+
           <v-file-input
             label="Vorschaubild"
             variant="filled"
@@ -206,6 +205,7 @@ async function submit() {
             v-model="imageFile"
             accept="image/png, image/jpeg, image/bmp"
           />
+
           <div
             v-if="tooltip !== ''"
             class="text-error">
