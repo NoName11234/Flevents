@@ -37,39 +37,50 @@ public class QuestionnaireController {
 
     @GetMapping("/{questionnaireId}")
     public ResponseEntity getQuestionnaire(@PathVariable String questionnaireId, Authentication auth){
-        //TODO: hier fehlt auth
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(),Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
        return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
     }
 
     @GetMapping("/{questionnaireId}/answers/{userId}")
     public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId, Authentication auth){
-        //TODO: hier fehlt auth
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
 
         return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity createQuestionnaire(@RequestParam String eventId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
-        //TODO: hier fehlt auth
-
+        if(!questionnaireControllerService.getGranted(auth, eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
         return new ResponseEntity<>(mapper.map(questionnaireControllerService.createQuestionnaire(eventId, bodyQuestionnaire), Questionnaire.class), HttpStatus.CREATED);
     }
     @PostMapping("/{questionnaireId}")
     public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
-        //TODO: hier fehlt auth
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
         return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{questionnaireId}")
     public ResponseEntity deleteQuestionnaire(@PathVariable String questionnaireId, Authentication auth) {
-        //TODO: hier fehlt auth
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
         questionnaireControllerService.deleteQuestionnaire(questionnaireId);
         return new ResponseEntity<>("Deleted.", HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/{questionnaireId}/answers")
     public ResponseEntity addAnswer(@PathVariable String questionnaireId,@RequestBody AnsweredQuestionnaire answeredQuestionnaire, Authentication auth){
-        //TODO: hier fehlt auth
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee, EventRole.guest))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
         questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
         return new ResponseEntity(HttpStatus.OK);
     }
