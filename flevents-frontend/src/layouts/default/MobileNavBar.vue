@@ -82,7 +82,7 @@ const minWidth = '130px';
       value="account"
       size="small"
       :to="{ name: 'home.account' }"
-      prepend-icon="mdi-account-circle"
+      prepend-icon="mdi-account"
       stacked
       :min-width="minWidth"
     >

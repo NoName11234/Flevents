@@ -72,7 +72,7 @@ const props = defineProps({
         v-if="showAccount"
         value="account"
         :to="{ name: 'home.account' }"
-        prepend-icon="mdi-account-circle"
+        prepend-icon="mdi-account"
         title="Konto & Info"
       />
 
