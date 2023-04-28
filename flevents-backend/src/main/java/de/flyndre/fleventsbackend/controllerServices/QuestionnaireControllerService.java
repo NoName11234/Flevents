@@ -111,7 +111,7 @@ public class QuestionnaireControllerService {
             List<ChoiceModel> choiceModels = new ArrayList<>();
             for(int a=0; a<q.getChoices().size();a++){
                 Choice dto = q.getChoices().get(a);
-                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice(), qm);
+                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice());
                 choiceModels.add(m);
             }
             qm.setUuid(q.getUuid());
@@ -136,7 +136,7 @@ public class QuestionnaireControllerService {
         for(int i=0;i<answeredQuestionnaire.getAnswers().size();i++){
             AnsweredQuestion aq = answeredQuestionnaire.getAnswers().get(i);
             //TODO: null austauschen
-            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice(), null);
+            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
             AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(),cm, aq.getAnswer(),answeredQuestionnaireModel);
             answerModels.add(aqm);
         }
