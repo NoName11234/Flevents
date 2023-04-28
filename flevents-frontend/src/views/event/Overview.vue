@@ -35,6 +35,8 @@ const appStore = useAppStore();
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
+const posts = computed(() => event.value
+  .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
 const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
@@ -506,7 +508,7 @@ async function deleteEvent() {
           multiple
         >
           <EventPost
-            v-for="(post, pIndex) in event.posts"
+            v-for="(post, pIndex) in posts"
             :event-uuid="eventUuid"
             :post="post"
             :admin-view="validateRole === EventRole.organizer"
