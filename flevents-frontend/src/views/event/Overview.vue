@@ -680,6 +680,8 @@ async function deleteEvent() {
               <v-checkbox
                 hide-details="auto"
                 density="compact"
+                v-model="item.checkedIn"
+                @click="eventApi.attendeeCheckIn(eventUuid, item.uuid)"
               />
             </td>
           </tr>

@@ -1,6 +1,8 @@
 import api from "@/api/api";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {EventRole} from "@/models/eventRole";
+import {Account} from "@/models/account";
+import {AccountPreview} from "@/models/accountPreview";
 
 const base = `/events`
 
@@ -158,6 +160,16 @@ class EventsApi {
       }
     });
   }
+
+  /**
+   * Accepts an invitation link as an anonymous User.
+   * @param eventUuid the uuid of the event
+   * @param account the account, only containing the mail
+   */
+  acceptAnonymousInvitation(eventUuid: string, account: AccountPreview) {
+    return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, {account: account});
+  }
+
 
   /**
    * Enrolls the current user to the event.
