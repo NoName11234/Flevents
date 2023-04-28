@@ -59,8 +59,9 @@ public class QuestionnaireControllerService {
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
         QuestionnaireModel questionnaireModel = convertQuestionnaireToQuestionnaireModel(questionnaire);
         questionnaireModel.setEvent(eventService.getEventById(eventId));
+        questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
         eventService.registerNewQuestionnaire(questionnaireModel, eventId);
-        return questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
+        return questionnaireModel;
     }
 
     public QuestionnaireModel editQuestionnaire(String questionnaireId, Questionnaire questionnaire){
