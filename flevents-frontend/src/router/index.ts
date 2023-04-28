@@ -35,6 +35,11 @@ const routes = [
         name: 'home.account',
         component: () => import(/* webpackChunkName: "home" */ '@/views/home/Account.vue'),
       },
+      {
+        path: 'console',
+        name: 'home.console',
+        component: () => import(/* webpackChunkName: "home" */ '@/views/home/Console.vue'),
+      },
     ],
   },
 
@@ -180,7 +185,7 @@ const routes = [
     component: () => import('@/layouts/default/BaseLayout.vue'),
     children: [
       {
-        path: '/errors/404',
+        path: '404',
         name: 'errors.404',
         meta: {
           public: true,
