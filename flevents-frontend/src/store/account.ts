@@ -27,6 +27,7 @@ export const useAccountStore = defineStore({
       }
       try {
         const { data } = await AccountApi.getMe();
+        console.log(data);
         this.currentAccount = data as Account;
         this.lastSuccessfulHydration = new Date();
       } catch (e) {
