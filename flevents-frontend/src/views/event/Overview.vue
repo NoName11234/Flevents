@@ -330,6 +330,7 @@ async function deleteEvent() {
     console.error('Failed to delete event.', e);
     openContext.value = false;
   }
+  eventStore.hydrate();
 }
 
 </script>
