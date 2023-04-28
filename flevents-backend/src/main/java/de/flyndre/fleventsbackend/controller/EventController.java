@@ -272,26 +272,44 @@ private final ModelMapper mapper;
    }
 
    /**
-    * not implemented yet
-    * Allows access for tutor and above of the specified event.
+    * Checks in the given Account
     * @param eventId the id of the event to check in
     * @param accountId the id of the account to be checked in
     * @param auth the Authentication generated out of a barer token.
     * @return HttpStatus whether the process was successfully or not
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
-   public ResponseEntity attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
+   public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+         return HttpStatus.UNAUTHORIZED;
       }
       try{
          eventControllerService.attendeesCheckIn(eventId,accountId);
-         return new ResponseEntity(HttpStatus.OK);
+         return HttpStatus.OK;
       }catch (Exception e){
-         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+         return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
 
+   /**
+    * Checks out the given Account
+    * @param eventId the id of the event to check in
+    * @param accountId the id of the account to be checked in
+    * @param auth the Authentication generated out of a barer token.
+    * @return HttpStatus whether the process was successfully or not
+    */
+   @PostMapping("/{eventId}/attendees/check-out/{accountId}")
+   public HttpStatus attendeesCheckOut(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+         return HttpStatus.UNAUTHORIZED;
+      }
+      try{
+         eventControllerService.attendeesCheckOut(eventId,accountId);
+         return HttpStatus.OK;
+      }catch (Exception e){
+         return HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+   }
    /**
     * not implemented yet
     * @param eventId the id of the event to add an attachment to

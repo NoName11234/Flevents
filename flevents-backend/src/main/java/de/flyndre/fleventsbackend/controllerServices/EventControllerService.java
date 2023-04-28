@@ -245,6 +245,15 @@ public class EventControllerService {
     }
 
     /**
+     * Sets the attendees status to checkedOut.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckOut(String eventId, String accountId){
+        eventService.attendeesCheckOut(getEventById(eventId), accountService.getAccountById(accountId));
+    }
+
+    /**
      * Gets all checked-In attendees
      * @param eventId the if of the event to get the checked-In attendees from
      * @return a list with all the Uuid of checked-In attendees

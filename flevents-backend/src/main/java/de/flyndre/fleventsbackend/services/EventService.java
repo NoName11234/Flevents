@@ -255,6 +255,20 @@ public class EventService {
     }
 
     /**
+     * Sets the attendees status to checkedOut.
+     * @param event the event to check in
+     * @param account the account to be checked in
+     */
+    public void attendeesCheckOut(Event event, FleventsAccount account){
+        for(EventRegistration eventRegistration:event.getAttendees()) {
+            if (account.getUuid().equals(eventRegistration.getAccount().getUuid())) {
+                eventRegistration.setCheckedIn(false);
+            }
+        }
+        eventRepository.save(event);
+    }
+
+    /**
      * Gets all checked-In attendees
      * @param eventId the if of the event to get the checked-In attendees from
      * @return a list with the Uuid of all checked-In attendees

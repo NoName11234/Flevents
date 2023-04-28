@@ -681,7 +681,7 @@ async function deleteEvent() {
                 hide-details="auto"
                 density="compact"
                 v-model="item.checkedIn"
-                @click="eventApi.attendeeCheckIn(eventUuid, item.uuid)"
+                @click="item.checkedIn ? eventApi.attendeeCheckOut(eventUuid, item.uuid) : eventApi.attendeeCheckIn(eventUuid, item.uuid)"
               />
             </td>
           </tr>

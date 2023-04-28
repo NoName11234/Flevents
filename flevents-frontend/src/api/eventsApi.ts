@@ -134,6 +134,15 @@ class EventsApi {
   }
 
   /**
+   * marks an Attendee as not present.
+   * @param eventUuid the uuid of the event
+   * @param accountUuid the uuid of the account
+   */
+  attendeeCheckOut(eventUuid: string, accountUuid: string){
+    return api.post(`${base}/${eventUuid}/attendees/check-out/${accountUuid}`);
+  }
+
+  /**
    * Invites an account to be associated with the event under the given role.
    * @param uuid the uuid of the event
    * @param email the e-mail of the person to be invited
