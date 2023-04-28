@@ -96,7 +96,8 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                         ,"/api/accounts/reset-password"
                         , "/api/organizations/{organizationId}/preview"
                         , "/api/events/{eventId}/preview"
-                        ,"/api/platform/login")
+                        ,"/api/platform/login",
+                        "/api/events/*/posts/attachments/*")
                 .permitAll()
                 .requestMatchers("/api/test/**").permitAll()
                 .anyRequest().authenticated();
