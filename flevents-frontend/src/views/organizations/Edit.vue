@@ -1,8 +1,8 @@
 <template>
   <Heading text="Organisationsdetails bearbeiten" />
   <OrganizationForm
-    :back-route="{ name: 'organizations.organization', params: { uuid: $route.params.uuid } }"
-    :submit-route="{ name: 'organizations.organization', params: { uuid: $route.params.uuid } }"
+    :back-route="{ name: 'organizations.organization', params: { uuid: $route.params.uuid }, query: { tab: 'info' } }"
+    :submit-route="{ name: 'organizations.organization', params: { uuid: $route.params.uuid }, query: { tab: 'info' } }"
   />
 </template>
 
