@@ -31,7 +31,8 @@ public class EMailServiceImpl implements EMailService{
     private ModelMapper mapper;
     @Value("${application.baseurl}")
     private String baseurl;
-
+    @Value("${frontend.port}")
+    private String frontendPort;
 
     public EMailServiceImpl(JavaMailSender javaMailSender, ModelMapper modelMapper){
         this.javaMailSender=javaMailSender;
@@ -97,7 +98,7 @@ public class EMailServiceImpl implements EMailService{
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be a part of "+organization.getName());
-        details.setMsgBody("You are invited to join the organization "+organization.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"organizations/join/" +organization.getUuid()+"?token="+token);
+        details.setMsgBody("You are invited to join the organization "+organization.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+":"+frontendPort+"/organizations/join/" +organization.getUuid()+"?token="+token);
         sendSimpleEmail(details);
     }
 
@@ -122,7 +123,7 @@ public class EMailServiceImpl implements EMailService{
             || mailConfig.getFeedbackMessage() == null
             || mailConfig.getRegisterMessage() == null
         ) {
-            details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+"join/" +event.getUuid()+"?token="+token);
+            details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+":"+frontendPort+"/join/" +event.getUuid()+"?token="+token);
         } else {
             details.setMsgBody(event.getMailConfig().getRegisterMessage());
         }

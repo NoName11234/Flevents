@@ -10,6 +10,7 @@ import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
 import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,7 +41,7 @@ public class FleventsAccountService {
     @Autowired
     PasswordEncoder encoder;
 
-    public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository, ModelMapper mapper, EMailService eMailService){
+    public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository, ModelMapper mapper, EMailServiceImpl eMailService){
         this.fleventsAccountRepository = fleventsAccountRepository;
         this.mapper = mapper;
         this.eMailService = eMailService;

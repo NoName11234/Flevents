@@ -6,4 +6,6 @@ export interface OrganizationPreview {
   description: string;
   icon: string;
   role?: Role;
+  address: string;
+  phoneContact: string;
 }

@@ -9,7 +9,7 @@ const base = `/accounts`
  * @author David Maier
  * @since Weekly Build 2
  */
-class AccountApi {
+class AccountsApi {
 
   // CRUD
 
@@ -150,4 +150,4 @@ class AccountApi {
   }
 }
 
-export default new AccountApi();
+export default new AccountsApi();

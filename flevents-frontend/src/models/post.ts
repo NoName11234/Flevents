@@ -1,4 +1,5 @@
 import {Account} from "@/models/account";
+import {Attachment} from "@/models/attachment";
 
 export interface Post {
 
@@ -6,7 +7,8 @@ export interface Post {
   author: Account,
   title: string,
   content: string,
-  date: Date,
-  attachments: Array<string>,
+  creationDate: Date,
+  attachments?: Array<Attachment>,
+  comments?: Array<Comment>,
 
 }

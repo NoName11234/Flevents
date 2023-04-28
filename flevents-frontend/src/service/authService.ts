@@ -9,7 +9,7 @@
  */
 
 import {useAppStore} from "@/store/app";
-import accountApi from "@/api/accountApi";
+import accountApi from "@/api/accountsApi";
 import api from "@/api/api";
 import router from "@/router";
 import {useJwt} from "@vueuse/integrations/useJwt";

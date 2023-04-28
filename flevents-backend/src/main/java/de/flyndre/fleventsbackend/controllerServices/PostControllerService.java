@@ -1,15 +1,16 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
+import de.flyndre.fleventsbackend.Models.Attachment;
 import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
 import de.flyndre.fleventsbackend.Models.Role;
-import de.flyndre.fleventsbackend.services.AuthService;
-import de.flyndre.fleventsbackend.services.EventService;
-import de.flyndre.fleventsbackend.services.FleventsAccountService;
-import de.flyndre.fleventsbackend.services.PostService;
+import de.flyndre.fleventsbackend.services.*;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -26,12 +27,14 @@ public class PostControllerService {
     private final PostService postService;
     private final FleventsAccountService accountService;
     private final AuthService authService;
+    private final AttachmentService attachmentService;
 
-    public PostControllerService(EventService eventService, PostService postService, FleventsAccountService accountService, AuthService authService) {
+    public PostControllerService(EventService eventService, PostService postService, FleventsAccountService accountService, AuthService authService, AttachmentService attachmentService) {
         this.eventService = eventService;
         this.postService = postService;
         this.accountService = accountService;
         this.authService = authService;
+        this.attachmentService = attachmentService;
     }
 
     /**
@@ -56,18 +59,33 @@ public class PostControllerService {
 
     /**
      * Creates a post in the specified id by the specified account.
-     * @param eventId the id of the event to create the post in
-     * @param accountId the id of the account which is the author of the post
-     * @param post the post to be created
+     *
+     * @param eventId     the id of the event to create the post in
+     * @param accountId   the id of the account which is the author of the post
+     * @param post        the post to be created
+     * @param attachments files to add as attachment.
      * @return the created post
      */
-    public Post createPost(String eventId, String accountId, Post post){
+    public Post createPost(String eventId, String accountId, Post post,@Nullable List<MultipartFile> attachments){
         post.setEvent(eventService.getEventById(eventId));
         post.setAuthor(accountService.getAccountById(accountId));
         post.setCreationDate(LocalDateTime.now());
         post.setUuid(null);
-        return postService.createPost(post);
-
+        post = postService.createPost(post);
+        if(attachments!=null) {
+            Post finalPost = post;
+            attachments.forEach(file -> {
+                try {
+                    Attachment attachment = attachmentService.createAttachment(file);
+                    attachment.setPost(finalPost);
+                    finalPost.getAttachments().add(attachment);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            post = postService.savePost(finalPost);
+        }
+        return post;
     }
 
     /**
@@ -93,7 +111,8 @@ public class PostControllerService {
         comment.setAuthor(accountService.getAccountById(accountId));
         comment.setCreationDate(LocalDateTime.now());
         comment.setUuid(null);
-        return postService.createComment(postService.getPostById(postId),comment);
+        comment = postService.createComment(comment);
+        return comment.getPost();
     }
     /**
      * Validate if the given Authentication matches to the given roles for the given event id.
@@ -104,5 +123,14 @@ public class PostControllerService {
      */
     public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
         return authService.validateRights(auth, roles, uuid);
+    }
+
+    /**
+     * Get attachment identified by an id
+     * @param attachmentId the id of the attachment
+     * @return the attachment or an error if something went wrong.
+     */
+    public Attachment getAttachment(String attachmentId) {
+        return attachmentService.getAttachment(attachmentId);
     }
 }

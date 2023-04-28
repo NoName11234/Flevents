@@ -20,7 +20,7 @@ import DefaultBar from '@/layouts/default/TitleBar.vue'
 import NavigationBar from "@/layouts/default/NavigationBar.vue";
 import ContentFlexContainer from "@/layouts/default/ContentFlexContainer.vue";
 import {useAppStore} from "@/store/app";
-import ToastDisplay from "@/layouts/default/toastDisplay.vue";
+import ToastDisplay from "@/layouts/default/ToastDisplay.vue";
 
 const appStore = useAppStore();
 

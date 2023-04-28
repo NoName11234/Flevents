@@ -42,6 +42,9 @@ public class Post {
     private LocalDateTime creationDate;
     @OneToMany(mappedBy = "post")
     private List<PostComment> comments = new ArrayList<>();
+    @OneToMany(mappedBy = "post")
+    private List<Attachment> attachments = new ArrayList<>();
+
 
     public void merge(Post post){
         if(post.getTitle()!=null){
