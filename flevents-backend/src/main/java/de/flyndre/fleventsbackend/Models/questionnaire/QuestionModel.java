@@ -22,8 +22,8 @@ public class QuestionModel {
     private String uuid;
     private String question;
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private QuestionnaireModel questionnaire;
-    @Nullable @OneToMany
+    @Nullable @OneToMany(cascade = CascadeType.ALL)
     private List<ChoiceModel> choiceModels;
 }

@@ -22,10 +22,10 @@ public class AnsweredQuestionnaireModel {
     @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private FleventsAccount user;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<AnsweredQuestionModel> answers = new ArrayList<>();
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private QuestionnaireModel questionnaireModel;
 }
