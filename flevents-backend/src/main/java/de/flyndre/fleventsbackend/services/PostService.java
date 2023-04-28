@@ -45,7 +45,7 @@ public class PostService {
     public Post getPostById(String postId){
         Optional<Post> optional = postRepository.findById(postId);
         if(!optional.isPresent()){
-            throw new NoSuchElementException("Could not found a Post with this id");
+            throw new NoSuchElementException("Could not found a Post with this id. Does it exist? ID: "+postId);
         }
         return optional.get();
     }
@@ -61,17 +61,20 @@ public class PostService {
 
     /**
      * Overwrites the specified post with the given post object. Throws an Exception if there is no post with the specified id.
-     * @param postId the id of the post to overwrite
-     * @param post the new post
+     *
+     * @param postId      the id of the post to overwrite
+     * @param post        the new post
+     * @param attachments
      * @return the overwritten post
      */
-    public Post updatePost(String postId,Post post){
-        Optional<Post> optional = postRepository.findById(postId);
-        if(!optional.isPresent()){
-            throw new NoSuchElementException("Could not found a Post with this id");
+    public Post updatePost(String postId, Post post, List<Attachment> attachments){
+        Post srcPost = getPostById(postId);
+        if(post!=null){
+            srcPost.merge(post);
         }
-        Post srcPost = optional.get();
-        srcPost.merge(post);
+        if(attachments!=null){
+            attachments.forEach(attachment -> addAttachment(srcPost,attachment));
+        }
         return postRepository.save(srcPost);
     }
 
@@ -97,5 +100,36 @@ public class PostService {
     public Post addAttachment(Post post, Attachment attachment) {
         post.addAttachment(attachment);
         return postRepository.save(post);
+    }
+
+    /**
+     * Get a comment by its id.
+     * @param commentId the id of the wanted comment
+     * @return the Comment if its exist
+     * @throws NoSuchElementException if there is no comment to the given id.
+     */
+    public PostComment getComment(String commentId) {
+        Optional<PostComment> optional = commentRepository.findById(commentId);
+        if(optional.isEmpty()){
+            throw new NoSuchElementException("The comment with the given id was not found. Id: "+commentId);
+        }
+        return optional.get();
+    }
+
+    /**
+     * Delete a comment out of the database.
+     * @param comment the comment to delete.
+     */
+    public void deleteComment(PostComment comment) {
+        commentRepository.delete(comment);
+    }
+
+    /**
+     * Deletes a post from the database
+     * @param post the post to delete
+     */
+    public void deletePost(Post post) {
+        post.getComments().forEach(comment -> deleteComment(comment));
+        postRepository.delete(post);
     }
 }

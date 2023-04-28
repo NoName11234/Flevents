@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Attachment;
+import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.repositories.AttachmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,11 +28,12 @@ public class AttachmentService {
      * @return the saved attachment
      * @throws IOException if MultipartFile not accessible
      */
-    public Attachment createAttachment(MultipartFile file) throws IOException {
+    public Attachment createAttachment(MultipartFile file, Post post) throws IOException {
         Attachment attachment = new Attachment();
         attachment.setUuid(null);
         attachment.setFilename(file.getOriginalFilename());
         attachment.setData(file.getBytes());
+        attachment.setPost(post);
         return attachmentRepository.save(attachment);
     }
 
@@ -42,5 +44,13 @@ public class AttachmentService {
      */
     public Attachment getAttachment(String attachmentId) {
         return attachmentRepository.findById(attachmentId).get();
+    }
+
+    /**
+     * Removes an attachment from the database.
+     * @param attachment the attachment to delete.
+     */
+    public void deleteAttachment(Attachment attachment) {
+        attachmentRepository.delete(attachment);
     }
 }

@@ -5,14 +5,17 @@ import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.services.*;
+import jdk.jshell.spi.ExecutionControl;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This Class is the service for the PostController class.
@@ -76,8 +79,7 @@ public class PostControllerService {
             Post finalPost = post;
             attachments.forEach(file -> {
                 try {
-                    Attachment attachment = attachmentService.createAttachment(file);
-                    attachment.setPost(finalPost);
+                    Attachment attachment = attachmentService.createAttachment(file,finalPost);
                     finalPost.getAttachments().add(attachment);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -90,12 +92,24 @@ public class PostControllerService {
 
     /**
      * Overwrites the specified post with the given post.
-     * @param postId the id of the post to be overwritten
-     * @param post the post to overwrite the old one with
+     *
+     * @param postId      the id of the post to be overwritten
+     * @param post        the post to overwrite the old one with
+     * @param attachments attachments to add to the post
      * @return the updated post
      */
-    public Post updatePost(String postId, Post post){
-        return postService.updatePost(postId,post);
+    public Post updatePost(String postId, @Nullable Post post,@Nullable List<MultipartFile> attachments){
+        if(attachments==null){
+            attachments = new ArrayList<>();
+        }
+        List<Attachment> attachmentList = attachments.stream().map(file -> {
+            try {
+                return attachmentService.createAttachment(file,getPost(postId));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).collect(Collectors.toList());
+        return postService.updatePost(postId,post,attachmentList);
     }
 
     /**
@@ -126,6 +140,16 @@ public class PostControllerService {
     }
 
     /**
+     * Decides if a user is the author of a comment an allowed to edit it.
+     * @param auth the Authentication to validate.
+     * @param commentId the id of the comment to check for.
+     * @return true if user is author otherwise false.
+     */
+    public boolean getCommentGranted(Authentication auth, String commentId) throws ExecutionControl.NotImplementedException {
+        throw new ExecutionControl.NotImplementedException("Not Implemented");
+    }
+
+    /**
      * Get attachment identified by an id
      * @param attachmentId the id of the attachment
      * @return the attachment or an error if something went wrong.
@@ -142,6 +166,32 @@ public class PostControllerService {
      * @throws IOException if the MultipartFile isn't present anymore.
      */
     public Post addAttachment(String postId, MultipartFile attachment) throws IOException {
-        return postService.addAttachment(getPost(postId),attachmentService.createAttachment(attachment));
+        return postService.addAttachment(getPost(postId),attachmentService.createAttachment(attachment,postService.getPostById(postId)));
+    }
+
+    /**
+     * Deletes the attachment anthe association to the post it belongs to.
+     * @param attachmentId the id of the attachment to delete.
+     */
+    public void deleteAttachment(String attachmentId) {
+        attachmentService.deleteAttachment(attachmentService.getAttachment(attachmentId));
+    }
+
+    /**
+     * Delete a comment and it's
+     * @param commentId the id of the comment to delete
+     */
+    public void deleteComment(String commentId) {
+        postService.deleteComment(postService.getComment(commentId));
+    }
+
+    /**
+     * Delete a post with all its associations
+     * @param postId the id of the post to delete
+     */
+    public void deletePost(String postId) {
+        Post post = getPost(postId);
+        post.getAttachments().forEach(attachment -> attachmentService.deleteAttachment(attachment));
+        postService.deletePost(post);
     }
 }
