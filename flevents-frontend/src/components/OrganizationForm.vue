@@ -18,12 +18,15 @@ const props = defineProps({
 
 const route = useRoute();
 const router = useRouter();
+
+const organizationUuid = route.params.uuid as string;
+
 const tooltip = ref("");
 const imageFile: Ref<Array<File>> = ref([]);
 const loading = ref(false);
 
 const organizationStore = useOrganizationStore()
-const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
+const organization = organizationStore.getOrganizationGetter(organizationUuid);
 
 const initialIcon = organization.value.icon;
 function previewImage(e: any) {
@@ -48,7 +51,7 @@ async function submit() {
       const file = imageFile.value[0]
       organization.value.icon = await getBase64(file) as string;
     }
-    const response = organizationsApi.edit(route.params.uuid as string, organization.value);
+    const response = organizationsApi.edit(organizationUuid, organization.value);
     await router.push(props.submitRoute);
   } catch (e) {
     if (e instanceof AxiosError) {
@@ -62,9 +65,9 @@ async function submit() {
       tooltip.value = `Unerwarteter Fehler: ${e}`;
     }
     console.error(e);
-  } finally {
-    loading.value = false;
   }
+  loading.value = false;
+  organizationStore.hydrateSpecific(organizationUuid);
 }
 
 </script>

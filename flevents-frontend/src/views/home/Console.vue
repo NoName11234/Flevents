@@ -64,6 +64,7 @@ async function deleteOrganization(organization: Organization) {
   ok = confirm(
     `Sind Sie sicher, dass Sie die Organisation ${organization.name} löschen wollen?`
     + ` Damit löschen Sie ${organization.eventPreviews.length} zugehörige Events und deren zugehörige Daten wie Posts und Umfragen.`
+    + ` Außerdem löschen Sie die Verbindugen zu ${organization.accountPreviews.length} Accounts.`
     + ` Diese Daten sind danach verloren und können nicht wiederhergestellt werden.`
   );
   if (!ok) return;
