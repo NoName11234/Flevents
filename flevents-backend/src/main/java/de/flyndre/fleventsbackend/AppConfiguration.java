@@ -94,7 +94,7 @@ public class AppConfiguration {
             protected List<AttachmentPreview> convert(List<Attachment> attachments) {
                 return attachments.stream().map(attachment -> {
                     AttachmentPreview preview = modelMapper.map(attachment, AttachmentPreview.class);
-                    preview.setUrl(baseurl+":"+serverPort+"/api/events/"+attachment.getPost().getEvent().getUuid()+"/posts/attachment/"+preview.getUuid());
+                    preview.setUrl(baseurl+":"+serverPort+"/api/events/"+attachment.getPost().getEvent().getUuid()+"/posts/attachments/"+preview.getUuid());
                     return preview;
                 }).collect(Collectors.toList());
             }
