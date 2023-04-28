@@ -9,13 +9,13 @@ const base = `/events`
  * @author David Maier
  * @since Weekly Build 2
  */
-class EventApi {
+class EventsApi {
 
   // CRUD
 
   /**
    * Creates an event.
-   * @param event the account to be created.
+   * @param event the event to be created.
    * @param organizationUuid the uuid of the organization the event belongs to
    */
   create(event: FleventsEvent, organizationUuid: string) {
@@ -189,4 +189,4 @@ class EventApi {
   }
 }
 
-export default new EventApi();
+export default new EventsApi();

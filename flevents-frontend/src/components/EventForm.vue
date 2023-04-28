@@ -9,7 +9,7 @@ import security from "@/service/security";
 import {Account} from "@/models/account";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 import {useEventStore} from "@/store/events";
 import {load} from "webfontloader";
 import {useOrganizationStore} from "@/store/organizations";

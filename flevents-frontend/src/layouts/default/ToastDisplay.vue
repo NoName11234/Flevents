@@ -15,6 +15,7 @@ function closeToast(toast: ToastType) {
 
 <template>
   <v-container
+    v-if="toasts.length > 0"
     class="c-toast-display"
   >
     <div

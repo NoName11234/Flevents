@@ -1,42 +1,74 @@
 <script setup lang="ts">
 import ColorService from "@/service/colorService";
 import {Comment} from "@/models/comment";
-import {Account} from "@/models/account";
-import {onBeforeMount, ref} from "vue";
+import {ref} from "vue";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import commentApi from "@/api/commentsApi";
+import {AxiosError} from "axios";
+import {useAppStore} from "@/store/app";
+import {useEventStore} from "@/store/events";
 
 const props = defineProps({
-  account: {
+  eventUuid: {
     required: true,
-    type: Object as () => Account,
+    type: String,
+  },
+  postUuid: {
+    required: true,
+    type: String,
   }
 });
 
+const appStore = useAppStore();
+const eventStore = useEventStore();
+
+const accountStore = useAccountStore();
+const { currentAccount: account } = storeToRefs(accountStore);
+
 const plainComment = {
-  author: props.account,
+  author: account.value,
   content: '',
 } as Comment;
 const comment = ref({ ...plainComment });
 
 const tooltip = ref('');
-const loading = ref(true);
-
-onBeforeMount(() => {
-  loading.value = false;
-});
+const loading = ref(false);
 
 async function submit() {
-  loading.value = true;
   tooltip.value = '';
   if (comment.value.content.length === 0) {
     tooltip.value = 'Es können keine leeren Kommentare gepostet werden.'
     loading.value = false;
     return;
   }
-  // TODO
-  await new Promise(res => setTimeout(res, 2000));
-  // TODO
-  comment.value = { ...plainComment };
+  loading.value = true;
+  try {
+    await commentApi.create(comment.value, props.postUuid, props.eventUuid);
+    comment.value = { ...plainComment };
+    appStore.addToast({
+      text: 'Kommentar gepostet.',
+      color: 'success',
+    });
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Kommentieren fehlgeschlagen: ${errorMessage}`,
+      color: 'error',
+    });
+  }
   loading.value = false;
+  eventStore.hydrateSpecific(props.eventUuid);
 }
 
 </script>
@@ -84,9 +116,5 @@ async function submit() {
 </template>
 
 <style scoped>
-
-.w-custom {
-  width: 100%;
-}
 
 </style>
