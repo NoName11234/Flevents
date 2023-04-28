@@ -188,4 +188,12 @@ public class FleventsAccountService {
         account.setAnsweredQuestionnaireModels(answeredQuestionnaireModels);
         fleventsAccountRepository.save(account);
     }
+
+    public void saveAnsweredQuestionnaire(AnsweredQuestionnaireModel answeredQuestionnaireModel, String userId){
+        FleventsAccount account = getAccountById(userId);
+        List<AnsweredQuestionnaireModel> answers = account.getAnsweredQuestionnaireModels();
+        answers.add(answeredQuestionnaireModel);
+        account.setAnsweredQuestionnaireModels(answers);
+        fleventsAccountRepository.save(account);
+    }
 }
