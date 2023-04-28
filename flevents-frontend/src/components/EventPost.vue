@@ -68,7 +68,7 @@ async function deletePost() {
 }
 
 async function downloadAttachment(url: string) {
-  window.location.href = url;
+  window.open(url, '_blank')?.focus();
 }
 
 </script>
