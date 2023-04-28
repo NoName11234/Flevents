@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.services;
 
+import de.flyndre.fleventsbackend.Models.Attachment;
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.Post;
 import de.flyndre.fleventsbackend.Models.PostComment;
@@ -9,6 +10,7 @@ import de.flyndre.fleventsbackend.repositories.PostRepository;
 import java.util.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * This Service provides logic and usage for the Post repository.
@@ -83,6 +85,17 @@ public class PostService {
     }
 
     public Post savePost(Post post) {
+        return postRepository.save(post);
+    }
+
+    /**
+     * Add an Attachemnt to an existing post and save it.
+     * @param post post to add attachment
+     * @param attachment attachment to add
+     * @return the manipulated post
+     */
+    public Post addAttachment(Post post, Attachment attachment) {
+        post.addAttachment(attachment);
         return postRepository.save(post);
     }
 }

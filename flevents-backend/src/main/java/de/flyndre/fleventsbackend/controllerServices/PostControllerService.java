@@ -133,4 +133,15 @@ public class PostControllerService {
     public Attachment getAttachment(String attachmentId) {
         return attachmentService.getAttachment(attachmentId);
     }
+
+    /**
+     * Add an MultipartFile to an existing post.
+     * @param postId the id of the post to add to
+     * @param attachment the MultipartFile to add
+     * @return the manipulated Post
+     * @throws IOException if the MultipartFile isn't present anymore.
+     */
+    public Post addAttachment(String postId, MultipartFile attachment) throws IOException {
+        return postService.addAttachment(getPost(postId),attachmentService.createAttachment(attachment));
+    }
 }

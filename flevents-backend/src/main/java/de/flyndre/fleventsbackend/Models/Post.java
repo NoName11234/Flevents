@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.jbosslog.JBossLog;
-import org.hibernate.SessionEventListener;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 /**
@@ -45,6 +42,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Attachment> attachments = new ArrayList<>();
 
+    public void addAttachment(Attachment attachment){
+        this.attachments.add(attachment);
+    }
 
     public void merge(Post post){
         if(post.getTitle()!=null){

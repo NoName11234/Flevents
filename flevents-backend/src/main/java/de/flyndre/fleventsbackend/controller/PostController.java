@@ -103,11 +103,12 @@ public class PostController {
      * @return ResponseEntity with the commented post and the http status code
      */
     @PostMapping("/{postId}/comments")
-    public ResponseEntity createComment(@PathVariable String eventId, @PathVariable String postId, @RequestParam String accountId,@RequestBody PostComment comment,Authentication auth){
+    public ResponseEntity createComment(@PathVariable String eventId, @PathVariable String postId,@RequestBody PostComment comment,Authentication auth){
         if(!postControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity(mapper.map(postControllerService.createComment(postId,eventId,accountId,comment), PostInformation.class),HttpStatus.OK);
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        return new ResponseEntity(mapper.map(postControllerService.createComment(postId,eventId,userDetails.getId(),comment), PostInformation.class),HttpStatus.OK);
     }
 
     /**
@@ -117,7 +118,7 @@ public class PostController {
      * @param auth the Authentication generated out of a barer token.
      * @return the raw file or an error if something went wrong.
      */
-    @GetMapping("/attachment/{attachmentId}")
+    @GetMapping("/attachments/{attachmentId}")
     public ResponseEntity getAttachment(@PathVariable String eventId,@PathVariable String attachmentId,Authentication auth){
         if(!postControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
@@ -129,4 +130,25 @@ public class PostController {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Adds a MultipartFile as an attachment to an existing post.
+     * @param eventId the id of the event of the post
+     * @param postId the id of the post to add to
+     * @param attachment the MultipartFile to add
+     * @param auth the Authentication generated out of a barer token.
+     * @return the manipulated post or an error if something went wrong
+     */
+    @PostMapping("/{postId}/attachments")
+    public ResponseEntity addAttachment(@PathVariable String eventId,@PathVariable String postId,@RequestBody MultipartFile attachment,Authentication auth){
+        if(!postControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer,EventRole.tutor))){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
+        try{
+            return new ResponseEntity(mapper.map(postControllerService.addAttachment(postId,attachment), PostInformation.class),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
