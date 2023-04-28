@@ -96,10 +96,9 @@ const props = defineProps({
   left: 0;
   top: 0;
   z-index: 1002;
-  width: 100%;
+  width: 230px;
   height: 100vh;
   padding-top: 5rem;
-  max-width: 230px;
   overflow: auto;
 }
 </style>

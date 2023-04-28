@@ -406,10 +406,12 @@ async function deleteEvent() {
     <v-window v-model="tab">
 
       <v-window-item value="info">
-        <v-container>
-          {{event?.description}}
-        </v-container>
-        <v-divider />
+        <template v-if="event?.description">
+          <v-container>
+            {{event?.description}}
+          </v-container>
+          <v-divider />
+        </template>
         <v-list>
           <v-list-item
             v-if="event?.startTime && event?.endTime"

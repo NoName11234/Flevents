@@ -10,10 +10,12 @@
       cover
       :src="event?.image ?? ''"
     />
-    <v-container>
-      {{event?.description}}
-    </v-container>
-    <v-divider />
+    <template v-if="event?.description">
+      <v-container>
+        {{event?.description}}
+      </v-container>
+      <v-divider />
+    </template>
     <v-list>
       <v-list-item
         v-if="event?.startTime && event?.endTime"

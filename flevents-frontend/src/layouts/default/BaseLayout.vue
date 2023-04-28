@@ -8,7 +8,7 @@
       </ContentFlexContainer>
     </v-main>
     <desktop-nav-bar
-      v-show="showDesktopBar"
+      v-if="showDesktopBar"
       :show-personal="showPersonal"
       :show-managed="showManaged"
       :show-explore="showExplore"
@@ -16,7 +16,7 @@
       :show-console="showConsole"
     />
     <mobile-nav-bar
-      v-show="showMobileBar"
+      v-if="showMobileBar"
       :show-personal="showPersonal"
       :show-managed="showManaged"
       :show-explore="showExplore"
