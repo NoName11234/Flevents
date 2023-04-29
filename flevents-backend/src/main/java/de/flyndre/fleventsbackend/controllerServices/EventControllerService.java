@@ -180,7 +180,7 @@ public class EventControllerService {
      * @param account the anonymous account to be added
      */
     public void addAnonymousAccountToEvent(String eventId, FleventsAccount account){
-        account = accountService.createAccount(account);
+        account = accountService.createAnonymousAccountWithName(account.getEmail(), account.getFirstname(), account.getLastname());
         eventService.addAccountToEvent(getEventById(eventId),account,EventRole.guest);
     }
 

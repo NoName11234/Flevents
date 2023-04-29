@@ -176,7 +176,7 @@ class EventsApi {
    * @param account the account, only containing the mail
    */
   acceptAnonymousInvitation(eventUuid: string, account: AccountPreview) {
-    return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, {account: account});
+    return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, account);
   }
 
 

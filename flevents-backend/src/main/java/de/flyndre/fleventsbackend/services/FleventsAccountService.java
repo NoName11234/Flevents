@@ -141,6 +141,26 @@ public class FleventsAccountService {
     }
 
     /**
+     * Creates an anonymous account in the Database with First and Lastname.
+     * @implNote This is for Event-Purpose Only
+     * @param email the email for the account to be created
+     * @param firstname the firstname for the account to be created
+     * @param lastname the lastname for the account to be created
+     * @return FleventsAccount which has been created
+     */
+    public FleventsAccount createAnonymousAccountWithName(String email, String firstname, String lastname){
+        if(fleventsAccountRepository.findByEmail(email).isPresent()){
+            throw new IllegalArgumentException("Email already in use");
+        }
+        FleventsAccount account = new FleventsAccount();
+        account.setEmail(email);
+        account.setFirstname(firstname);
+        account.setLastname(lastname);
+        return fleventsAccountRepository.save(account);
+    }
+
+
+    /**
      * Overwrites an existing account with a new given account object.
      * @param accountId the id of the account to be overwritten
      * @param account the account object with the new values
