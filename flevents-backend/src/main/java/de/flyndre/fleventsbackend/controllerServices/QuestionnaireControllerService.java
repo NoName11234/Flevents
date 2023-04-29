@@ -44,12 +44,17 @@ public class QuestionnaireControllerService {
         return authService.validateRights(auth, roles, uuid);
     }
 
-    public List<QuestionnaireModel> getQuestionnaires(String eventId){
-        return questionnaireService.getQuestionnaires(eventService.getEventById(eventId));
+    public List<Questionnaire> getQuestionnaires(String eventId){
+        List<QuestionnaireModel> questionnaireModels = questionnaireService.getQuestionnaires(eventService.getEventById(eventId));
+        List<Questionnaire> questionnaires = new ArrayList<>();
+        for(int i=0;i<questionnaireModels.size();i++){
+            questionnaires.add(convertQuestionnaireModelToQuestionnaire(questionnaireModels.get(i)));
+        }
+        return questionnaires;
     }
 
-    public QuestionnaireModel getQuestionnaire(String questionnaireId){
-        return questionnaireService.getQuestionnaire(questionnaireId);
+    public Questionnaire getQuestionnaire(String questionnaireId){
+        return convertQuestionnaireModelToQuestionnaire(questionnaireService.getQuestionnaire(questionnaireId));
     }
 
     public AnsweredQuestionnaireModel getAnswerFromUser(String questionnaireId, String userId){
@@ -133,7 +138,7 @@ public class QuestionnaireControllerService {
         AnsweredQuestionnaireModel answeredQuestionnaireModel = new AnsweredQuestionnaireModel();
         answeredQuestionnaireModel.setUuid(answeredQuestionnaire.getUuid());
         answeredQuestionnaireModel.setUser(fleventsAccountService.getAccountById(answeredQuestionnaire.getUserId()));
-        answeredQuestionnaireModel.setQuestionnaireModel(getQuestionnaire(answeredQuestionnaire.getQuestionnaireId()));
+        answeredQuestionnaireModel.setQuestionnaireModel(questionnaireService.getQuestionnaire(answeredQuestionnaire.getQuestionnaireId()));
 
         List<AnsweredQuestionModel> answerModels = new ArrayList<>();
 
@@ -146,5 +151,39 @@ public class QuestionnaireControllerService {
 
         answeredQuestionnaireModel.setAnswers(answerModels);
         return answeredQuestionnaireModel;
+    }
+
+    private Questionnaire convertQuestionnaireModelToQuestionnaire(QuestionnaireModel questionnaireModel){
+        Questionnaire questionnaire = new Questionnaire();
+        List<Question> questions = new ArrayList<>();
+        List<QuestionModel> questionModels = questionnaireModel.getQuestions();
+
+        for(int a=0;a<questionModels.size();a++){
+            QuestionModel questionModel = questionModels.get(a);
+            Question question = new Question();
+            List<Choice> choices = new ArrayList<>();
+            List<ChoiceModel> choiceModels = questionModel.getChoiceModels();
+
+            for(int b=0;b<choiceModels.size();b++){
+                ChoiceModel choiceModel = choiceModels.get(b);
+                Choice choice = new Choice();
+
+                choice.setChoice(choiceModel.getChoice());
+                choice.setUuid(choiceModel.getUuid());
+                choices.add(choice);
+            }
+
+            question.setChoices(choices);
+            question.setQuestion(questionModel.getQuestion());
+            question.setUuid(questionModel.getUuid());
+            questions.add(question);
+        }
+        questionnaire.setQuestions(questions);
+        questionnaire.setUuid(questionnaireModel.getUuid());
+        questionnaire.setTitle(questionnaireModel.getTitle());
+        questionnaire.setCreationDate(questionnaireModel.getCreationDate());
+        questionnaire.setClosingDate(questionnaireModel.getClosingDate());
+
+        return questionnaire;
     }
 }
