@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {AxiosError} from "axios";
@@ -39,7 +39,7 @@ const posts = computed(() => event.value
   .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
-const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
+const questionnaires = computed(() => event.value.questionnaires);
 const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
 const organizationStore = useOrganizationStore();
 const addAnon = ref(false);
@@ -357,6 +357,10 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
+onMounted(() => {
+  console.log(event);
+  console.log(questionnaires);
+})
 </script>
 
 <template>

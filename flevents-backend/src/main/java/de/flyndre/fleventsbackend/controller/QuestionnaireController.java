@@ -54,9 +54,10 @@ public class QuestionnaireController {
        return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
     }
 
+    //TODO: Ändern das Auth als User verwendet wird
     @GetMapping("/{questionnaireId}/answers/{userId}")
     public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId, Authentication auth){
-        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
 

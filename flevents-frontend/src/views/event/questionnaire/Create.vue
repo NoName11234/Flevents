@@ -80,7 +80,7 @@ async function removeChoice(question: SingleChoiceQuestion, index: number) {
 }
 
 async function submit(){
-  console.log(JSON.stringify(questionnaire.value));
+  console.log(questionnaire.value);
 
   try {
     const response = questionnaireApi.create( questionnaire.value, eventId as string)

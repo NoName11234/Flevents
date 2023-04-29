@@ -44,6 +44,15 @@ class QuestionnaireApi {
   }
 
   /**
+   * Retrieves the Answer of the questionnaire.
+   * @param questionnaireUuid the uuid of the questionnaire
+   * @param userUuid the Uuid of the user
+   */
+  getAnswers(questionnaireUuid : string, userUuid: string) {
+    return api.get(`/questionnaires/${questionnaireUuid}/answers/${userUuid}`);
+  }
+
+  /**
    * Modifies the post with the given uuid.
    * @param uuid the uuid of the post
    * @param eventUuid the uuid of the post's event
