@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -159,6 +158,16 @@ public class EventControllerService {
     }
 
     /**
+     * invalidates the given InvitationToken
+     * @param token the InvitationToken to a specific event
+     * @param eventId the EventUuid to the Event
+     * */
+
+    public void validateAndDeleteToken(String token, String eventId) throws InvalidAttributesException {
+        InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
+        invitationTokenService.deleteToken(invitationToken);
+    }
+    /**
      * Changes the role of a specified account in an event.
      * @param eventId the id of the event with the account
      * @param accountId the id of the account which role has to be changed
@@ -179,11 +188,23 @@ public class EventControllerService {
      * @param eventId the id of the event to add the anonymous account to
      * @param email the email of the anonymous account to be added
      */
+
     public void addAnonymousAccountToEvent(String eventId, String email, String token) throws  InvalidAttributesException{
         FleventsAccount account = accountService.createAnonymousAccount(email);
         InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
+
         eventService.addAccountToEvent(getEventById(eventId),account,EventRole.guest);
         invitationTokenService.deleteToken(invitationToken);
+    }
+
+    /**
+     * Registers an anonymous Account to an Event.
+     * @param eventId the id of the event to add the anonymous account to
+     * @param mailAddress the mail adr ess to be added
+     */
+    public void registerAnonymousAccountToEvent(String eventId, String mailAddress){
+        FleventsAccount account = accountService.createAnonymousAccount(mailAddress);
+        eventService.addAccountToEvent(getEventById(eventId),account,EventRole.attendee);
     }
 
     /**
@@ -244,6 +265,15 @@ public class EventControllerService {
      */
     public void attendeesCheckIn(String eventId, String accountId){
         eventService.attendeesCheckIn(getEventById(eventId), accountService.getAccountById(accountId));
+    }
+
+    /**
+     * Sets the attendees status to checkedOut.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckOut(String eventId, String accountId){
+        eventService.attendeesCheckOut(getEventById(eventId), accountService.getAccountById(accountId));
     }
 
     /**

@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.dtos;
 
 import de.flyndre.fleventsbackend.Models.MailConfig;
+import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
@@ -28,5 +29,8 @@ public class EventInformation extends EventPreview{
     @Getter
     @Setter
     private List<PostInformation> posts;
+    @Getter
+    @Setter
+    private List<Questionnaire> questionnaires;
 
 }
