@@ -60,7 +60,8 @@ public class QuestionnaireControllerService {
         QuestionnaireModel questionnaireModel = convertQuestionnaireToQuestionnaireModel(questionnaire);
         questionnaireModel.setEvent(eventService.getEventById(eventId));
         questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
-        eventService.registerNewQuestionnaire(questionnaireModel, eventId);
+        //for test purposes
+        //eventService.registerNewQuestionnaire(questionnaireModel, eventId);
         return questionnaireModel;
     }
 
@@ -90,7 +91,8 @@ public class QuestionnaireControllerService {
     public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){
         answeredQuestionnaire.setQuestionnaireId(questionnaireId);
         AnsweredQuestionnaireModel newAqm = convertAnsweredQuestionnaireToAnsweredQuestionnaireModel(answeredQuestionnaire);
-        fleventsAccountService.saveAnsweredQuestionnaire(newAqm, answeredQuestionnaire.getUserId());
+        //for test purposes
+        //fleventsAccountService.saveAnsweredQuestionnaire(newAqm, answeredQuestionnaire.getUserId());
         return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
     }
 
@@ -111,7 +113,7 @@ public class QuestionnaireControllerService {
             List<ChoiceModel> choiceModels = new ArrayList<>();
             for(int a=0; a<q.getChoices().size();a++){
                 Choice dto = q.getChoices().get(a);
-                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice(), qm);
+                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice());
                 choiceModels.add(m);
             }
             qm.setUuid(q.getUuid());
@@ -135,8 +137,7 @@ public class QuestionnaireControllerService {
 
         for(int i=0;i<answeredQuestionnaire.getAnswers().size();i++){
             AnsweredQuestion aq = answeredQuestionnaire.getAnswers().get(i);
-            //TODO: null austauschen
-            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice(), null);
+            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
             AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(),cm, aq.getAnswer(),answeredQuestionnaireModel);
             answerModels.add(aqm);
         }

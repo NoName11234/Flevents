@@ -51,18 +51,6 @@ public class QuestionnaireService {
     }
 
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
-        List<QuestionModel> questions = questionnaireModel.getQuestions();
-
-        for(int i=0;i<questions.size();i++){
-            QuestionModel thisQuestion = questions.get(i);
-            List<ChoiceModel> choices = thisQuestion.getChoiceModels();
-
-            for(int a=0;a<choices.size();a++){
-                choiceRepository.save(choices.get(a));
-            }
-
-            questionRepository.save(thisQuestion);
-        }
         return questionnaireRepository.save(questionnaireModel);
     }
 

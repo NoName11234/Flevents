@@ -7,7 +7,7 @@ export interface Post {
   author: Account,
   title: string,
   content: string,
-  creationDate: Date,
+  creationDate: string,
   attachments?: Array<Attachment>,
   comments?: Array<Comment>,
 

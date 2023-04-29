@@ -6,12 +6,19 @@ import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
 import {useEventStore} from "@/store/events";
+import attachmentsApi from "@/api/attachmentsApi";
+import {Attachment} from "@/models/attachment";
+import {useAppStore} from "@/store/app";
 
 const router = useRouter();
 const route = useRoute();
 
 const eventUuid = route.params.uuid as string;
 const postUuid = route.params.postUuid as string;
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
+
+const appStore = useAppStore();
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
@@ -25,15 +32,15 @@ const tooltip = ref("");
 const loading = ref(false);
 const inputFiles = ref([] as File[]);
 const files = ref([] as File[]);
-
-const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
+const deletedAttachments = ref([] as Attachment[]);
+const remainingExistingAttachments = computed(() => post.value.attachments?.filter(a => !deletedAttachments.value.includes(a)));
 
 async function removeAttachment(index: number) {
   files.value.splice(index, 1);
 }
 
-async function removeExistingAttachment(index: number) {
-  post.value.attachments?.splice(index, 1);
+async function removeExistingAttachment(attachment: Attachment) {
+  deletedAttachments.value.push(attachment);
 }
 
 
@@ -59,6 +66,27 @@ async function submit() {
     return;
   }
   loading.value = true;
+
+  // First, try to remove all deleted attachments.
+  let successful = [] as string[];
+  let unsuccessful = [] as string[];
+  for (let attachment of deletedAttachments.value) {
+    try {
+      await attachmentsApi.delete(attachment.uuid, eventUuid);
+      successful.push(attachment.filename);
+    } catch (e) {
+      unsuccessful.push(attachment.filename);
+    }
+  }
+  // Only notify if removal was unsuccessful.
+  if (unsuccessful.length > 0) {
+    appStore.addToast({
+      text: `Fehler beim Entfernen folgender Anhänge: ${unsuccessful.join(', ')}`,
+      color: 'error',
+    });
+  }
+
+  // Then try to update the post itself.
   try {
     await postApi.edit(postUuid, eventUuid, post.value, files.value);
     await router.push(backRoute);
@@ -124,12 +152,14 @@ async function submit() {
 
       </v-container>
 
-      <template v-if="post.attachments?.length > 0">
+      <template v-if="remainingExistingAttachments.length > 0">
         <v-divider />
         <v-container class="d-flex flex-column gap-3">
-          <small class="text-grey">Existierende Anhänge</small>
+          <small class="text-grey">
+            Existierende Anhänge
+          </small>
           <div
-            v-for="(attachment, aIndex) in post.attachments"
+            v-for="(attachment, aIndex) in remainingExistingAttachments"
             :key="aIndex"
           >
             <v-card
@@ -152,7 +182,7 @@ async function submit() {
                   size="small"
                   variant="text"
                   color="error"
-                  @click="removeExistingAttachment(aIndex)"
+                  @click="removeExistingAttachment(attachment)"
                 />
               </div>
             </v-card>
@@ -226,7 +256,7 @@ async function submit() {
           v-if="tooltip !== ''"
           class="text-error"
         >
-          {{tooltip}}
+          {{ tooltip }}
         </div>
 
       </v-container>
