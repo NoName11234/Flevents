@@ -193,6 +193,27 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Adds an Anonymous account identified by the given Email. Invalidates the invitation token to the event.
+    * Allows access for invited and above of the specified event.
+    * @implNote Does Method is for anonymous Accounts only
+    * @param eventId the id of the event to add the account to
+    * @param token the token in the invitation link to verify the invitation
+    * @param mailAddress the MailAddress of the anonymous Account.
+    * @return ResponseEntity with the http status code
+    */
+   @PostMapping("/{eventId}/accept-invitation/anonymously")
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, @RequestParam String mailAddress){
+      try{
+         eventControllerService.validateAndDeleteToken(token, eventId);
+         eventControllerService.registerAnonymousAccountToEvent(eventId, mailAddress);
+         return new ResponseEntity(HttpStatus.OK);
+
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+      }
+   }
+
+   /**
     * Adds an account as an attendee to the event if the account is in the organization of this event.
     * Allows access for member and above of the organization of the specified event.
     * @param eventId the id of the event to add the account to
@@ -272,26 +293,44 @@ private final ModelMapper mapper;
    }
 
    /**
-    * not implemented yet
-    * Allows access for tutor and above of the specified event.
+    * Checks in the given Account
     * @param eventId the id of the event to check in
     * @param accountId the id of the account to be checked in
     * @param auth the Authentication generated out of a barer token.
     * @return HttpStatus whether the process was successfully or not
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
-   public ResponseEntity attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
+   public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+         return HttpStatus.UNAUTHORIZED;
       }
       try{
          eventControllerService.attendeesCheckIn(eventId,accountId);
-         return new ResponseEntity(HttpStatus.OK);
+         return HttpStatus.OK;
       }catch (Exception e){
-         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+         return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
 
+   /**
+    * Checks out the given Account
+    * @param eventId the id of the event to check in
+    * @param accountId the id of the account to be checked in
+    * @param auth the Authentication generated out of a barer token.
+    * @return HttpStatus whether the process was successfully or not
+    */
+   @PostMapping("/{eventId}/attendees/check-out/{accountId}")
+   public HttpStatus attendeesCheckOut(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+         return HttpStatus.UNAUTHORIZED;
+      }
+      try{
+         eventControllerService.attendeesCheckOut(eventId,accountId);
+         return HttpStatus.OK;
+      }catch (Exception e){
+         return HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+   }
    /**
     * not implemented yet
     * @param eventId the id of the event to add an attachment to
