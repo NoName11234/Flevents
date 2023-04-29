@@ -46,6 +46,8 @@ const fleventsEvent = ref( { ...props.presetEvent } as FleventsEvent || {
   endTime: "",
 } as FleventsEvent);
 
+const eventStore = useEventStore();
+
 const organizationStore = useOrganizationStore();
 const { managedOrganizations } = storeToRefs(organizationStore);
 
@@ -116,6 +118,7 @@ async function submit() {
     fleventsEvent.value.mailConfig = fleventsEvent.value.mailConfig ?? {};
     const response = await eventApi.create(fleventsEvent.value, selectedOrga.value.uuid);
     await router.push(props.submitRoute);
+    eventStore.hydrate();
   } catch (e) {
     console.log(e);
     if (e instanceof AxiosError) {
@@ -148,13 +151,6 @@ async function submit() {
       @submit.prevent="submit()"
     >
       <v-container class="d-flex flex-column gap-3">
-
-<!--        <v-select-->
-<!--          label="Event als Vorlage verwenden"-->
-<!--          messages="Hier kann später optional ein existierendes Event als Grundlage für das neue Event ausgewählt werden."-->
-<!--          hide-details="auto"-->
-<!--          disabled-->
-<!--        />-->
 
         <v-select
           label="Organisation"
@@ -211,6 +207,7 @@ async function submit() {
           no-resize
           v-model="fleventsEvent.description"
         ></v-textarea>
+
         <v-file-input
           label="Vorschaubild"
           variant="filled"
@@ -222,6 +219,7 @@ async function submit() {
           v-model="imageFile"
           accept="image/png, image/jpeg, image/bmp"
         />
+
         <div
           v-if="tooltip !== ''"
           class="text-error">

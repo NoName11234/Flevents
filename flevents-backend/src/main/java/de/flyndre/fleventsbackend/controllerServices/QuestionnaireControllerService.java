@@ -59,8 +59,10 @@ public class QuestionnaireControllerService {
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
         QuestionnaireModel questionnaireModel = convertQuestionnaireToQuestionnaireModel(questionnaire);
         questionnaireModel.setEvent(eventService.getEventById(eventId));
-
-        return questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
+        questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
+        //for test purposes
+        //eventService.registerNewQuestionnaire(questionnaireModel, eventId);
+        return questionnaireModel;
     }
 
     public QuestionnaireModel editQuestionnaire(String questionnaireId, Questionnaire questionnaire){
@@ -89,6 +91,8 @@ public class QuestionnaireControllerService {
     public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){
         answeredQuestionnaire.setQuestionnaireId(questionnaireId);
         AnsweredQuestionnaireModel newAqm = convertAnsweredQuestionnaireToAnsweredQuestionnaireModel(answeredQuestionnaire);
+        //for test purposes
+        //fleventsAccountService.saveAnsweredQuestionnaire(newAqm, answeredQuestionnaire.getUserId());
         return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
     }
 
@@ -107,10 +111,12 @@ public class QuestionnaireControllerService {
             Question q =  questionnaire.getQuestions().get(i);
             QuestionModel qm = new QuestionModel();
             List<ChoiceModel> choiceModels = new ArrayList<>();
-            for(int a=0; a<q.getChoices().size();a++){
-                Choice dto = q.getChoices().get(a);
-                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice());
-                choiceModels.add(m);
+            if(q.getChoices()!=null) {
+                for (int a = 0; a < q.getChoices().size(); a++) {
+                    Choice dto = q.getChoices().get(a);
+                    ChoiceModel m = new ChoiceModel(dto.getUuid(), dto.getChoice());
+                    choiceModels.add(m);
+                }
             }
             qm.setUuid(q.getUuid());
             qm.setQuestion(q.getQuestion());

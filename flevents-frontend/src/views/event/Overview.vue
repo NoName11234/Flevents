@@ -25,7 +25,7 @@ const eventUuid = route.params.uuid as string;
 
 const tab = computed({
   get: () => route.query.tab ?? 'info',
-  set: (tabValue) => router.replace({ query: { ...route.query, tab: tabValue }}),
+  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
 const accountStore = useAccountStore();
@@ -35,6 +35,8 @@ const appStore = useAppStore();
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
+const posts = computed(() => event.value
+  .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
 const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
@@ -352,6 +354,7 @@ async function deleteEvent() {
     console.error('Failed to delete event.', e);
     openContext.value = false;
   }
+  eventStore.hydrate();
 }
 
 </script>
@@ -425,10 +428,12 @@ async function deleteEvent() {
     <v-window v-model="tab">
 
       <v-window-item value="info">
-        <v-container>
-          {{event?.description}}
-        </v-container>
-        <v-divider />
+        <template v-if="event?.description">
+          <v-container>
+            {{event?.description}}
+          </v-container>
+          <v-divider />
+        </template>
         <v-list>
           <v-list-item
             v-if="event?.startTime && event?.endTime"
@@ -527,7 +532,7 @@ async function deleteEvent() {
           multiple
         >
           <EventPost
-            v-for="(post, pIndex) in event.posts"
+            v-for="(post, pIndex) in posts"
             :event-uuid="eventUuid"
             :post="post"
             :admin-view="validateRole === EventRole.organizer"

@@ -302,4 +302,12 @@ public class EventService {
         event.setQuestionnaires(questions);
         eventRepository.save(event);
     }
+
+    public void registerNewQuestionnaire(QuestionnaireModel questionnaireModel, String eventId){
+        Event event = getEventById(eventId);
+        List<QuestionnaireModel> questionnaires = event.getQuestionnaires();
+        questionnaires.add(questionnaireModel);
+        event.setQuestionnaires(questionnaires);
+        eventRepository.save(event);
+    }
 }

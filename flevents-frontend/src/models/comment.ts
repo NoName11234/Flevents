@@ -8,6 +8,6 @@ export interface Comment {
   author: Account,
   content: string,
   post: Post,
-  creationDate: Date,
+  creationDate: string,
 
 }

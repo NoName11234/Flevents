@@ -13,7 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//todo: implement authorization
+/**
+ * This Class is the Controller for the REST-API path "/api/questionnaires".
+ * It provides an interface regarding questionnaires.
+ * @author Paul Lehmann
+ * @version $I$
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/api/questionnaires")
@@ -27,6 +32,12 @@ public class QuestionnaireController {
         this.mapper = mapper;
     }
 
+    /**
+     * Returns all questionnaires from the specified event.
+     * @param eventId the id of the event to get the questionnaires from
+     * @param auth the authorization object
+     * @return
+     */
     @GetMapping
     public ResponseEntity getQuestionnaires(@RequestParam String eventId, Authentication auth){
         if(!questionnaireControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){

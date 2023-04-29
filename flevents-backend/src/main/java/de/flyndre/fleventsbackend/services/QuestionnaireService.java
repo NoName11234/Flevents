@@ -2,10 +2,11 @@ package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
-import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
-import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
+import de.flyndre.fleventsbackend.Models.questionnaire.*;
 import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
 import de.flyndre.fleventsbackend.repositories.AnsweredQuestionnaireRepository;
+import de.flyndre.fleventsbackend.repositories.ChoiceRepository;
+import de.flyndre.fleventsbackend.repositories.QuestionRepository;
 import de.flyndre.fleventsbackend.repositories.QuestionnaireRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,14 @@ import java.util.Optional;
 @Service
 public class QuestionnaireService {
     private final QuestionnaireRepository questionnaireRepository;
+    private final QuestionRepository questionRepository;
+    private final ChoiceRepository choiceRepository;
     private final AnsweredQuestionnaireRepository answeredQuestionnaireRepository;
-    public QuestionnaireService(QuestionnaireRepository questionnaireRepository, AnsweredQuestionnaireRepository answeredQuestionnaireRepository){
+    public QuestionnaireService(QuestionnaireRepository questionnaireRepository, AnsweredQuestionnaireRepository answeredQuestionnaireRepository, QuestionRepository questionRepository, ChoiceRepository choiceRepository){
         this.questionnaireRepository = questionnaireRepository;
         this.answeredQuestionnaireRepository = answeredQuestionnaireRepository;
+        this.questionRepository = questionRepository;
+        this.choiceRepository = choiceRepository;
     }
 
     public List<QuestionnaireModel> getQuestionnaires(Event event){

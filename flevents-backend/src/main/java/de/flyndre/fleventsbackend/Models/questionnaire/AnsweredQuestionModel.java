@@ -20,10 +20,10 @@ public class AnsweredQuestionModel {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
-    @Nullable @OneToOne
+    @Nullable @OneToOne(cascade = CascadeType.ALL)
     private ChoiceModel choiceModel;
     @Nullable
     private String answer;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private AnsweredQuestionnaireModel answeredQuestionnaireModel;
 }
