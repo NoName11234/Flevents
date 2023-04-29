@@ -1,72 +1,103 @@
-<template>
-  <v-expansion-panel>
-
-    <v-expansion-panel-title>
-      <div class="d-flex flex-row justify-start align-center gap-3 w-100">
-        <strong>
-          {{ config['name'] }}
-        </strong>
-      </div>
-    </v-expansion-panel-title>
-
-    <v-expansion-panel-text>
-      <div class="d-flex flex-column gap-3 my-3">
-        <v-card
-          elevation="0"
-          border
-        >
-          <v-textarea
-            hide-details="auto"
-            label="E-Mail-Text"
-            variant="solo"
-            v-model="configText"
-          >
-          </v-textarea>
-        </v-card>
-
-        <div
-          v-if="tooltip !== ''"
-          class="text-error"
-        >
-          {{ tooltip }}
-        </div>
-
-        <div class="d-flex flex-column flex-sm-row justify-end gap">
-          <v-spacer />
-          <v-btn
-            prepend-icon="mdi-check"
-            color="primary"
-            @click="submit()"
-          >
-            Speichern
-          </v-btn>
-        </div>
-
-      </div>
-    </v-expansion-panel-text>
-
-  </v-expansion-panel>
-</template>
-
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
+import {MailConfig} from "@/models/mailConfig";
 
 const props = defineProps({
   config: {
     required: true,
-    type: Object,
+    type: Object as () => MailConfig,
+  },
+  eventStart: {
+    required: true,
+    type: Date,
+  },
+  eventEnd: {
+    required: true,
+    type: Date,
   },
 });
 
-const configText = ref(props.config.text);
+const emits = defineEmits<{
+  (e: 'update', value: MailConfig): void
+}>();
+
 const tooltip = ref('');
 
+const infoOffset = ref(1);
+const feedbackOffset = ref(1);
+
 async function submit() {
-  //TODO: Post updated config to backend
-  alert('Speichern fehlt noch');
+  emits.call(emits, 'update', props.config);
 }
 
 </script>
+
+<template>
+  <v-container class="d-flex flex-column gap-3">
+    <v-textarea
+      label="Registrierungs-E-Mail-Text"
+      hide-details="auto"
+      no-resize
+      v-model="config.registerMessage"
+    >
+    </v-textarea>
+  </v-container>
+
+  <v-divider />
+
+  <v-container class="d-flex flex-column gap-3">
+    <v-textarea
+      label="Info-E-Mail-Text"
+      hide-details="auto"
+      no-resize
+      v-model="config.infoMessage"
+    >
+    </v-textarea>
+<!--    <v-text-field-->
+<!--      label="Sendezeitpunkt vor dem Event in h"-->
+<!--      prepend-inner-icon="mdi-clock"-->
+<!--      min="0"-->
+<!--      type="number"-->
+<!--      v-model="infoOffset"-->
+<!--      hide-details="auto"-->
+<!--      :rules="[() => infoOffset >= 0 || 'Muss größer 1 sein.']"-->
+<!--    />-->
+  </v-container>
+
+  <v-divider />
+
+  <v-container class="d-flex flex-column gap-3">
+    <v-textarea
+      label="Abschluss-E-Mail-Text"
+      hide-details="auto"
+      no-resize
+      v-model="config.feedbackMessage"
+    >
+    </v-textarea>
+<!--    <v-text-field-->
+<!--      label="Sendezeitpunkt nach dem Event in h"-->
+<!--      prepend-inner-icon="mdi-clock"-->
+<!--      min="0"-->
+<!--      type="number"-->
+<!--      v-model="feedbackOffset"-->
+<!--      hide-details="auto"-->
+<!--      :rules="[() => feedbackOffset >= 0 || 'Muss größer 1 sein.']"-->
+<!--    />-->
+  </v-container>
+
+  <v-divider />
+
+  <v-container class="d-flex flex-column flex-sm-row justify-end gap">
+    <v-spacer />
+    <v-btn
+      prepend-icon="mdi-check"
+      color="primary"
+      @click="submit()"
+    >
+      Speichern
+    </v-btn>
+  </v-container>
+</template>
 
 <style scoped>
 

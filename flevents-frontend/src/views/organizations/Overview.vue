@@ -15,7 +15,9 @@
       >
         Informationen
       </v-tab>
-      <v-tab value="mails">
+      <v-tab
+        value="mails"
+      >
         E-Mail-Vorlagen
       </v-tab>
       <v-tab

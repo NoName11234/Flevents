@@ -17,6 +17,9 @@ import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
 import {useOrganizationStore} from "@/store/organizations";
+import MailConfigCard from "@/components/MailConfigCard.vue";
+import {MailConfig} from "@/models/mailConfig";
+import {FleventsEvent} from "@/models/fleventsEvent";
 
 const openContext = ref(false);
 const address = ref("");
@@ -335,6 +338,24 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
+async function updateMailConfig(config: MailConfig) {
+  const newEvent = { ...event.value, mailConfig: config } as FleventsEvent;
+  try {
+    const response = await eventApi.edit(eventUuid, newEvent);
+    appStore.addToast({
+      text: 'Mail-Konfiguration aktualisiert!',
+      color: 'success',
+    });
+  } catch (e) {
+    console.error('Failed to delete event.', e);
+    appStore.addToast({
+      text: 'Fehler beim Aktualisieren der Mail-Konfiguration.',
+      color: 'error',
+    });
+  }
+  eventStore.hydrateSpecific(eventUuid);
+}
+
 </script>
 
 <template>
@@ -380,6 +401,12 @@ async function deleteEvent() {
 <!--        >-->
 <!--        Umfragen-->
 <!--      </v-tab>-->
+      <v-tab
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+        value="mails"
+      >
+        E-Mail-Vorlagen
+      </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendees"
@@ -545,6 +572,15 @@ async function deleteEvent() {
             :event="event"
           />
         </v-expansion-panels>
+      </v-window-item>
+
+      <v-window-item value="mails">
+        <MailConfigCard
+          :config="event.mailConfig"
+          :event-start="new Date(event.startTime)"
+          :event-end="new Date(event.endTime)"
+          @update="updateMailConfig"
+        />
       </v-window-item>
 
       <v-window-item value="attendees" :disabled="attendeesLoading">

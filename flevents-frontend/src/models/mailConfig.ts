@@ -1,5 +1,8 @@
 export interface MailConfig {
+    uuid: string;
     registerMessage: string;
-    alertMessage: string;
-    thankMessage: string;
+    infoMessage: string;
+    infoMessageTime: string;
+    feedbackMessage: string;
+    feedbackMessageTime: string;
 }
