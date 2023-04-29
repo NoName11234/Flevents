@@ -5,5 +5,5 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SingleChoiceQuestionSummary {
+public class SingleChoiceQuestionSummary extends QuestionSummary{
 }

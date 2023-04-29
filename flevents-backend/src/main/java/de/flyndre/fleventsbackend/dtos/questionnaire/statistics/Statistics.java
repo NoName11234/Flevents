@@ -8,5 +8,5 @@ import java.util.List;
 @Getter
 @Setter
 public class Statistics {
-    private List<FreeTextQuestionSummary> questionSummaries;
+    private List<QuestionSummary> questionSummaries;
 }

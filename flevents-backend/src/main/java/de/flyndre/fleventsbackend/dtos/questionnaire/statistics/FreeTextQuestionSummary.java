@@ -5,5 +5,5 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FreeTextQuestionSummary {
+public class FreeTextQuestionSummary extends QuestionSummary{
 }
