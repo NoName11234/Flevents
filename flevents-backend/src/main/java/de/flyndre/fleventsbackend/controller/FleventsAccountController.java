@@ -146,7 +146,7 @@ public class FleventsAccountController {
      * @return ResponseEntity with the http status code and an optional error message.
      */
     @PostMapping("/reset-password")
-    public ResponseEntity resetPassword(@RequestParam String email){
+    public ResponseEntity resetPassword(@RequestBody String email){
         try{
             fleventsAccountControllerService.resetPassword(email);
             return new ResponseEntity(HttpStatus.OK);
