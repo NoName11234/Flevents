@@ -139,21 +139,6 @@ public class FleventsAccountControllerService {
         }
     }
 
-    /**
-     * Creates a new anonymous account.
-     * @param email the E-Mail to create an anonymous account
-     * @return the created account
-     */
-    public FleventsAccount createAnonymousAccount(String email){
-        try{
-            FleventsAccount anonymousAccount = fleventsAccountService.createAnonymousAccount(email);
-            eMailService.sendRegistraitionMail(anonymousAccount);
-            return anonymousAccount;
-        }catch (MessagingException e) {
-            throw new RuntimeException("Was not able to send the registration mail, so the account was not created", e);
-        }
-    }
-
 
     public FleventsAccount getByAccountMail(String mail){
         return fleventsAccountService.getAccountByMail(mail);
