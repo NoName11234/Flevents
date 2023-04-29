@@ -35,8 +35,12 @@ class QuestionnaireApi {
     return api.get(`/events/${eventUuid}/posts/${uuid}`);
   }
 
+  /**
+   * Retrieves all questionnaires of the given event.
+   * @param eventUuid the uuid of the event
+   */
   getOf(eventUuid: string) {
-    return api.get(`/events/${eventUuid}/posts`);
+    return api.get(`/questionnaires/${eventUuid}`);
   }
 
   /**
