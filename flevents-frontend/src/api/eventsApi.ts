@@ -1,6 +1,8 @@
 import api from "@/api/api";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {EventRole} from "@/models/eventRole";
+import {Account} from "@/models/account";
+import {AccountPreview} from "@/models/accountPreview";
 
 const base = `/events`
 
@@ -123,6 +125,24 @@ class EventsApi {
   }
 
   /**
+   * marks an Attendee as present.
+   * @param eventUuid the uuid of the event
+   * @param accountUuid the uuid of the account
+   */
+  attendeeCheckIn(eventUuid: string, accountUuid: string){
+    return api.post(`${base}/${eventUuid}/attendees/check-in/${accountUuid}`);
+  }
+
+  /**
+   * marks an Attendee as not present.
+   * @param eventUuid the uuid of the event
+   * @param accountUuid the uuid of the account
+   */
+  attendeeCheckOut(eventUuid: string, accountUuid: string){
+    return api.post(`${base}/${eventUuid}/attendees/check-out/${accountUuid}`);
+  }
+
+  /**
    * Invites an account to be associated with the event under the given role.
    * @param uuid the uuid of the event
    * @param email the e-mail of the person to be invited
@@ -150,6 +170,21 @@ class EventsApi {
     });
   }
 
+  /**
+   * Accepts an invitation link as an anonymous User.
+   * @param eventUuid the uuid of the event
+   * @param account the account, only containing the mail
+   */
+  acceptAnonymousInvitation(eventUuid: string, account: AccountPreview) {
+    return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, account);
+  }
+  registerAnonymously(eventUuid: string, mail: string, invToken: string) {
+    const mailAdd = mail;
+    return api.post(`${base}/${eventUuid}/accept-invitation/anonymously`,{},{params: {
+        token: invToken,
+        mailAddress: mail
+      }});
+  }
   /**
    * Enrolls the current user to the event.
    * @param uuid the uuid of the event

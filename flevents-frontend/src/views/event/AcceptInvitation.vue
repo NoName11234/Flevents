@@ -2,7 +2,18 @@
   <Heading
     :text="`Anmelden zu Event ${event.name}`"
   />
-
+  <v-alert
+    v-if="alertAnon == 1"
+    type="success"
+    title="Erfolgreich angemeldet"
+    text="Sie wurden erfolgreich angemeldet! Sie erhalten nun Informationen per Mail zum Event. Sie können diese Seite jetzt schließen."
+  ></v-alert>
+  <v-alert
+    v-if="alertAnon == -1"
+    type="error"
+    title="Fehler"
+    text="Sie wurden nicht zum Event angemeldet! Versuchen sie es bitte nochmal."
+  ></v-alert>
   <v-card>
     <v-img
       height="250"
@@ -32,7 +43,8 @@
     </v-list>
   </v-card>
 
-  <v-card>
+  <!-- Regular Account-Registration -->
+  <v-card v-if="!anon">
     <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
         label="Mailadresse"
@@ -58,7 +70,14 @@
       </div>
     </v-container>
     <v-divider />
-    <v-container class="d-flex flex-column flex-sm-row justify-end gap">
+    <v-container  class="d-flex flex-column flex-sm-row justify-end gap">
+      <v-btn
+        @click="anon = true"
+        target="_blank"
+        variant="text"
+      >
+        Nur mit meiner Mail-Adresse anmelden
+      </v-btn>
       <v-btn
         :to="{ name: 'accounts.create' }"
         target="_blank"
@@ -68,6 +87,48 @@
       </v-btn>
       <v-btn
         @click="performLogin()"
+        color="primary"
+        prepend-icon="mdi-login-variant"
+      >
+        Login
+      </v-btn>
+    </v-container>
+  </v-card>
+
+  <!-- Anonymous Registration -->
+
+  <v-card v-if="anon">
+    <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
+      <v-text-field
+        label="Mailadresse"
+        prepend-inner-icon="mdi-email"
+        v-model="account.email"
+        hide-details="auto"
+      />
+      <div
+        v-if="tooltip !== ''"
+        class="text-error">
+        {{tooltip}}
+      </div>
+    </v-container>
+    <v-divider />
+    <v-container  class="d-flex flex-column flex-sm-row justify-end gap">
+      <v-btn
+        @click="anon = false"
+        target="_blank"
+        variant="text"
+      >
+        Mit Flevents-Account anmelden
+      </v-btn>
+      <v-btn
+        :to="{ name: 'accounts.create' }"
+        target="_blank"
+        variant="text"
+      >
+        Registrieren
+      </v-btn>
+      <v-btn
+        @click="anonlogged = true"
         color="primary"
         prepend-icon="mdi-login-variant"
       >
@@ -116,6 +177,46 @@
       </v-container>
     </v-card>
   </v-overlay>
+
+  <v-overlay
+    max-width="600"
+    :model-value="anonlogged"
+    class="align-center justify-center"
+  >
+    <v-card>
+      <v-container>
+        <h4>
+          Sind sie sicher das sie als
+          {{account?.email}}
+          anonym am Event
+          {{event.name}}
+          teilnehmen wollen?
+        </h4>
+      </v-container>
+      <v-container
+        v-if="enrollToolTip != ''"
+        class="text-red">
+        {{enrollToolTip}}
+      </v-container>
+      <v-container
+        class="d-flex justify-end gap"
+      >
+        <v-btn
+          @click="anonlogged = false"
+          variant="text">
+          Abbrechen
+        </v-btn>
+        <v-btn
+          @click="performAnonLogin()"
+          prepend-icon="mdi-check"
+          color="primary"
+        >
+          Anmelden
+        </v-btn>
+      </v-container>
+    </v-card>
+  </v-overlay>
+
 </template>
 
 
@@ -138,13 +239,14 @@ import {FleventsEventPreview} from "@/models/fleventsEventPreview";
 import EventCard from "@/components/EventCard.vue";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import DatetimeService from "../../service/datetimeService";
+import {AccountPreview} from "@/models/accountPreview";
 
 const route = useRoute();
 const router = useRouter();
 
 const eventUuid = route.params.uuid as string;
 const invitationToken = route.query.token as string;
-
+const alertAnon = ref(0);
 const appStore = useAppStore();
 const { loggedIn } = storeToRefs(appStore);
 
@@ -163,6 +265,8 @@ const loading = ref(false);
 const showPass = ref(false);
 const tooltip = ref("");
 const enrollToolTip = ref("");
+const anon = ref(false);
+const anonlogged = ref(false);
 
 onMounted(async () => {
   if (!invitationToken) {
@@ -230,6 +334,33 @@ async function enroll(){
     }
     enrollToolTip.value = `Beitritt fehlgeschlagen: ${errorMessage}`;
   }
+}
+async function performAnonLogin(){
+  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
+  try {
+    console.log(account.value.email);
+    const response = await eventApi.registerAnonymously(eventUuid, account.value.email as string, invitationToken);
+    appStore.addToast({
+      text: `Sie sind dem Event anonym mit ihrer E-Mail-Adresse beigetreten.`,
+      color: "success",
+    });
+    alertAnon.value = 1;
+  } catch (e) {
+    alertAnon.value = -1;
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      } else if (e.response) {
+        // already enrolled
+        errorMessage = 'Der Account gehört dem Event bereits an oder die Einladung ist ungültig.';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
+    enrollToolTip.value = `Beitritt fehlgeschlagen: ${errorMessage}`;
+  }
+  anonlogged.value = false
 }
 
 </script>

@@ -40,9 +40,9 @@ const posts = computed(() => event.value
 
 const surveyStore = useSurveyStore();
 const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
-
+const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
 const organizationStore = useOrganizationStore();
-
+const addAnon = ref(false);
 const enrollLoading = ref(false);
 const organizersLoading = ref(false);
 const attendeesLoading = ref(false);
@@ -51,7 +51,7 @@ const storesLoading = computed(() =>
 );
 
 const attendees = computed(() => {
-  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor].includes(a.role as EventRole)) as AccountPreview[];
+  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor, EventRole.guest].includes(a.role as EventRole)) as AccountPreview[];
 });
 const organizers = computed(() => {
   return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole)) as AccountPreview[]
@@ -95,6 +95,28 @@ const eventStatus = computed(() => {
       return {text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick"};
   }
 });
+async function addAnonAcc(){
+  enrollLoading.value = true;
+  try {
+    const response = await eventApi.acceptAnonymousInvitation(eventUuid, anonAcc.value);
+    await eventStore.hydrateSpecific(eventUuid);
+    appStore.addToast({
+      text: 'Unangemeldeter Nutzer angemeldet.',
+      color: 'success',
+    });
+  } catch (e) {
+    // already enrolled
+    console.error("Enrollment failed, probably already enrolled.", e);
+    appStore.addToast({
+      text: 'Anmelden des unangemeldeten Nutzers fehlgeschlagen. Versuchen Sie die Seite neu zu laden.',
+      color: 'error',
+    });
+  }
+  anonAcc.value = {email: '', firstname: '', lastname: ''} as AccountPreview
+  addAnon.value = false;
+  enrollLoading.value = false;
+  eventStore.hydrate();
+}
 
 async function enroll(){
   enrollLoading.value = true;
@@ -593,6 +615,7 @@ async function deleteEvent() {
             <tr
              v-for="(item, index) in attendees"
              :key="index"
+             v-show="item.role !== EventRole.guest"
             >
               <td>
                 {{item.firstname}}&nbsp;{{item.lastname}}
@@ -602,13 +625,13 @@ async function deleteEvent() {
               </td>
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
                 <v-btn
+                  v-if="item.role !== EventRole.guest"
                   append-icon="mdi-chevron-down"
                   variant="text"
                   class="d-flex flex-row justify-space-between"
                   block
                 >
                   {{ item.role }}
-
                   <v-menu activator="parent">
                     <v-list>
                       <v-list-subheader>
@@ -654,6 +677,7 @@ async function deleteEvent() {
             prepend-icon="mdi-account-plus"
             color="primary"
             variant="tonal"
+            @click="addAnon = true"
           >
             Unangemeldeten Teilnehmer hinzufügen
           </v-btn>
@@ -685,11 +709,14 @@ async function deleteEvent() {
               <v-checkbox
                 hide-details="auto"
                 density="compact"
+                v-model="item.checkedIn"
+                @click="item.checkedIn ? eventApi.attendeeCheckOut(eventUuid, item.uuid) : eventApi.attendeeCheckIn(eventUuid, item.uuid)"
               />
             </td>
           </tr>
           </tbody>
         </v-table>
+
       </v-window-item>
 
       <v-window-item value="organizers" :disabled="organizersLoading">
@@ -747,6 +774,56 @@ async function deleteEvent() {
 
     </v-window>
   </v-card>
+  <v-dialog
+    v-model="addAnon"
+    persistent
+    width="30rem"
+  >
+    <v-card>
+      <v-card-title class="text-h5">
+        Account hinzufügen
+      </v-card-title>
+      <v-card-text>
+        <v-text-field
+          class="mt-2"
+          v-model="anonAcc.firstname"
+          label="Vorname"
+          prepend-inner-icon="mdi-account"
+          :rules="[() => anonAcc.firstname !== '' || 'Dieses Feld wird benötigt.']"
+          required
+        ></v-text-field>
+        <v-text-field
+          class="mt-2"
+          v-model="anonAcc.lastname"
+          label="Nachname"
+          prepend-inner-icon="mdi-account"
+          :rules="[() => anonAcc.lastname !== '' || 'Dieses Feld wird benötigt.']"
+          required
+        ></v-text-field>
+        <v-text-field
+          class="mt-2"
+          v-model="anonAcc.email"
+          label="Mailadresse"
+          prepend-inner-icon="mdi-email"
+          :rules="[() => anonAcc.email !== '' || 'Dieses Feld wird benötigt.']"
+          required
+        ></v-text-field>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn
+          variant="flat"
+          @click="addAnon = false"
+        >Schließen
+        </v-btn>
+        <v-btn
+          color="primary"
+          variant="flat"
+          @click="addAnonAcc()"
+        >Hinzufügen
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

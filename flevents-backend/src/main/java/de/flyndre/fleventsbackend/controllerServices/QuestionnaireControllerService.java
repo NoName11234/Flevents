@@ -111,10 +111,12 @@ public class QuestionnaireControllerService {
             Question q =  questionnaire.getQuestions().get(i);
             QuestionModel qm = new QuestionModel();
             List<ChoiceModel> choiceModels = new ArrayList<>();
-            for(int a=0; a<q.getChoices().size();a++){
-                Choice dto = q.getChoices().get(a);
-                ChoiceModel m = new ChoiceModel(dto.getUuid(),dto.getChoice());
-                choiceModels.add(m);
+            if(q.getChoices()!=null) {
+                for (int a = 0; a < q.getChoices().size(); a++) {
+                    Choice dto = q.getChoices().get(a);
+                    ChoiceModel m = new ChoiceModel(dto.getUuid(), dto.getChoice());
+                    choiceModels.add(m);
+                }
             }
             qm.setUuid(q.getUuid());
             qm.setQuestion(q.getQuestion());
