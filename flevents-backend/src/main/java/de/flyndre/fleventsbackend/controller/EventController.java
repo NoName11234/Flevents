@@ -193,6 +193,27 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Adds an Anonymous account identified by the given Email. Invalidates the invitation token to the event.
+    * Allows access for invited and above of the specified event.
+    * @implNote Does Method is for anonymous Accounts only
+    * @param eventId the id of the event to add the account to
+    * @param token the token in the invitation link to verify the invitation
+    * @param mailAddress the MailAddress of the anonymous Account.
+    * @return ResponseEntity with the http status code
+    */
+   @PostMapping("/{eventId}/accept-invitation/anonymously")
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, @RequestParam String mailAddress){
+      try{
+         eventControllerService.validateAndDeleteToken(token, eventId);
+         eventControllerService.registerAnonymousAccountToEvent(eventId, mailAddress);
+         return new ResponseEntity(HttpStatus.OK);
+
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+      }
+   }
+
+   /**
     * Adds an account as an attendee to the event if the account is in the organization of this event.
     * Allows access for member and above of the organization of the specified event.
     * @param eventId the id of the event to add the account to

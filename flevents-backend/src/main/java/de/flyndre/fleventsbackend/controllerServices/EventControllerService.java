@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -159,6 +158,16 @@ public class EventControllerService {
     }
 
     /**
+     * invalidates the given InvitationToken
+     * @param token the InvitationToken to a specific event
+     * @param eventId the EventUuid to the Event
+     * */
+
+    public void validateAndDeleteToken(String token, String eventId) throws InvalidAttributesException {
+        InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
+        invitationTokenService.deleteToken(invitationToken);
+    }
+    /**
      * Changes the role of a specified account in an event.
      * @param eventId the id of the event with the account
      * @param accountId the id of the account which role has to be changed
@@ -182,6 +191,16 @@ public class EventControllerService {
     public void addAnonymousAccountToEvent(String eventId, FleventsAccount account){
         account = accountService.createAnonymousAccountWithName(account.getEmail(), account.getFirstname(), account.getLastname());
         eventService.addAccountToEvent(getEventById(eventId),account,EventRole.guest);
+    }
+
+    /**
+     * Registers an anonymous Account to an Event.
+     * @param eventId the id of the event to add the anonymous account to
+     * @param mailAddress the mail adr ess to be added
+     */
+    public void registerAnonymousAccountToEvent(String eventId, String mailAddress){
+        FleventsAccount account = accountService.createAnonymousAccount(mailAddress);
+        eventService.addAccountToEvent(getEventById(eventId),account,EventRole.attendee);
     }
 
     /**

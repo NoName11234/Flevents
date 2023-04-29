@@ -178,8 +178,13 @@ class EventsApi {
   acceptAnonymousInvitation(eventUuid: string, account: AccountPreview) {
     return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, account);
   }
-
-
+  registerAnonymously(eventUuid: string, mail: string, invToken: string) {
+    const mailAdd = mail;
+    return api.post(`${base}/${eventUuid}/accept-invitation/anonymously`,{},{params: {
+        token: invToken,
+        mailAddress: mail
+      }});
+  }
   /**
    * Enrolls the current user to the event.
    * @param uuid the uuid of the event

@@ -2,7 +2,18 @@
   <Heading
     :text="`Anmelden zu Event ${event.name}`"
   />
-
+  <v-alert
+    v-if="alertAnon == 1"
+    type="success"
+    title="Erfolgreich angemeldet"
+    text="Sie wurden erfolgreich angemeldet! Sie erhalten nun Informationen per Mail zum Event. Sie können diese Seite jetzt schließen."
+  ></v-alert>
+  <v-alert
+    v-if="alertAnon == -1"
+    type="error"
+    title="Fehler"
+    text="Sie wurden nicht zum Event angemeldet! Versuchen sie es bitte nochmal."
+  ></v-alert>
   <v-card>
     <v-img
       height="250"
@@ -115,7 +126,7 @@
         Registrieren
       </v-btn>
       <v-btn
-        @click="performAnonLogin()"
+        @click="anonlogged = true"
         color="primary"
         prepend-icon="mdi-login-variant"
       >
@@ -164,6 +175,46 @@
       </v-container>
     </v-card>
   </v-overlay>
+
+  <v-overlay
+    max-width="600"
+    :model-value="anonlogged"
+    class="align-center justify-center"
+  >
+    <v-card>
+      <v-container>
+        <h4>
+          Sind sie sicher das sie als
+          {{account?.email}}
+          anonym am Event
+          {{event.name}}
+          teilnehmen wollen?
+        </h4>
+      </v-container>
+      <v-container
+        v-if="enrollToolTip != ''"
+        class="text-red">
+        {{enrollToolTip}}
+      </v-container>
+      <v-container
+        class="d-flex justify-end gap"
+      >
+        <v-btn
+          @click="anonlogged = false"
+          variant="text">
+          Abbrechen
+        </v-btn>
+        <v-btn
+          @click="performAnonLogin()"
+          prepend-icon="mdi-check"
+          color="primary"
+        >
+          Anmelden
+        </v-btn>
+      </v-container>
+    </v-card>
+  </v-overlay>
+
 </template>
 
 
@@ -193,7 +244,7 @@ const router = useRouter();
 
 const eventUuid = route.params.uuid as string;
 const invitationToken = route.query.token as string;
-
+const alertAnon = ref(0);
 const appStore = useAppStore();
 const { loggedIn } = storeToRefs(appStore);
 
@@ -213,6 +264,7 @@ const showPass = ref(false);
 const tooltip = ref("");
 const enrollToolTip = ref("");
 const anon = ref(false);
+const anonlogged = ref(false);
 
 onMounted(async () => {
   if (!invitationToken) {
@@ -284,12 +336,15 @@ async function enroll(){
 async function performAnonLogin(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    const response = await eventApi.acceptAnonymousInvitation(eventUuid, {email: account.value.email} as AccountPreview);
+    console.log(account.value.email);
+    const response = await eventApi.registerAnonymously(eventUuid, account.value.email as string, invitationToken);
     appStore.addToast({
       text: `Sie sind dem Event anonym mit ihrer E-Mail-Adresse beigetreten.`,
       color: "success",
     });
+    alertAnon.value = 1;
   } catch (e) {
+    alertAnon.value = -1;
     let errorMessage = '';
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_NETWORK) {
@@ -303,6 +358,7 @@ async function performAnonLogin(){
     }
     enrollToolTip.value = `Beitritt fehlgeschlagen: ${errorMessage}`;
   }
+  anonlogged.value = false
 }
 
 </script>
