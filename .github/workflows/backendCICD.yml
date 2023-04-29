@@ -26,7 +26,7 @@ jobs:
       - name: Set Config
         uses: DamianReeves/write-file-action@master
         with: 
-          path: flevents-backend/src/main/resources/application.properties
+          path: flevents-backend/src/main/resources/application-test.properties
           contents: |
             spring.datasource.url=jdbc:h2:mem:test
             spring.datasource.username=postgres
@@ -41,8 +41,9 @@ jobs:
             spring.mail.properties.mail.smtp.auth=true
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
-            server.port=8080
-            application.baseurl=http://localhost:3000/
+            server.port=8082
+            frontend.port=3000
+            application.baseurl=http://localhost
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
             application.jwtExpirationMs=86400000
           write-mode: overwrite
@@ -100,7 +101,8 @@ jobs:
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
             server.port=8082
-            application.baseurl=http://flevents.flyndre.de:8080/
+            frontend.port=3000
+            application.baseurl=http://flevents.flyndre.de
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
             application.jwtExpirationMs=86400000
           write-mode: overwrite

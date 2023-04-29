@@ -1,57 +1,102 @@
 package de.flyndre.fleventsbackend;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
-import de.flyndre.fleventsbackend.Models.Organization;
-import de.flyndre.fleventsbackend.controller.FleventsAccountController;
-import de.flyndre.fleventsbackend.controller.OrganizationController;
-import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
+import de.flyndre.fleventsbackend.Models.InvitationToken;
+import de.flyndre.fleventsbackend.Models.OrganizationRole;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
-import de.flyndre.fleventsbackend.repositories.OrganizationRepository;
+import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
+import de.flyndre.fleventsbackend.repositories.InvitationTokenRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@TestPropertySource("classpath:application-local.properties")
+@AutoConfigureMockMvc
+@TestPropertySource("classpath:application-test.properties")
 public class FullApiTest {
+
     @Autowired
-    private OrganizationController organizationController;
+    private MockMvc mockMvc;
     @Autowired
-    private OrganizationRepository organizationRepository;
-    @Autowired
-    private FleventsAccountController fleventsAccountController;
+    InvitationTokenRepository tokenRepository;
+
+    private final ObjectMapper mapper = new JsonMapper();
+
 
 
     @Test
-    void createOrganization(){
-        Organization organization = new Organization();
-        organization.setName("TestOrganization");
-        organization.setDescription("This is an Organization");
-        organization.setAddress("93389 Horb");
-        organization.setPhoneContact("74888930384");
-        organization.setIcon("This should be an icon");
-        OrganizationInformation information = (OrganizationInformation) organizationController.createOrganisation(organization,"test@test").getBody();
-        compare(information,organization);
-        assertNotNull(information.getUuid());
-        FleventsAccount account = new FleventsAccount(null,"Lukas","Burkhardt",true,"test@test.com","icon","geheim",null,null);
-        List list = organizationRepository.findAll();
+    @WithMockUser(authorities = {"platformAdmin"})
+    void apiTest() throws Exception {
+        OrganizationInformation testOrga = testCreateOrganization();
+        testGetAllOrganizations();
+        testGetOrganization(testOrga);
+        AccountInformation testAcc = testCreateAccount();
+        testAddAccountToOrga(testAcc,testOrga,OrganizationRole.admin);
+        testDeleteOrganization(testOrga);
+
+
+
     }
 
-    public void compare(OrganizationInformation information, Organization organization){
-        assertThat(information.getName()).isEqualTo(organization.getName());
-        assertThat(information.getDescription()).isEqualTo(organization.getDescription());
-        assertThat(information.getAddress()).isEqualTo(organization.getAddress());
-        assertThat(information.getPhoneContact()).isEqualTo(organization.getPhoneContact());
-        assertThat(information.getIcon()).isEqualTo(organization.getIcon());
+    public OrganizationInformation testCreateOrganization() throws Exception {
+        OrganizationPreview organizationPreview = new OrganizationPreview();
+        organizationPreview.setName("Test Orga");
+        organizationPreview.setDescription("Test description");
+        var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/platform/organizations")
+                        .param("email","test@flyndre.de")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(organizationPreview)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return mapper.readValue(result.getResponse().getContentAsString(),OrganizationInformation.class);
     }
+
+    public void testGetAllOrganizations() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/organizations")).andExpect(status().isOk());
+    }
+
+    public void testDeleteOrganization(OrganizationInformation testOrga) throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/platform/organizations/"+testOrga.getUuid()))
+                .andExpect(status().isOk());
+    }
+    public void testGetOrganization(OrganizationInformation testOrga) throws Exception {
+       var result = mockMvc.perform(MockMvcRequestBuilders.get("/api/organizations/"+testOrga.getUuid()))
+               .andExpect(status().isOk())
+               .andReturn();
+       OrganizationInformation orgaResult = mapper.readValue(result.getResponse().getContentAsString(), OrganizationInformation.class);
+       assertThat(orgaResult.equals(testOrga));
+    }
+    public AccountInformation testCreateAccount()throws Exception{
+        FleventsAccount accPre = new FleventsAccount();
+        accPre.setEmail("test@flyndre.de");
+        accPre.setFirstname("Olaf");
+        accPre.setLastname("Müller");
+        accPre.setSecret("TopSecret");
+        var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/accounts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(accPre)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return mapper.readValue(result.getResponse().getContentAsString(),AccountInformation.class);
+    }
+    public void testAddAccountToOrga(AccountInformation testAcc, OrganizationInformation testOrga, OrganizationRole role)throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/organizations/"+testOrga.getUuid()+"/invite?email=test@flyndre.de&role="+role.toString()))
+                .andExpect(status().isOk());
+        InvitationToken token = tokenRepository.findAll().stream().findFirst().get();
+        assertThat(token.getInvitedToId().equals(testOrga.getUuid()));
+        assertThat(token.getRole().equals(role));
+    }
+
 }

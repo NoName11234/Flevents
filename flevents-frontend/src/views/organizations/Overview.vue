@@ -24,25 +24,29 @@
 
     <v-window v-model="tab">
       <v-window-item value="info">
-        <v-container>
-          {{ organization?.description }}
-        </v-container>
-        <v-divider></v-divider>
-        <v-list>
-          <v-list-item
-            v-if="organization?.phoneContact"
-            prepend-icon="mdi-phone"
-          >
-            {{ organization?.phoneContact }}
-          </v-list-item>
-          <v-list-item
-            v-if="organization?.address"
-            prepend-icon="mdi-map-marker"
-          >
-            {{ organization?.address }}
-          </v-list-item>
-        </v-list>
-        <v-divider/>
+        <template v-if="organization?.description">
+          <v-container>
+            {{ organization?.description }}
+          </v-container>
+          <v-divider />
+        </template>
+        <template v-if="organization.address || organization.phoneContact">
+          <v-list>
+            <v-list-item
+              v-if="organization?.phoneContact"
+              prepend-icon="mdi-phone"
+            >
+              {{ organization?.phoneContact}}
+            </v-list-item>
+            <v-list-item
+              v-if="organization?.address"
+              prepend-icon="mdi-map-marker"
+            >
+              {{ organization?.address }}
+            </v-list-item>
+          </v-list>
+          <v-divider/>
+        </template>
         <v-container
           v-if="currentAccountRole === OrganizationRole.admin"
           class="d-flex flex-column flex-sm-row justify-end gap"
@@ -91,18 +95,24 @@
             </tr>
           </thead>
           <tbody
-            v-if="organization?.accountPreviews"
+            v-if="members"
           >
             <tr
-              v-for="(item, index) in organization?.accountPreviews"
+              v-for="(item, index) in members"
               :key="index"
             >
-              <td>{{item.firstname}} {{item.lastname}}</td>
-              <td>{{item.email}}</td>
+              <td>
+                {{item.firstname}}&nbsp;{{item.lastname}}
+              </td>
+              <td>
+                {{item.email}}
+              </td>
               <td>
                 <v-btn
                   append-icon="mdi-chevron-down"
-                  variant="outlined"
+                  variant="text"
+                  class="d-flex flex-row justify-space-between"
+                  block
                   :disabled="
                     (
                       organization?.accountPreviews?.filter(a => a.role === OrganizationRole.admin).length <= 1
@@ -167,9 +177,14 @@ import organizationsApi from "@/api/organizationsApi";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import {useAppStore} from "@/store/app";
+import {EventRole} from "@/models/eventRole";
+import router from "@/router";
 
 const route = useRoute();
-const tab = ref(null);
+const tab = computed({
+  get: () => route.query.tab ?? 'info',
+  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
+});
 
 const appStore = useAppStore();
 
@@ -178,6 +193,10 @@ const { currentAccount: account } = storeToRefs(accountStore);
 
 const organizationStore = useOrganizationStore();
 const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
+
+const members = computed(() => {
+  return organization?.value?.accountPreviews as AccountPreview[];
+});
 
 const customLoading = ref(false);
 const loading = computed(() =>
@@ -192,7 +211,11 @@ const currentAccountRole = computed(() => {
 
 async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationRole) {
   if (updatedAccount.uuid === account.value!.uuid) {
-    const ok = window.confirm(`Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newRole}" ändern möchten?`);
+    // Current user changes own role and possibly removes his access
+    const ok = window.confirm(
+      `Sind Sie sicher, dass Sie Ihre eigene Rolle zu "${newRole}" ändern möchten?`
+      + ` Sie verlieren damit alle Rechte, die Sie als ${currentAccountRole.value} besitzen.`
+    );
     if (!ok) {
       return;
     }
@@ -226,10 +249,31 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
   organizationStore.hydrate();
 }
 
-async function removeAccount(account: AccountPreview) {
+async function removeAccount(removeAccount: AccountPreview) {
+  let ok = false;
+  if (removeAccount.uuid === account.value!.uuid) {
+    // Current user removes himself and therefore removes his access to the organization
+    ok = window.confirm(
+      `Sind Sie sicher, dass Sie Sich aus der Organisation ${organization.value.name} entfernen wollen?`
+      + ` Ihnen werden damit alle Rechte in ihr entzogen und Sie haben keinen Zugriff mehr auf deren Events.`
+      + ` Der Zugriff auf vergangene Events, an denen Sie teilgenommen haben und zukünftige Events, für die Sie registriert sind, bleibt erhalten.`
+      + ` Um erneut Zugriff zu erhalten, müssen Sie erneut zur Organisation eingeladen werden.`
+    );
+  } else {
+    // Someone else is being removed
+    ok = window.confirm(
+      `Sind Sie sicher, dass Sie ${removeAccount.firstname} ${removeAccount.lastname} (${removeAccount.email}) aus der Organisation ${organization.value.name} entfernen wollen?`
+      + ` Der Person werden damit alle Rechte in ihr entzogen und sie hat keinen Zugriff mehr auf Events der Organisation.`
+      + ` Der Zugriff auf vergangene Events, an denen sie teilgenommen hat und zukünftige Events, für die sie registriert ist, bleibt erhalten.`
+      + ` Um erneut Zugriff zu erhalten, muss sie erneut zur Organisation eingeladen werden.`
+    );
+  }
+  if (!ok) {
+    return;
+  }
   customLoading.value = true;
   try {
-    await organizationsApi.removeMember(route.params.uuid as string, account.uuid);
+    await organizationsApi.removeMember(route.params.uuid as string, removeAccount.uuid);
     await organizationStore.hydrateSpecific(route.params.uuid as string);
     appStore.addToast({
       text: 'Mitglied entfernt.',

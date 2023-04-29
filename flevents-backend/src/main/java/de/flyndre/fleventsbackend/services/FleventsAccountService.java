@@ -2,6 +2,7 @@ package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EmailDetails;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
@@ -9,6 +10,7 @@ import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
 import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +41,7 @@ public class FleventsAccountService {
     @Autowired
     PasswordEncoder encoder;
 
-    public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository, ModelMapper mapper, EMailService eMailService){
+    public FleventsAccountService(FleventsAccountRepository fleventsAccountRepository, ModelMapper mapper, EMailServiceImpl eMailService){
         this.fleventsAccountRepository = fleventsAccountRepository;
         this.mapper = mapper;
         this.eMailService = eMailService;
@@ -108,7 +110,6 @@ public class FleventsAccountService {
      * @return FleventsAccount the saved account
      */
     public FleventsAccount createAccount(FleventsAccount account){
-        //TODO: Implement
         if(account.getEmail()==null){
             throw new IllegalArgumentException("No email provided");
         }
@@ -120,6 +121,7 @@ public class FleventsAccountService {
         }
         account.setUuid(null);
         account.setIsActive(true);
+        account.setIsPlatformAdmin(false);
         account.setSecret(encoder.encode(account.getSecret()));
         return fleventsAccountRepository.save(account);
     }
@@ -156,7 +158,9 @@ public class FleventsAccountService {
             }
         }
         FleventsAccount srcAccount = existingAcc.get();
-        account.setSecret(encoder.encode(account.getSecret()));
+        if (account.getSecret() != null) {
+            account.setSecret(encoder.encode(account.getSecret()));
+        }
         srcAccount.merge(account);
         return fleventsAccountRepository.save(srcAccount);
     }
@@ -167,6 +171,29 @@ public class FleventsAccountService {
      */
     public void deleteAccount(FleventsAccount account){
         account.setIsActive(false);
+        fleventsAccountRepository.save(account);
+    }
+
+    public void deleteAnsweredQuestionnaireFromAccount(String answeredQuestionnaireId, String accountId){
+        FleventsAccount account = getAccountById(accountId);
+        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = account.getAnsweredQuestionnaireModels();
+
+        for(int i = 0;i<answeredQuestionnaireModels.size(); i++){
+            if(answeredQuestionnaireModels.get(i).getUuid().equals(answeredQuestionnaireId)){
+                answeredQuestionnaireModels.remove(i);
+                break;
+            }
+        }
+
+        account.setAnsweredQuestionnaireModels(answeredQuestionnaireModels);
+        fleventsAccountRepository.save(account);
+    }
+
+    public void saveAnsweredQuestionnaire(AnsweredQuestionnaireModel answeredQuestionnaireModel, String userId){
+        FleventsAccount account = getAccountById(userId);
+        List<AnsweredQuestionnaireModel> answers = account.getAnsweredQuestionnaireModels();
+        answers.add(answeredQuestionnaireModel);
+        account.setAnsweredQuestionnaireModels(answers);
         fleventsAccountRepository.save(account);
     }
 }

@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/events")
 public class EventController {
 
-private EventControllerService eventControllerService;
+private final EventControllerService eventControllerService;
 private final ModelMapper mapper;
    public EventController(EventControllerService eventControllerService, ModelMapper mapper){
       this.eventControllerService = eventControllerService;
@@ -145,11 +145,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
-      Event event1 = eventControllerService.getEventById(eventId); //todo: find better way to authorize
-      if(
-              !eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))
-              &&!eventControllerService.getGranted(auth,event1.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))
-      ){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
@@ -160,7 +156,7 @@ private final ModelMapper mapper;
     * Allows access for tutor and above of the specified event.
     * @param eventId the id of the event to send an invitation to
     * @param email the email to send the invitation link to
-    * @param role the role which gets assigend to the invited person
+    * @param role the role which gets assigned to the invited person
     * @param auth the Authentication generated out of a barer token.
     * @return ResponseEntity with the http status code and an optional error message
     */
@@ -205,8 +201,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId,Authentication auth){
-      Event event = eventControllerService.getEventById(eventId);
-      if(!eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.values()))){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();

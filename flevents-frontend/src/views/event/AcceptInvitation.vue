@@ -1,7 +1,37 @@
 <template>
   <Heading
-    :text="`Anmelden zu Organisation ${organization.name}`"
+    :text="`Anmelden zu Event ${event.name}`"
   />
+
+  <v-card>
+    <v-img
+      height="250"
+      class="bg-gradient"
+      cover
+      :src="event?.image ?? ''"
+    />
+    <template v-if="event?.description">
+      <v-container>
+        {{event?.description}}
+      </v-container>
+      <v-divider />
+    </template>
+    <v-list>
+      <v-list-item
+        v-if="event?.startTime && event?.endTime"
+        prepend-icon="mdi-clock"
+      >
+        {{ DatetimeService.formatDateRange(event?.startTime, event?.endTime)}}
+      </v-list-item>
+      <v-list-item
+        v-if="event?.location"
+        prepend-icon="mdi-map-marker"
+      >
+        {{event?.location}}
+      </v-list-item>
+    </v-list>
+  </v-card>
+
   <v-card>
     <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
@@ -27,11 +57,12 @@
         {{tooltip}}
       </div>
     </v-container>
+    <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
         :to="{ name: 'accounts.create' }"
-        variant="text"
         target="_blank"
+        variant="text"
       >
         Registrieren
       </v-btn>
@@ -57,22 +88,22 @@
           {{currentAccount?.firstname}}
           {{currentAccount?.lastname}}
           ({{currentAccount?.email}})
-          an der Organisation
-          {{organization?.name}}
+          am Event
+          {{event.name}}
           teilnehmen wollen?
         </h4>
       </v-container>
       <v-container
         v-if="enrollToolTip != ''"
-        class="text-red"
-      >
+        class="text-red">
         {{enrollToolTip}}
       </v-container>
-      <v-container class="d-flex justify-end gap">
+      <v-container
+        class="d-flex justify-end gap"
+      >
         <v-btn
           @click="showDialog = false"
-          variant="text"
-        >
+          variant="text">
           Abbrechen
         </v-btn>
         <v-btn
@@ -93,35 +124,38 @@ import {onMounted, ref, Ref} from "vue";
 import {Account} from "@/models/account";
 import Heading from "@/components/Heading.vue";
 import {useRoute, useRouter} from "vue-router";
+import eventApi from "@/api/eventsApi";
 import {login, logout} from "@/service/authService";
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
-import OrganizationsApi from "@/api/organizationsApi";
-import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
+import {useEventStore} from "@/store/events";
 import {AxiosError} from "axios";
 import {hydrateAll} from "@/service/storesService";
-import {Organization} from "@/models/organization";
-import {OrganizationPreview} from "@/models/organizationPreview";
 import organizationsApi from "@/api/organizationsApi";
+import {OrganizationPreview} from "@/models/organizationPreview";
+import {FleventsEventPreview} from "@/models/fleventsEventPreview";
+import EventCard from "@/components/EventCard.vue";
+import {FleventsEvent} from "@/models/fleventsEvent";
+import DatetimeService from "../../service/datetimeService";
 
 const route = useRoute();
 const router = useRouter();
 
-const organizationUuid = route.params.uuid as string;
+const eventUuid = route.params.uuid as string;
 const invitationToken = route.query.token as string;
 
 const appStore = useAppStore();
 const { loggedIn } = storeToRefs(appStore);
 
-const accountStore = useAccountStore();
+const accountStore = useAccountStore()
 const { currentAccount } = storeToRefs(accountStore);
 const account : Ref<Partial<Account>> = ref({
   email: "",
   secret: ""
 });
 
-const organization = ref({} as OrganizationPreview);
+const event = ref({} as FleventsEventPreview);
 
 const address = ref("");
 const showDialog = ref(false);
@@ -139,17 +173,17 @@ onMounted(async () => {
     return;
   }
   try {
-    const { data } = await organizationsApi.getPreview(organizationUuid, invitationToken);
-    organization.value = data as OrganizationPreview;
+    const { data } = await eventApi.getPreview(eventUuid, invitationToken);
+    event.value = data as FleventsEventPreview;
   } catch (e) {
     appStore.addToast({
-      text: "Die in der URL angegebene Organisation kann nicht gefunden werden. Womöglich ist die Einladung ungültig.",
+      text: "Das in der URL angegebene Event kann nicht gefunden werden. Womöglich ist die Einladung ungültig.",
       color: "error",
     });
   }
 });
 
-async function performLogin() {
+async function performLogin(){
   loading.value = true;
   tooltip.value = '';
   try {
@@ -175,13 +209,13 @@ async function performLogin() {
 async function enroll(){
   // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    await OrganizationsApi.acceptInvitation(organizationUuid,  invitationToken);
+    const response = await eventApi.acceptInvitation(eventUuid, invitationToken);
     appStore.addToast({
-      text: `Sie sind der Organisation beigetreten.`,
+      text: `Sie sind dem Event beigetreten.`,
       color: "success",
     });
-    await router.push({ name: 'home.account' });
-    hydrateAll()
+    await router.push({ name: 'home.personal' });
+    hydrateAll();
   } catch (e) {
     let errorMessage = '';
     if (e instanceof AxiosError) {
@@ -189,7 +223,7 @@ async function enroll(){
         errorMessage = 'Netzwerkfehler';
       } else if (e.response) {
         // already enrolled
-        errorMessage = 'Der Account gehört der Organisation bereits an oder die Einladung ist ungültig.';
+        errorMessage = 'Der Account gehört dem Event bereits an oder die Einladung ist ungültig.';
       }
     } else {
       tooltip.value = `Unerwarteter Fehler: ${e}`;

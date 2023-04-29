@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
@@ -85,10 +86,9 @@ public class EventService {
      * @param event the event to be deleted
      */
     public void deleteEvent(Event event){
-        event.getAttendees().stream().map(registration -> {
-            eventRegistrationRepository.delete(registration);
-            return null;
-        });
+        for(EventRegistration eventRegistration:event.getAttendees()){
+            eventRegistrationRepository.delete(eventRegistration);
+        }
         eventRepository.delete(event);
     }
 
@@ -272,5 +272,28 @@ public class EventService {
             }
         }
         return checkedIns;
+    }
+
+    public void deleteQuestionnaireFromEvent(String questionnaireId, String eventId){
+        Event event = getEventById(eventId);
+        List<QuestionnaireModel> questions = event.getQuestionnaires();
+
+        for(int i=0;i< questions.size();i++){
+            if(questions.get(i).getUuid().equals(questionnaireId)){
+                questions.remove(i);
+                break;
+            }
+        }
+
+        event.setQuestionnaires(questions);
+        eventRepository.save(event);
+    }
+
+    public void registerNewQuestionnaire(QuestionnaireModel questionnaireModel, String eventId){
+        Event event = getEventById(eventId);
+        List<QuestionnaireModel> questionnaires = event.getQuestionnaires();
+        questionnaires.add(questionnaireModel);
+        event.setQuestionnaires(questionnaires);
+        eventRepository.save(event);
     }
 }

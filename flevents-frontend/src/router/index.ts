@@ -2,8 +2,6 @@
 import {createRouter, createWebHistory, RouteLocationRaw} from 'vue-router'
 import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
-import security, {setAccount} from "@/service/security";
-import {Account} from "@/models/account";
 import {logout, tryRestoreSession} from "@/service/authService";
 
 const routes = [
@@ -36,6 +34,11 @@ const routes = [
         path: 'account',
         name: 'home.account',
         component: () => import(/* webpackChunkName: "home" */ '@/views/home/Account.vue'),
+      },
+      {
+        path: 'console',
+        name: 'home.console',
+        component: () => import(/* webpackChunkName: "home" */ '@/views/home/Console.vue'),
       },
     ],
   },
@@ -70,11 +73,20 @@ const routes = [
         name: 'events.invite',
         component: () => import(/* webpackChunkName: "events" */ '@/views/event/Invite.vue')
       },
-      // {
-      //   path: ':uuid/edit',
-      //   name: 'events.edit',
-      //   component: () => import(/* webpackChunkName: "events" */ '@/views/event/Overview.vue'),
-      // },
+
+      // POSTS
+      {
+        path: ':uuid/posts/create',
+        name: 'events.posts.create',
+        component: () => import(/* webpackChunkName: "posts" */ '@/views/event/posts/Create.vue'),
+      },
+      {
+        path: ':uuid/posts/:postUuid/edit',
+        name: 'events.posts.edit',
+        component: () => import(/* webpackChunkName: "posts" */ '@/views/event/posts/Edit.vue'),
+      },
+
+      // SURVEYS
       {
         path: ':uuid/questionnaires/create',
         name: 'events.questionnaires.create',
@@ -126,7 +138,7 @@ const routes = [
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "join" */ '@/views/event/EventInvite.vue')
+        component: () => import(/* webpackChunkName: "join" */ '@/views/event/AcceptInvitation.vue')
       }
     ]
   },
@@ -141,7 +153,7 @@ const routes = [
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "join" */ '@/views/organizations/OrganizationInviteLink.vue'),
+        component: () => import(/* webpackChunkName: "join" */ '@/views/organizations/AcceptInvitation.vue'),
       },
     ]
   },
@@ -173,18 +185,24 @@ const routes = [
     component: () => import('@/layouts/default/BaseLayout.vue'),
     children: [
       {
-        path: '/errors/404',
+        path: '404',
         name: 'errors.404',
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "events" */ '@/views/error/404.vue')
+        component: () => import(/* webpackChunkName: "errors" */ '@/views/error/404.vue')
       },
     ],
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/errors/404',
+    component: () => import('@/layouts/default/BaseLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import(/* webpackChunkName: "errors" */ '@/views/error/404.vue')
+      },
+    ],
   },
 ]
 

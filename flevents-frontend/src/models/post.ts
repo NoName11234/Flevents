@@ -1,12 +1,14 @@
 import {Account} from "@/models/account";
+import {Attachment} from "@/models/attachment";
 
 export interface Post {
 
   uuid: string,
   author: Account,
   title: string,
-  text: string,
-  date: Date,
-  attachments: Array<string>,
+  content: string,
+  creationDate: string,
+  attachments?: Array<Attachment>,
+  comments?: Array<Comment>,
 
 }

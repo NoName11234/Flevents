@@ -1,28 +1,43 @@
 import { defineStore } from 'pinia'
-// import postsApi from "@/api/postsApi";
 import {Post} from "@/models/post";
+import postApi from "@/api/postsApi";
+import {STORES} from "@/constants";
+import {computed} from "vue";
+import {FleventsEvent} from "@/models/fleventsEvent";
 
 export const usePostStore = defineStore('posts', {
   state: () => ({
-    posts: new Map<string, Post[]>(),
+    postsOfEvents: new Map<string, string[]>(),
     lastSuccessfulHydration: new Map<string, Date>(),
+
+    cachedPosts: new Map<string, Post>(),
+    specificLoading: new Map<string, boolean>,
+    lastCaching: new Map<string, Date>,
+
     loading: false,
     error: false,
   }),
   actions: {
 
     /**
-     * Hydrates the store by requesting the posts of the given event uuid from the api.
+     * Hydrates the store by requesting the posts of the given event uuid from the API.
      * @param eventUuid the uuid of the event associated with requested posts
      */
-    async hydrate(eventUuid: string) {
+    async hydrateSpecific(eventUuid: string) {
       this.loading = true;
       this.error = false;
-      // TODO: create and use posts store
       try {
-        // const { data } = await postsApi.getPosts(eventUuid);
-        // this.posts.set(eventUuid, data as Post[]);
-        // this.lastSuccessfulHydration.set(eventUuid, new Date());
+        const { data } = await postApi.getOf(eventUuid);
+        let postsOfEvent = data as Post[];
+        postsOfEvent.forEach(p => {
+          this.cachedPosts.set(p.uuid, p);
+          this.lastCaching.set(p.uuid, new Date());
+        });
+        this.postsOfEvents.set(
+          eventUuid,
+          postsOfEvent.map(p => p.uuid)
+        );
+        this.lastSuccessfulHydration.set(eventUuid, new Date());
       } catch (e) {
         console.warn(`Failed to fetch posts for event with id ${eventUuid}.`, e);
         this.error = true;
@@ -36,16 +51,52 @@ export const usePostStore = defineStore('posts', {
      * @param eventUuid the uuid of the event associated with requested posts
      * @returns an array of posts
      */
-    getPosts(eventUuid: string) {
-      const requestedPosts = this.posts.get(eventUuid);
+    getPostsOf(eventUuid: string) {
+      const requestedPosts = this.postsOfEvents.get(eventUuid);
       const lastUpdate = this.lastSuccessfulHydration.get(eventUuid);
       if (
         requestedPosts === undefined
-        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > 60000
+        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
       ) {
-        this.hydrate(eventUuid);
+        this.hydrateSpecific(eventUuid);
       }
-      return requestedPosts || [] as Post[];
+      return requestedPosts?.map(pUuid => this.cachedPosts.get(pUuid) as Post) || [] as Post[];
+    },
+
+    /**
+     * Retrieves a post.
+     * If the requested post is not yet loaded, it initialized its loading.
+     * @param uuid the uuid of the post
+     * @param eventUuid the uuid of the event associated with requested post
+     * @returns The post if cached, `undefined` otherwise.
+     */
+    getPost(uuid: string, eventUuid: string) {
+      const requestedPost = this.cachedPosts.get(uuid);
+      const lastUpdate = this.lastCaching.get(uuid);
+      if (
+        requestedPost === undefined
+        || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
+      ) {
+        this.hydrateSpecific(eventUuid);
+      }
+      return requestedPost || {} as Post;
+    },
+
+    /**
+     * Changes the cached post to the given one.
+     * If one of `post` or `post.uuid` is `undefined` no action is taken.
+     * @param post the event
+     */
+    setEvent(post: Post|undefined) {
+      if (post === undefined || post.uuid === undefined) return;
+      this.cachedPosts.set(post.uuid, post);
+    },
+
+    getEventGetter(uuid: string, eventUuid: string) {
+      return computed({
+        get: () => this.getPost(uuid, eventUuid),
+        set: (e) => this.setEvent(e),
+      });
     },
   },
 })

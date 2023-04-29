@@ -7,8 +7,9 @@ import {useRouter} from "vue-router";
 import security from "@/service/security";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import accountApi from "@/api/accountApi";
+import accountApi from "@/api/accountsApi";
 import api from "@/api/api";
+import {VALIDATION} from "@/constants";
 
 const router = useRouter();
 const accountStore = useAccountStore();
@@ -40,11 +41,14 @@ async function submit() {
   } else {
     account.value.secret = undefined;
   }
+  if (!account.value.email.match(VALIDATION.EMAIL)) {
+    tooltip.value = "Die angegebene E-Mail-Adresse ist ungültig.";
+    return;
+  }
   formLoading.value = true;
   try {
     console.log(api.defaults.headers.common['Authorization']);
     const response = await accountApi.editMe(account.value);
-    // const response = await api.post()
     if (Math.floor(response.status/100) !== 2) {
       throw new Error(`Request failed ${response}`);
     }
@@ -80,7 +84,7 @@ async function submit() {
       <v-container class="d-flex flex-column gap-3">
 
         <div
-          class="d-flex gap-2"
+          class="d-flex flex-column flex-sm-row gap-3"
         >
 
           <v-text-field
@@ -112,6 +116,9 @@ async function submit() {
       </v-container>
         <v-divider />
       <v-container class="d-flex flex-column gap-3">
+        <small class="text-grey">
+          Um Ihr Passwort zu ändern, geben Sie die folgenden Felder an:
+        </small>
         <v-text-field
           label="Neues Passwort"
           v-model="account.secret"

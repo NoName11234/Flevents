@@ -11,11 +11,14 @@ import Heading from "@/components/Heading.vue";
 import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
 import {useEventStore} from "@/store/events";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 const router = useRouter()
+const route = useRoute();
+
+const eventUuid = route.params.uuid as string;
+
 const selectedOrga = ref();
 const files = ref([new Array<any>()]);
-const route = useRoute();
 const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
@@ -30,6 +33,8 @@ const { managedOrganizations: organizations } = storeToRefs(organizationStore);
 
 const formLoading = ref(false);
 const loading = computed(() => formLoading.value||storeLoading.value);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
 
 const imageFile: Ref<Array<File>> = ref([]);
 // image
@@ -84,8 +89,7 @@ function getBase64(file : any) {
 async function submit() {
   if (
     fleventsEvent.value.name === ''
-    || fleventsEvent.value.description === ''
-    || selectedOrga.value == undefined
+    || fleventsEvent.value.location === ''
   ) {
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
@@ -110,9 +114,9 @@ async function submit() {
     await router.push({ name: 'events.event', params: { uuid: route.params.uuid } });
   } catch (e) {
     tooltip.value = "Das Event konnte nicht bearbeitet werden.";
-  } finally {
-    formLoading.value = false;
   }
+  formLoading.value = false;
+  eventStore.hydrateSpecific(eventUuid);
 }
 </script>
 
@@ -140,8 +144,10 @@ async function submit() {
             :items="organizations"
             :item-title="item => item.name"
             :item-value="item => item.uuid"
-            :rules="[() => selectedOrga !== undefined || 'Events müssen einer Organisation zugehören.']"
+            messages="Die Organisation existierender Events kann nicht verändert werden."
+            menu-icon="mdi-chevron-down"
             return-object
+            disabled
           />
 
           <v-text-field
@@ -187,6 +193,7 @@ async function submit() {
             no-resize
             v-model="fleventsEvent.description"
           ></v-textarea>
+
           <v-file-input
             label="Vorschaubild"
             variant="filled"
@@ -198,6 +205,7 @@ async function submit() {
             v-model="imageFile"
             accept="image/png, image/jpeg, image/bmp"
           />
+
           <div
             v-if="tooltip !== ''"
             class="text-error">

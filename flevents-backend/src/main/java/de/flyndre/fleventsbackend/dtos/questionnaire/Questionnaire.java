@@ -1,16 +1,11 @@
-package de.flyndre.fleventsbackend.dtos.questionaire;
+package de.flyndre.fleventsbackend.dtos.questionnaire;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
 import java.util.List;
-/**
- * This Class is a model of a Questionnaire.
- * It provides getter as well as setter.
- * @author Lukas Burkhardt
- * @version $I$
- */
+
 @Getter
 @Setter
 public class Questionnaire {

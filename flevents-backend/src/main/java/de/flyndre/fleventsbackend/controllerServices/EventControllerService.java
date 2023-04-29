@@ -202,7 +202,7 @@ public class EventControllerService {
      * Ignoring the values of minute, second and nanosecond.
      * Makes not sure that the emails were sent when something happens while sending them.
      */
-    @Scheduled(cron = "1 39 * * * *")
+    @Scheduled(cron = "1 0 * * * *")
     public void sendAutomaticEmails(){
         List<Event> events = eventService.getEvents();
         LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);

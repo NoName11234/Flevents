@@ -9,10 +9,14 @@ import {OrganizationRole} from "@/models/organizationRole";
 import {useOrganizationStore} from "@/store/organizations";
 import {useAppStore} from "@/store/app";
 import organizationsApi from "@/api/organizationsApi";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
-const uuid = route.params.uuid as string;
+const organizationUuid = route.params.uuid as string;
+
+const backRoute = { name: 'organizations.organization', params: { uuid: organizationUuid }, query: { tab: 'members' } };
+
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
@@ -21,7 +25,7 @@ const role = ref(OrganizationRole.member) as Ref<OrganizationRole>;
 const appStore = useAppStore();
 
 const organizationStore = useOrganizationStore();
-const organization = organizationStore.getOrganizationGetter(uuid);
+const organization = organizationStore.getOrganizationGetter(organizationUuid);
 
 const selectableRoles = [
   OrganizationRole.admin,
@@ -38,15 +42,18 @@ async function submit() {
   let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
+    }
     try {
-      const response = await organizationsApi.invite(uuid, email, role.value);
+      const response = await organizationsApi.invite(organizationUuid, email, role.value);
       successfulInvitations.push(email);
     } catch (e) {
       console.log(`Invitation of ${email} failed.`);
       failedInvitations.push(email);
     }
   }
-
   if (failedInvitations.length > 0) {
     appStore.addToast({
       text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
@@ -59,7 +66,7 @@ async function submit() {
       color: 'success',
     });
   }
-  await router.push( { name: 'organizations.organization', params: { uuid: uuid } } );
+  await router.push(backRoute);
 }
 </script>
 
@@ -98,13 +105,14 @@ async function submit() {
           hide-details="auto"
           :items="selectableRoles"
           v-model="role"
+          menu-icon="mdi-chevron-down"
         />
       </v-container>
       <v-divider />
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="flat"
-          :to="{ name: 'organizations.organization', params: { uuid: uuid } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>

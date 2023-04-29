@@ -16,17 +16,14 @@ import java.io.IOException;
  */
 @Service
 public class ApiService {
-    private OrganizationRepository organizationRepository;
-    private FleventsAccountRepository fleventsAccountRepository;
-    private OrganizationAccountRepository organizationAccountRepository;
-    private EventRegistrationRepository eventRegistrationRepository;
-    private EventRepository eventRepository;
-    public ApiService(OrganizationRepository organizationRepository, FleventsAccountRepository fleventsAccountRepository, OrganizationAccountRepository organizationAccountRepository, EventRegistrationRepository eventRegistrationRepository, EventRepository eventRepository){
+    private final OrganizationRepository organizationRepository;
+    private final FleventsAccountRepository fleventsAccountRepository;
+    private final OrganizationAccountRepository organizationAccountRepository;
+
+    public ApiService(OrganizationRepository organizationRepository, FleventsAccountRepository fleventsAccountRepository, OrganizationAccountRepository organizationAccountRepository){
         this.organizationRepository = organizationRepository;
         this.fleventsAccountRepository = fleventsAccountRepository;
         this.organizationAccountRepository = organizationAccountRepository;
-        this.eventRegistrationRepository = eventRegistrationRepository;
-        this.eventRepository = eventRepository;
     }
 
     /**
@@ -40,11 +37,11 @@ public class ApiService {
         Organization dhbw = new Organization(null,"DHBW","not so the best university of the world",null,null,null,null,null);
         dhbw = organizationRepository.save(dhbw);
 
-        FleventsAccount lukas = fleventsAccountRepository.save(new FleventsAccount(null,"Lukas","Burkhardt",true,"i21005@hb.dhbw-stuttgart.de",null,"You'll never gona gues this!!",null,null));
-        FleventsAccount paul = fleventsAccountRepository.save(new FleventsAccount(null,"Paul","Lehmann",true,"paul@hb.dhbw-stuttgart.de",null,"You'll never gonna gues this!!",null,null));
-        FleventsAccount ruben = fleventsAccountRepository.save(new FleventsAccount(null,"Ruben","Kraft",true,"ruben@hb.dhbw-stuttgart.de",null,"You'll never gonna guess this!!",null,null));
-        FleventsAccount pasi = fleventsAccountRepository.save(new FleventsAccount(null,"Pascal","Fuchs",true,"pasi@hb.dhbw-stuttgart.de",null,"You'll gonna guess this!!",null,null));
-        FleventsAccount david = fleventsAccountRepository.save(new FleventsAccount(null, "David", "Maier",true, "dm@flyndre.de", null, "wireshork", null, null));
+        FleventsAccount lukas = fleventsAccountRepository.save(new FleventsAccount(null,"Lukas","Burkhardt",true,false,"i21005@hb.dhbw-stuttgart.de",null,"You'll never gona gues this!!",null,null,null));
+        FleventsAccount paul = fleventsAccountRepository.save(new FleventsAccount(null,"Paul","Lehmann",true,false,"paul@hb.dhbw-stuttgart.de",null,"You'll never gonna gues this!!",null,null,null));
+        FleventsAccount ruben = fleventsAccountRepository.save(new FleventsAccount(null,"Ruben","Kraft",true,false,"ruben@hb.dhbw-stuttgart.de",null,"You'll never gonna guess this!!",null,null,null));
+        FleventsAccount pasi = fleventsAccountRepository.save(new FleventsAccount(null,"Pascal","Fuchs",true,false,"pasi@hb.dhbw-stuttgart.de",null,"You'll gonna guess this!!",null,null,null));
+        FleventsAccount david = fleventsAccountRepository.save(new FleventsAccount(null, "David", "Maier",true,false, "dm@flyndre.de", null, "wireshork", null, null,null));
 
         //Event birthday = eventRepository.save(new Event(null,"Birthday","This is my birthday party",null,null,null,"My house",null,flyndre,null));
         //Event exam = eventRepository.save(new Event(null,"Exam","This is the exam from the lecture swe",null,null,null,"Campus Horb",null,dhbw,null));
