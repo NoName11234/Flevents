@@ -71,7 +71,7 @@ async function addChoice(question: Question) {
   tooltip.value = '';
   question.choices.push({choice: ''} as Choices);
 }
-async function removeChoice(question: SingleChoiceQuestion, index: number) {
+async function removeChoice(question: any, index: number) {
   if (question.choices.length <= 2) {
     tooltip.value = 'Single-Choice-Fragen müssen mindestens zwei Antwortmöglichkeiten haben.';
     return;
