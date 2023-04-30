@@ -47,7 +47,11 @@ public class QuestionnaireService {
     }
 
     public AnsweredQuestionnaireModel getAnswerFromUser(FleventsAccount user, QuestionnaireModel questionnaireModel){
-        return answeredQuestionnaireRepository.findByUserAndQuestionnaireModel(user, questionnaireModel);
+        Optional<AnsweredQuestionnaireModel> opt = answeredQuestionnaireRepository.findByUserAndQuestionnaireModel(user, questionnaireModel);
+        if(opt.isEmpty()){
+            throw new NoSuchElementException("Could not find AnsweredQuestionnaireModel.");
+        }
+        return opt.get();
     }
 
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
@@ -68,8 +72,8 @@ public class QuestionnaireService {
         return answeredQuestionnaireRepository.findById(answeredQuestionnaireId).get();
     }
 
-    public void deleteAnsweredQuestionnaire(String answeredQuestionnaireId){
-        answeredQuestionnaireRepository.delete(getAnsweredQuestionnaireById(answeredQuestionnaireId));
+    public void deleteAnsweredQuestionnaire(AnsweredQuestionnaireModel answeredQuestionnaire){
+        answeredQuestionnaireRepository.delete(answeredQuestionnaire);
     }
 
     public void deleteQuestionnaire(String questionnaireId){

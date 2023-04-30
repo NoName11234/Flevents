@@ -30,9 +30,9 @@ public class QuestionnaireModel {
     private String title;
     private Timestamp creationDate;
     private Timestamp closingDate;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true, mappedBy = "questionnaire")
     private List<QuestionModel> questions = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true, mappedBy = "questionnaireModel")
     private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
 
     public void merge(QuestionnaireModel questionnaireModel){

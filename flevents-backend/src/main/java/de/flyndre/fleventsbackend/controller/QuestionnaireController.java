@@ -1,6 +1,8 @@
 package de.flyndre.fleventsbackend.controller;
 
 import de.flyndre.fleventsbackend.Models.EventRole;
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionModel;
+import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import de.flyndre.fleventsbackend.controllerServices.QuestionnaireControllerService;
 import de.flyndre.fleventsbackend.dtos.questionnaire.AnsweredQuestionnaire;
 import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
@@ -60,7 +62,6 @@ public class QuestionnaireController {
         //if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee))){
         //    return new ResponseEntity(HttpStatus.UNAUTHORIZED);
        //}
-
         return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
     }
 

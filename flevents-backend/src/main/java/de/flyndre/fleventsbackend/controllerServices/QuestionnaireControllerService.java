@@ -59,7 +59,7 @@ public class QuestionnaireControllerService {
     }
 
     public AnsweredQuestionnaireModel getAnswerFromUser(String questionnaireId, String userId){
-        return questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId),    questionnaireService.getQuestionnaire(questionnaireId));
+        return questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId), questionnaireService.getQuestionnaire(questionnaireId));
     }
 
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
@@ -78,11 +78,12 @@ public class QuestionnaireControllerService {
 
     public void deleteQuestionnaire(String questionnaireId) {
         QuestionnaireModel questionnaire = questionnaireService.getQuestionnaire(questionnaireId);
-        questionnaireService.deleteQuestionnaire(questionnaireId);
+
         List<AnsweredQuestionnaireModel> answeredQuestionnaires = questionnaire.getAnsweredQuestionnaireModels();
         for(AnsweredQuestionnaireModel answeredQuestionnaire : answeredQuestionnaires){
-            deleteAnsweredQuestionnaire(answeredQuestionnaire.getUuid());
+            questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaire);
         }
+        questionnaireService.deleteQuestionnaire(questionnaireId);
         /*
         List<QuestionModel> questionModels = questionnaire.getQuestions();
         for(QuestionModel question : questionModels){
@@ -104,7 +105,7 @@ public class QuestionnaireControllerService {
 
 
 
-        questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaireId);
+        //questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaireId);
         //fleventsAccountService.deleteAnsweredQuestionnaireFromAccount(answeredQuestionnaireId, aqm.getUser().getUuid());
 
     }

@@ -22,10 +22,10 @@ public class AnsweredQuestionModel {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
-    @Nullable @OneToOne
+    @Nullable @OneToOne(cascade = CascadeType.PERSIST, orphanRemoval = true)
     private ChoiceModel choiceModel;
     @Nullable
     private String answer;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private AnsweredQuestionnaireModel answeredQuestionnaireModel;
 }

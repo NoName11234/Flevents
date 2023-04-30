@@ -10,6 +10,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.lang.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,8 +25,8 @@ public class QuestionModel {
     private String uuid;
     private String question;
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private QuestionnaireModel questionnaire;
-    @Nullable @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChoiceModel> choiceModels;
+    @Nullable @OneToMany(cascade = CascadeType.PERSIST)
+    private List<ChoiceModel> choiceModels = new ArrayList<>();
 }
