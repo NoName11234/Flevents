@@ -19,6 +19,7 @@ import {useAppStore} from "@/store/app";
 import {useOrganizationStore} from "@/store/organizations";
 import QuestionnaireApi from "@/api/questionnaireApi";
 import api from "@/api/api";
+import {OrganizationRole} from "@/models/organizationRole";
 
 const openContext = ref(false);
 const address = ref("");
@@ -403,9 +404,11 @@ onMounted(async () => {
       >
         Posts
       </v-tab>
-     <v-tab
+      <!-- TODO: hier eventuell anpassen, weil ja auch Orgaleute die Umfrage sehen dürfen -->
+      <v-tab
        value="polls"
       :disabled="storesLoading"
+       v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer || validateRole === EventRole.attendee || validateRole === OrganizationRole.organizer || validateRole === OrganizationRole.admin"
         >
        Umfragen
       </v-tab>
