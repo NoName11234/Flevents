@@ -41,10 +41,9 @@ const aq = ref({
   questionnaire: props.questionnaire.uuid,
   userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
-    switch (question.questionType) {
-      case QuestionType.SingleChoice:
-        return {choice: question.choices[0]} as AnsweredQuestion
-      case QuestionType.FreeText:
+    if(question.choices != null) {
+      return {choice: question.choices[0]} as AnsweredQuestion
+    }else{
         return {answer: ''} as AnsweredQuestion;
     }
   }),
@@ -55,6 +54,7 @@ const loading = ref(true);
 onMounted(setup);
 async function setup() {
   loading.value = true;
+  console.log(props.questionnaire);
   console.log(aq.value.answers);
   try {
     //const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
@@ -150,7 +150,7 @@ function hasRights() {
         <v-divider />
 
         <v-textarea
-          v-if="question.questionType === QuestionType.FreeText"
+          v-if="question.choices.length == 0"
           hide-details="auto"
           label="Eigene Antwort"
           variant="solo"
@@ -160,7 +160,7 @@ function hasRights() {
         </v-textarea>
 
         <v-radio-group
-          v-if="question.questionType === QuestionType.SingleChoice"
+          v-if="question.choices.length != 0"
           hide-details="auto"
           class="pa-2"
           :disabled="alreadyVoted || loading"

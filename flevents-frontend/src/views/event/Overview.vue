@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, Ref, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {AxiosError} from "axios";
@@ -17,6 +17,8 @@ import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
 import {useOrganizationStore} from "@/store/organizations";
+import QuestionnaireApi from "@/api/questionnaireApi";
+import api from "@/api/api";
 
 const openContext = ref(false);
 const address = ref("");
@@ -39,7 +41,7 @@ const posts = computed(() => event.value
   .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
-const questionnaires = computed(() => event.value.questionnaires);
+const questionnaires : any = ref(null);
 const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
 const organizationStore = useOrganizationStore();
 const addAnon = ref(false);
@@ -357,7 +359,8 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
-onMounted(() => {
+onMounted(async () => {
+  questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
   console.log(event);
   console.log(questionnaires);
 })
@@ -559,12 +562,13 @@ onMounted(() => {
         </v-container>
 
         <v-divider />
-
         <v-expansion-panels
+          v-if="questionnaires"
           variant="accordion"
           multiple
         >
           <QuestionnaireDisplay
+            v-if="questionnaires != null"
             v-for="(questionnaire, index) in questionnaires"
             :key="index"
             :questionnaire="questionnaire"
