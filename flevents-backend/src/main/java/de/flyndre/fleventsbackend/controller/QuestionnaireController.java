@@ -43,21 +43,20 @@ public class QuestionnaireController {
         if(!questionnaireControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId).stream().map(questionnaire -> mapper.map(questionnaire, Questionnaire.class)).collect(Collectors.toList()), HttpStatus.OK);
+        return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId), HttpStatus.OK);
     }
 
     @GetMapping("/{questionnaireId}")
     public ResponseEntity getQuestionnaire(@PathVariable String questionnaireId, Authentication auth){
-        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(),Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(),Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
        return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
     }
 
-    //TODO: Ändern das Auth als User verwendet wird
     @GetMapping("/{questionnaireId}/answers/{userId}")
     public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId, Authentication auth){
-        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee))){
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
 
@@ -73,7 +72,7 @@ public class QuestionnaireController {
     }
     @PostMapping("/{questionnaireId}")
     public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
-        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
@@ -81,7 +80,7 @@ public class QuestionnaireController {
 
     @DeleteMapping("/{questionnaireId}")
     public ResponseEntity deleteQuestionnaire(@PathVariable String questionnaireId, Authentication auth) {
-        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         questionnaireControllerService.deleteQuestionnaire(questionnaireId);
@@ -90,7 +89,7 @@ public class QuestionnaireController {
 
     @PostMapping("/{questionnaireId}/answers")
     public ResponseEntity addAnswer(@PathVariable String questionnaireId,@RequestBody AnsweredQuestionnaire answeredQuestionnaire, Authentication auth){
-        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEvent().getUuid(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee, EventRole.guest))){
+        if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee, EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
