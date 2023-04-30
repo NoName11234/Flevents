@@ -101,10 +101,10 @@ jobs:
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
             server.port=8082
-            frontend.port=3000
+            frontend.port=8080
             application.baseurl=http://flevents.flyndre.de
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
-            application.jwtExpirationMs=86400000
+            application.jwtExpirationMs=6300000
           write-mode: overwrite
                
       #Set up JDK 17
