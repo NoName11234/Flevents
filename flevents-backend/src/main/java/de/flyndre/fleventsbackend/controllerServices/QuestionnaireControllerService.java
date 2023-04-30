@@ -144,8 +144,11 @@ public class QuestionnaireControllerService {
 
         for(int i=0;i<answeredQuestionnaire.getAnswers().size();i++){
             AnsweredQuestion aq = answeredQuestionnaire.getAnswers().get(i);
-            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
-            AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(),cm, aq.getAnswer(),answeredQuestionnaireModel);
+            ChoiceModel cm = null;
+            if(aq.getChoice()!=null) {
+                cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
+            }
+            AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(), cm, aq.getAnswer(), answeredQuestionnaireModel);
             answerModels.add(aqm);
         }
 

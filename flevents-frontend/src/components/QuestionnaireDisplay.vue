@@ -42,7 +42,7 @@ const aq = ref({
   questionnaireId: props.questionnaire.uuid,
   userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
-    if(question.choices != null) {
+    if(question.choices.length != 0) {
       return {choice: question.choices[0]}as AnsweredQuestion
     }else{
         return {answer: ''} as AnsweredQuestion;
@@ -58,10 +58,11 @@ async function setup() {
   console.log(props.questionnaire);
   console.log(aq.value.answers);
   try {
-    //const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
-    //console.log(response);
-    //aq.value = response.data as AnsweredQuestionnaire;
-    //alreadyVoted.value = true;
+    const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
+    console.log("11111111111111")
+    console.log(response);
+    aq.value = response.data as AnsweredQuestionnaire;
+    alreadyVoted.value = true;
   } catch (e) {
     console.error('Failed to fetch answered questionnaire.');
     alreadyVoted.value = false;
