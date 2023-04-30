@@ -8,6 +8,7 @@ import {Organization} from "@/models/organization";
 import {AxiosError} from "axios";
 import {VALIDATION} from "@/constants";
 import ConsoleApi from "@/api/consoleApi";
+import {el} from "vuetify/locale";
 
 const appStore = useAppStore();
 
@@ -93,7 +94,12 @@ async function deleteOrganization(organization: Organization) {
   }
   platformStore.hydrate();
 }
-
+function checkmacher(string : string | undefined) : string{
+  if(string !== undefined){
+    return string;
+  }
+  return "";
+}
 </script>
 
 <template>
@@ -122,7 +128,7 @@ async function deleteOrganization(organization: Organization) {
           v-model="firstAdminEmail"
           label="E-Mail-Adresse des ersten Administrators"
           prepend-inner-icon="mdi-at"
-          :rules="[() => firstAdminEmail !== '' || 'Dieses Feld wird benötigt.', () => firstAdminEmail?.match(VALIDATION.EMAIL)?.length > 0 || 'Muss eine gültige E-Mail-Adresse sein.']"
+          :rules="[() => firstAdminEmail !== '' || 'Dieses Feld wird benötigt.', () => (firstAdminEmail?.match(VALIDATION.EMAIL)?.length ?? 0) > 0 || 'Muss eine gültige E-Mail-Adresse sein.']"
           required
           hide-details="auto"
         />
