@@ -298,7 +298,6 @@ public class EventService {
                 break;
             }
         }
-
         event.setQuestionnaires(questions);
         eventRepository.save(event);
     }
