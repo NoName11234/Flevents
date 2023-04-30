@@ -30,11 +30,10 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits<{
-  (e: 'update'): void
-}>();
+const emits = defineEmits(['update'])
 const accountStore = useAccountStore();
 const router = useRouter();
+const isDelete = ref(false);
 const tooltip = ref('');
 const user = security.getAccount()!;
 const aq = ref({
@@ -67,7 +66,6 @@ async function setup() {
     console.error('Failed to fetch answered questionnaire.');
     alreadyVoted.value = false;
   }
-  alreadyVoted.value = false;
   loading.value = false;
 }
 
@@ -78,11 +76,12 @@ async function submit() {
     console.log(aq);
     const response = QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
     console.log(response);
+    alreadyVoted.value = true;
   } catch (e) {
     console.error('Failed to answer questionnaire.', e);
     tooltip.value = 'Abstimmen fehlgeschlagen.';
   }
-  await setup();
+  //await setup();
   loading.value = false;
 }
 
@@ -91,11 +90,12 @@ async function remove(this: any) {
   try {
     const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
     console.log(response);
+    isDelete.value = true;
   } catch (e) {
     console.error('Failed to delete questionnaire.', e);
     tooltip.value = 'Löschen fehlgeschlagen.';
   }
-  emits.call(emits, 'update');
+  emits("update", props.questionnaire?.uuid);
   loading.value = false;
 }
 
@@ -118,7 +118,7 @@ function hasRights() {
 </script>
 
 <template>
-  <v-expansion-panel>
+  <v-expansion-panel v-if="!isDelete">
 
     <v-expansion-panel-title>
       <div class="d-flex flex-row justify-start align-center gap-3 w-100">

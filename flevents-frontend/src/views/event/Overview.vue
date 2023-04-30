@@ -360,6 +360,11 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
+function reducelist(uuid: string){
+  questionnaires.value.filter((qeuestionair : Questionnaire) => {
+      return qeuestionair.uuid != uuid
+  })
+}
 onMounted(async () => {
   questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
   console.log(event);
@@ -576,6 +581,7 @@ onMounted(async () => {
             :key="index"
             :questionnaire="questionnaire"
             :event="event"
+            @update="reducelist"
           />
         </v-expansion-panels>
       </v-window-item>
