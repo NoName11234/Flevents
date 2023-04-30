@@ -89,9 +89,7 @@ async function submit() {
 async function remove(this: any) {
   loading.value = true;
   try {
-    const response = await axios.delete(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}`
-    );
+    const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
     console.log(response);
   } catch (e) {
     console.error('Failed to delete questionnaire.', e);

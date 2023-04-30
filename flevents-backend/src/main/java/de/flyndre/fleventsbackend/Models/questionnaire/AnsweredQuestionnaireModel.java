@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class AnsweredQuestionnaireModel {
     private String uuid;
     @ManyToOne(cascade = CascadeType.ALL)
     private FleventsAccount user;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnsweredQuestionModel> answers = new ArrayList<>();
     @ManyToOne(cascade = CascadeType.ALL)
     private QuestionnaireModel questionnaireModel;

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -24,6 +26,6 @@ public class QuestionModel {
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
     @ManyToOne(cascade = CascadeType.ALL)
     private QuestionnaireModel questionnaire;
-    @Nullable @OneToMany(cascade = CascadeType.ALL)
+    @Nullable @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChoiceModel> choiceModels;
 }

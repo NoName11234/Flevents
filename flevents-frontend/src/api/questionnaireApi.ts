@@ -26,22 +26,10 @@ class QuestionnaireApi {
       params: { "eventId": eventUuid}
     });
   }
-
-  /**
-   * Retrieves a post.
-   * @param uuid the uuid of the post
-   * @param eventUuid the uuid of the post's event
-   */
-  get(uuid: string, eventUuid: string) {
-    return api.get(`/events/${eventUuid}/posts/${uuid}`);
-  }
-
   /**
    * Retrieves all questionnaires of the given event.
    * @param eventUuid the uuid of the event
    */
-
-
   getOf(eventUuid: string) {
     return api.get("/questionnaires", {params:{ eventId: eventUuid}});
   }
@@ -65,30 +53,12 @@ class QuestionnaireApi {
     return api.post(`/questionnaires/${questionnaireId}/answers`, answeredQuestionnaire)
   }
 
-
   /**
-   * Modifies the post with the given uuid.
-   * @param uuid the uuid of the post
-   * @param eventUuid the uuid of the post's event
-   * @param post a post object containing only the attributes to be modified
-   * @param addedAttachments list of files to be appended to the post additionally to existing ones
+   * Deletes a questionnaire.
+   * @param uuid the uuid of the questionnaire
    */
-  edit(uuid: string, eventUuid: string, post: Post, addedAttachments: File[]) {
-    let data = new FormData();
-    addedAttachments.forEach(v => data.append('attachments', v));
-    data.append('post', new Blob([JSON.stringify(post)], {type: 'application/json'}));
-    return api.post(`/events/${eventUuid}/posts/${uuid}`, data, {
-      headers: { "Content-Type": undefined }
-    });
-  }
-
-  /**
-   * Deletes a post.
-   * @param uuid the uuid of the post
-   * @param eventUuid the uuid of the post's event
-   */
-  delete(uuid: string, eventUuid: string) {
-    return api.post(`/events/${eventUuid}/posts/${uuid}`);
+  delete(uuid: string) {
+    return api.delete(`/questionnaires/${uuid}`);
   }
 }
 

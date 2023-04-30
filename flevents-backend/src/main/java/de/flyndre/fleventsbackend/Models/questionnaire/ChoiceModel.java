@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.lang.Nullable;
 
 @Entity
 @Getter
@@ -19,3 +20,5 @@ public class ChoiceModel {
     private String uuid;
     private String choice;
 }
+
+

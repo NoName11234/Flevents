@@ -1,13 +1,9 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.Models.questionnaire.*;
 import de.flyndre.fleventsbackend.dtos.questionnaire.*;
-import de.flyndre.fleventsbackend.services.AuthService;
-import de.flyndre.fleventsbackend.services.EventService;
-import de.flyndre.fleventsbackend.services.FleventsAccountService;
-import de.flyndre.fleventsbackend.services.QuestionnaireService;
+import de.flyndre.fleventsbackend.services.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +21,17 @@ public class QuestionnaireControllerService {
     private final AuthService authService;
     private final QuestionnaireService questionnaireService;
     private final EventService eventService;
+
+    private final AnsweredQuestionService answeredQuestionService;
+    private final QuestionService questionService;
     private final FleventsAccountService fleventsAccountService;
 
-    public QuestionnaireControllerService(AuthService authService, QuestionnaireService questionnaireService, EventService eventService, FleventsAccountService fleventsAccountService){
+    public QuestionnaireControllerService(AuthService authService, QuestionnaireService questionnaireService, EventService eventService, AnsweredQuestionService answeredQuestionService, QuestionService questionService, FleventsAccountService fleventsAccountService){
         this.questionnaireService = questionnaireService;
         this.authService = authService;
         this.eventService = eventService;
+        this.answeredQuestionService = answeredQuestionService;
+        this.questionService = questionService;
         this.fleventsAccountService = fleventsAccountService;
     }
     /**
@@ -75,22 +76,37 @@ public class QuestionnaireControllerService {
         return questionnaireService.editQuestionnaire(questionnaireId,newQm);
     }
 
-    public void deleteQuestionnaire(String questionnaireId){
-        QuestionnaireModel qm = questionnaireService.getQuestionnaire(questionnaireId);
-        eventService.deleteQuestionnaireFromEvent(questionnaireId, qm.getEvent().getUuid());
-        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = qm.getAnsweredQuestionnaireModels();
-
-        for(int i=0;i<answeredQuestionnaireModels.size();i++){
-            deleteAnsweredQuestionnaire(answeredQuestionnaireModels.get(i).getUuid());
-        }
-
+    public void deleteQuestionnaire(String questionnaireId) {
+        QuestionnaireModel questionnaire = questionnaireService.getQuestionnaire(questionnaireId);
         questionnaireService.deleteQuestionnaire(questionnaireId);
+        List<AnsweredQuestionnaireModel> answeredQuestionnaires = questionnaire.getAnsweredQuestionnaireModels();
+        for(AnsweredQuestionnaireModel answeredQuestionnaire : answeredQuestionnaires){
+            deleteAnsweredQuestionnaire(answeredQuestionnaire.getUuid());
+        }
+        /*
+        List<QuestionModel> questionModels = questionnaire.getQuestions();
+        for(QuestionModel question : questionModels){
+            questionService.deleteQuestion(question.getUuid());
+        }*/
+
+        //eventService.deleteQuestionnaireFromEvent(questionnaireId, questionnaire.getEvent().getUuid());
     }
 
+
     public void deleteAnsweredQuestionnaire(String answeredQuestionnaireId){
+
         AnsweredQuestionnaireModel aqm = questionnaireService.getAnsweredQuestionnaireById(answeredQuestionnaireId);
-        fleventsAccountService.deleteAnsweredQuestionnaireFromAccount(answeredQuestionnaireId, aqm.getUser().getUuid());
+
+        //List<AnsweredQuestionModel> answeredQuestionModels = aqm.getAnswers();
+        //for(AnsweredQuestionModel answeredQuestion : answeredQuestionModels){
+        //   answeredQuestionService.deleteQuestion(answeredQuestion.getUuid());
+       // }
+
+
+
         questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaireId);
+        //fleventsAccountService.deleteAnsweredQuestionnaireFromAccount(answeredQuestionnaireId, aqm.getUser().getUuid());
+
     }
 
     public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){

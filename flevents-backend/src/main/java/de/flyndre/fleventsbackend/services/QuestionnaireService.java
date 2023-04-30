@@ -39,7 +39,7 @@ public class QuestionnaireService {
     }
 
     public QuestionnaireModel getQuestionnaire(String questionnaireId){
-        Optional<QuestionnaireModel> optional = questionnaireRepository.findById(questionnaireId);
+        Optional<QuestionnaireModel> optional = questionnaireRepository.findAllByUuid(questionnaireId);
         if(!optional.isPresent()){
             throw new NoSuchElementException("Could not find a questionnaire with this id");
         }
