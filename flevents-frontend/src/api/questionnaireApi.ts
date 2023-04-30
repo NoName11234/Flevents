@@ -3,6 +3,7 @@ import {FleventsEvent} from "@/models/fleventsEvent";
 import {EventRole} from "@/models/eventRole";
 import {Post} from "@/models/post";
 import {Questionnaire} from "@/models/questionnaire";
+import {AnsweredQuestionnaire} from "@/models/answeredQuestionnaire";
 
 /**
  * Api endpoints to access and modify posts.
@@ -53,6 +54,17 @@ class QuestionnaireApi {
   getAnswers(questionnaireUuid : string, userUuid: string) {
     return api.get(`/questionnaires/${questionnaireUuid}/answers/${userUuid}`);
   }
+
+  /**
+   * saves the Answer of the questionnaire.
+   * @param answeredQuestionnaire the answered questionnaire
+   * @param questionnaireId the Uuid of the questionnaire
+   */
+  saveAnswer(answeredQuestionnaire : AnsweredQuestionnaire, questionnaireId : string){
+    console.log(answeredQuestionnaire);
+    return api.post(`/questionnaires/${questionnaireId}/answers`, answeredQuestionnaire)
+  }
+
 
   /**
    * Modifies the post with the given uuid.

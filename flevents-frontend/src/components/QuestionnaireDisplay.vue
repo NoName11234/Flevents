@@ -17,6 +17,7 @@ import {AnsweredQuestion} from "@/models/answeredQuestion";
 import {useAccountStore} from "@/store/account";
 import QuestionnaireApi from "@/api/questionnaireApi";
 import AccountsApi from "@/api/accountsApi";
+import {Choices} from "@/models/choices";
 
 const props = defineProps({
   questionnaire: {
@@ -38,11 +39,11 @@ const tooltip = ref('');
 const user = security.getAccount()!;
 const aq = ref({
   uuid: '',
-  questionnaire: props.questionnaire.uuid,
+  questionnaireId: props.questionnaire.uuid,
   userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
     if(question.choices != null) {
-      return {choice: question.choices[0]} as AnsweredQuestion
+      return {choice: question.choices[0]}as AnsweredQuestion
     }else{
         return {answer: ''} as AnsweredQuestion;
     }
@@ -72,10 +73,9 @@ async function setup() {
 async function submit() {
   loading.value = true;
   try {
-    const response = await axios.post(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}/answers`,
-      aq.value
-    );
+    console.log("------------------------")
+    console.log(aq);
+    const response = QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
     console.log(response);
   } catch (e) {
     console.error('Failed to answer questionnaire.', e);
@@ -169,7 +169,7 @@ function hasRights() {
           <v-radio
             v-for="(option, oIndex) in question.choices"
             :key="oIndex"
-            :value="option.choice"
+            :value="option"
             :label="option.choice"
           />
         </v-radio-group>
