@@ -60,7 +60,7 @@ public class QuestionnaireController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
 
-        return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
+        return new ResponseEntity<>(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId),HttpStatus.OK);
     }
 
     @PostMapping

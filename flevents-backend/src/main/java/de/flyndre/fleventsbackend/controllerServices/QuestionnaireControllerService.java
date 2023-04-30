@@ -57,8 +57,8 @@ public class QuestionnaireControllerService {
         return convertQuestionnaireModelToQuestionnaire(questionnaireService.getQuestionnaire(questionnaireId));
     }
 
-    public AnsweredQuestionnaireModel getAnswerFromUser(String questionnaireId, String userId){
-        return questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId),    questionnaireService.getQuestionnaire(questionnaireId));
+    public AnsweredQuestionnaire getAnswerFromUser(String questionnaireId, String userId){
+        return convertAnsweredQuestionnaireModelToAnsweredQuestionnaire(questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId),questionnaireService.getQuestionnaire(questionnaireId)));
     }
 
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
@@ -185,5 +185,31 @@ public class QuestionnaireControllerService {
         questionnaire.setClosingDate(questionnaireModel.getClosingDate());
 
         return questionnaire;
+    }
+
+    public AnsweredQuestionnaire convertAnsweredQuestionnaireModelToAnsweredQuestionnaire(AnsweredQuestionnaireModel answeredQuestionnaireModel){
+        AnsweredQuestionnaire answeredQuestionnaire = new AnsweredQuestionnaire();
+        List<AnsweredQuestion> answeredQuestions = new ArrayList<>();
+        List<AnsweredQuestionModel> answeredQuestionModels = answeredQuestionnaireModel.getAnswers();
+
+        for(int i=0;i<answeredQuestionModels.size();i++){
+            AnsweredQuestionModel answeredQuestionModel = answeredQuestionModels.get(i);
+            AnsweredQuestion answeredQuestion = new AnsweredQuestion();
+
+            Choice choice = new Choice();
+            choice.setUuid(answeredQuestionModel.getChoiceModel().getUuid());
+            choice.setChoice(answeredQuestionModel.getChoiceModel().getChoice());
+
+            answeredQuestion.setUuid(answeredQuestionModel.getUuid());
+            answeredQuestion.setAnswer(answeredQuestionModel.getAnswer());
+            answeredQuestion.setChoice(choice);
+            answeredQuestions.add(answeredQuestion);
+        }
+        answeredQuestionnaire.setAnswers(answeredQuestions);
+        answeredQuestionnaire.setUuid(answeredQuestionnaireModel.getUuid());
+        answeredQuestionnaire.setQuestionnaireId(answeredQuestionnaireModel.getQuestionnaireModel().getUuid());
+        answeredQuestionnaire.setUserId(answeredQuestionnaireModel.getUser().getUuid());
+
+        return answeredQuestionnaire;
     }
 }
