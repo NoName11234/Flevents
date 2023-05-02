@@ -1,13 +1,9 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.Models.questionnaire.*;
 import de.flyndre.fleventsbackend.dtos.questionnaire.*;
-import de.flyndre.fleventsbackend.services.AuthService;
-import de.flyndre.fleventsbackend.services.EventService;
-import de.flyndre.fleventsbackend.services.FleventsAccountService;
-import de.flyndre.fleventsbackend.services.QuestionnaireService;
+import de.flyndre.fleventsbackend.services.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +21,17 @@ public class QuestionnaireControllerService {
     private final AuthService authService;
     private final QuestionnaireService questionnaireService;
     private final EventService eventService;
+
+    private final AnsweredQuestionService answeredQuestionService;
+    private final QuestionService questionService;
     private final FleventsAccountService fleventsAccountService;
 
-    public QuestionnaireControllerService(AuthService authService, QuestionnaireService questionnaireService, EventService eventService, FleventsAccountService fleventsAccountService){
+    public QuestionnaireControllerService(AuthService authService, QuestionnaireService questionnaireService, EventService eventService, AnsweredQuestionService answeredQuestionService, QuestionService questionService, FleventsAccountService fleventsAccountService){
         this.questionnaireService = questionnaireService;
         this.authService = authService;
         this.eventService = eventService;
+        this.answeredQuestionService = answeredQuestionService;
+        this.questionService = questionService;
         this.fleventsAccountService = fleventsAccountService;
     }
     /**
@@ -57,8 +58,8 @@ public class QuestionnaireControllerService {
         return convertQuestionnaireModelToQuestionnaire(questionnaireService.getQuestionnaire(questionnaireId));
     }
 
-    public AnsweredQuestionnaire getAnswerFromUser(String questionnaireId, String userId){
-        return convertAnsweredQuestionnaireModelToAnsweredQuestionnaire(questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId),questionnaireService.getQuestionnaire(questionnaireId)));
+    public AnsweredQuestionnaireModel getAnswerFromUser(String questionnaireId, String userId){
+        return questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId), questionnaireService.getQuestionnaire(questionnaireId));
     }
 
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
@@ -75,22 +76,38 @@ public class QuestionnaireControllerService {
         return questionnaireService.editQuestionnaire(questionnaireId,newQm);
     }
 
-    public void deleteQuestionnaire(String questionnaireId){
-        QuestionnaireModel qm = questionnaireService.getQuestionnaire(questionnaireId);
-        eventService.deleteQuestionnaireFromEvent(questionnaireId, qm.getEvent().getUuid());
-        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = qm.getAnsweredQuestionnaireModels();
+    public void deleteQuestionnaire(String questionnaireId) {
+        QuestionnaireModel questionnaire = questionnaireService.getQuestionnaire(questionnaireId);
 
-        for(int i=0;i<answeredQuestionnaireModels.size();i++){
-            deleteAnsweredQuestionnaire(answeredQuestionnaireModels.get(i).getUuid());
+        List<AnsweredQuestionnaireModel> answeredQuestionnaires = questionnaire.getAnsweredQuestionnaireModels();
+        for(AnsweredQuestionnaireModel answeredQuestionnaire : answeredQuestionnaires){
+            questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaire);
         }
-
         questionnaireService.deleteQuestionnaire(questionnaireId);
+        /*
+        List<QuestionModel> questionModels = questionnaire.getQuestions();
+        for(QuestionModel question : questionModels){
+            questionService.deleteQuestion(question.getUuid());
+        }*/
+
+        //eventService.deleteQuestionnaireFromEvent(questionnaireId, questionnaire.getEvent().getUuid());
     }
 
+
     public void deleteAnsweredQuestionnaire(String answeredQuestionnaireId){
+
         AnsweredQuestionnaireModel aqm = questionnaireService.getAnsweredQuestionnaireById(answeredQuestionnaireId);
-        fleventsAccountService.deleteAnsweredQuestionnaireFromAccount(answeredQuestionnaireId, aqm.getUser().getUuid());
-        questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaireId);
+
+        //List<AnsweredQuestionModel> answeredQuestionModels = aqm.getAnswers();
+        //for(AnsweredQuestionModel answeredQuestion : answeredQuestionModels){
+        //   answeredQuestionService.deleteQuestion(answeredQuestion.getUuid());
+       // }
+
+
+
+        //questionnaireService.deleteAnsweredQuestionnaire(answeredQuestionnaireId);
+        //fleventsAccountService.deleteAnsweredQuestionnaireFromAccount(answeredQuestionnaireId, aqm.getUser().getUuid());
+
     }
 
     public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){
@@ -144,8 +161,11 @@ public class QuestionnaireControllerService {
 
         for(int i=0;i<answeredQuestionnaire.getAnswers().size();i++){
             AnsweredQuestion aq = answeredQuestionnaire.getAnswers().get(i);
-            ChoiceModel cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
-            AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(),cm, aq.getAnswer(),answeredQuestionnaireModel);
+            ChoiceModel cm = null;
+            if(aq.getChoice()!=null) {
+                cm = new ChoiceModel(aq.getChoice().getUuid(), aq.getChoice().getChoice());
+            }
+            AnsweredQuestionModel aqm = new AnsweredQuestionModel(aq.getUuid(), cm, aq.getAnswer(), answeredQuestionnaireModel);
             answerModels.add(aqm);
         }
 

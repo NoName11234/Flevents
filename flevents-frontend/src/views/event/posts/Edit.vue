@@ -152,7 +152,7 @@ async function submit() {
 
       </v-container>
 
-      <template v-if="remainingExistingAttachments.length > 0">
+      <template v-if="(remainingExistingAttachments?.length ?? 0) > 0">
         <v-divider />
         <v-container class="d-flex flex-column gap-3">
           <small class="text-grey">

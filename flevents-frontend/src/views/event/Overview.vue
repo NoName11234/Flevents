@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, onMounted, Ref, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {AxiosError} from "axios";
@@ -17,6 +17,9 @@ import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
 import {useOrganizationStore} from "@/store/organizations";
+import QuestionnaireApi from "@/api/questionnaireApi";
+import api from "@/api/api";
+import {OrganizationRole} from "@/models/organizationRole";
 
 const openContext = ref(false);
 const address = ref("");
@@ -39,7 +42,7 @@ const posts = computed(() => event.value
   .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
-const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
+const questionnaires : any = ref(null);
 const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
 const organizationStore = useOrganizationStore();
 const addAnon = ref(false);
@@ -357,6 +360,16 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
+function reducelist(uuid: string){
+  questionnaires.value.filter((qeuestionair : Questionnaire) => {
+      return qeuestionair.uuid != uuid
+  })
+}
+onMounted(async () => {
+  questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
+  console.log(event);
+  console.log(questionnaires);
+})
 </script>
 
 <template>
@@ -396,12 +409,14 @@ async function deleteEvent() {
       >
         Posts
       </v-tab>
-<!--      <v-tab-->
-<!--        value="polls"-->
-<!--        :disabled="storesLoading"-->
-<!--        >-->
-<!--        Umfragen-->
-<!--      </v-tab>-->
+      <!-- TODO: hier eventuell anpassen, weil ja auch Orgaleute die Umfrage sehen dürfen -->
+      <v-tab
+       value="polls"
+      :disabled="storesLoading"
+       v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer || validateRole === EventRole.attendee || validateRole === OrganizationRole.organizer || validateRole === OrganizationRole.admin"
+        >
+       Umfragen
+      </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendees"
@@ -555,16 +570,18 @@ async function deleteEvent() {
         </v-container>
 
         <v-divider />
-
         <v-expansion-panels
+          v-if="questionnaires"
           variant="accordion"
           multiple
         >
           <QuestionnaireDisplay
+            v-if="questionnaires != null"
             v-for="(questionnaire, index) in questionnaires"
             :key="index"
             :questionnaire="questionnaire"
             :event="event"
+            @update="reducelist"
           />
         </v-expansion-panels>
       </v-window-item>

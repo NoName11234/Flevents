@@ -14,6 +14,10 @@ import {OrganizationRole} from "@/models/organizationRole";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {Question} from "@/models/question";
 import {AnsweredQuestion} from "@/models/answeredQuestion";
+import {useAccountStore} from "@/store/account";
+import QuestionnaireApi from "@/api/questionnaireApi";
+import AccountsApi from "@/api/accountsApi";
+import {Choices} from "@/models/choices";
 
 const props = defineProps({
   questionnaire: {
@@ -26,23 +30,21 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits<{
-  (e: 'update'): void
-}>();
-
+const emits = defineEmits(['update'])
+const accountStore = useAccountStore();
 const router = useRouter();
+const isDelete = ref(false);
 const tooltip = ref('');
 const user = security.getAccount()!;
 const aq = ref({
   uuid: '',
-  questionnaire: props.questionnaire.uuid,
-  userId: user.uuid,
+  questionnaireId: props.questionnaire.uuid,
+  userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
-    switch (question.type) {
-      case QuestionType.SingleChoice:
-        return {choice: question.choices[0]} as AnsweredSingleChoiceQuestion
-      case QuestionType.FreeText:
-        return {answer: ''} as AnsweredFreeTextQuestion;
+    if(question.choices.length != 0) {
+      return {choice: question.choices[0]}as AnsweredQuestion
+    }else{
+        return {answer: ''} as AnsweredQuestion;
     }
   }),
 } as AnsweredQuestionnaire);
@@ -52,11 +54,11 @@ const loading = ref(true);
 onMounted(setup);
 async function setup() {
   loading.value = true;
+  console.log(props.questionnaire);
   console.log(aq.value.answers);
   try {
-    const response = await axios.get(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}/answers/${user.uuid}`
-    );
+    const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
+    console.log("11111111111111")
     console.log(response);
     aq.value = response.data as AnsweredQuestionnaire;
     alreadyVoted.value = true;
@@ -70,31 +72,30 @@ async function setup() {
 async function submit() {
   loading.value = true;
   try {
-    const response = await axios.post(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}/answers`,
-      aq.value
-    );
+    console.log("------------------------")
+    console.log(aq);
+    const response = QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
     console.log(response);
+    alreadyVoted.value = true;
   } catch (e) {
     console.error('Failed to answer questionnaire.', e);
     tooltip.value = 'Abstimmen fehlgeschlagen.';
   }
-  await setup();
+  //await setup();
   loading.value = false;
 }
 
 async function remove(this: any) {
   loading.value = true;
   try {
-    const response = await axios.delete(
-      `http://localhost:8082/api/questionnaires/${props.questionnaire.uuid}`
-    );
+    const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
     console.log(response);
+    isDelete.value = true;
   } catch (e) {
     console.error('Failed to delete questionnaire.', e);
     tooltip.value = 'Löschen fehlgeschlagen.';
   }
-  emits.call(emits, 'update');
+  emits("update", props.questionnaire?.uuid);
   loading.value = false;
 }
 
@@ -103,7 +104,7 @@ function hasRights() {
     EventRole.tutor,
     EventRole.organizer,
   ];
-  let hasEventRights = props.event?.accountPreviews.find(a => a.uuid === user.uuid && eventRoles.includes(a.role as EventRole))
+  let hasEventRights = props.event?.accountPreviews.find(a => a.uuid === accountStore.currentAccount!.uuid && eventRoles.includes(a.role as EventRole))
   if (hasEventRights) return true;
   let organizationRoles = [
     OrganizationRole.admin,
@@ -117,7 +118,7 @@ function hasRights() {
 </script>
 
 <template>
-  <v-expansion-panel>
+  <v-expansion-panel v-if="!isDelete">
 
     <v-expansion-panel-title>
       <div class="d-flex flex-row justify-start align-center gap-3 w-100">
@@ -148,27 +149,27 @@ function hasRights() {
         <v-divider />
 
         <v-textarea
-          v-if="question.type === QuestionType.FreeText"
+          v-if="question.choices.length == 0"
           hide-details="auto"
           label="Eigene Antwort"
           variant="solo"
           :disabled="alreadyVoted || loading"
-          v-model="(aq.answers[index] as AnsweredFreeTextQuestion).answer"
+          v-model="(aq.answers[index]).answer"
         >
         </v-textarea>
 
         <v-radio-group
-          v-if="question.type === QuestionType.SingleChoice"
+          v-if="question.choices.length != 0"
           hide-details="auto"
           class="pa-2"
           :disabled="alreadyVoted || loading"
-          v-model="(aq.answers[index] as AnsweredSingleChoiceQuestion).choice"
+          v-model="(aq.answers[index]).choice"
         >
           <v-radio
-            v-for="(option, oIndex) in (question as SingleChoiceQuestion).choices"
+            v-for="(option, oIndex) in question.choices"
             :key="oIndex"
             :value="option"
-            :label="option"
+            :label="option.choice"
           />
         </v-radio-group>
 
