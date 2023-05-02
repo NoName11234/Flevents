@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
@@ -85,10 +86,9 @@ public class EventService {
      * @param event the event to be deleted
      */
     public void deleteEvent(Event event){
-        event.getAttendees().stream().map(registration -> {
-            eventRegistrationRepository.delete(registration);
-            return null;
-        });
+        for(EventRegistration eventRegistration:event.getAttendees()){
+            eventRegistrationRepository.delete(eventRegistration);
+        }
         eventRepository.delete(event);
     }
 
@@ -176,6 +176,9 @@ public class EventService {
      * @return the eventregistration object
      */
     public EventRegistration addAccountToEvent(Event event, FleventsAccount account, EventRole role){
+        if(!event.getOrganization().getAccounts().contains(account)){
+            throw new IllegalArgumentException("The given account is not a part of the organization of the event.");
+        }
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
             throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
@@ -255,6 +258,20 @@ public class EventService {
     }
 
     /**
+     * Sets the attendees status to checkedOut.
+     * @param event the event to check in
+     * @param account the account to be checked in
+     */
+    public void attendeesCheckOut(Event event, FleventsAccount account){
+        for(EventRegistration eventRegistration:event.getAttendees()) {
+            if (account.getUuid().equals(eventRegistration.getAccount().getUuid())) {
+                eventRegistration.setCheckedIn(false);
+            }
+        }
+        eventRepository.save(event);
+    }
+
+    /**
      * Gets all checked-In attendees
      * @param eventId the if of the event to get the checked-In attendees from
      * @return a list with the Uuid of all checked-In attendees
@@ -272,5 +289,27 @@ public class EventService {
             }
         }
         return checkedIns;
+    }
+
+    public void deleteQuestionnaireFromEvent(String questionnaireId, String eventId){
+        Event event = getEventById(eventId);
+        List<QuestionnaireModel> questions = event.getQuestionnaires();
+
+        for(int i=0;i< questions.size();i++){
+            if(questions.get(i).getUuid().equals(questionnaireId)){
+                questions.remove(i);
+                break;
+            }
+        }
+        event.setQuestionnaires(questions);
+        eventRepository.save(event);
+    }
+
+    public void registerNewQuestionnaire(QuestionnaireModel questionnaireModel, String eventId){
+        Event event = getEventById(eventId);
+        List<QuestionnaireModel> questionnaires = event.getQuestionnaires();
+        questionnaires.add(questionnaireModel);
+        event.setQuestionnaires(questionnaires);
+        eventRepository.save(event);
     }
 }

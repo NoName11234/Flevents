@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.Models;
 
+import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
@@ -56,6 +57,9 @@ public class Event {
 
     @OneToMany(mappedBy = "event")
     private List<Post> posts =new ArrayList<>();
+
+    @OneToMany(mappedBy = "event")
+    private List<QuestionnaireModel> questionnaires = new ArrayList<>();
 
     public Event(String uuid){
         this.uuid=uuid;

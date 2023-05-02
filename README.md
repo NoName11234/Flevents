@@ -1,3 +1,3 @@
 # Flevents 
-a scalable and fast Event-Managing Software. 
+a Event-Managing Software. 
 

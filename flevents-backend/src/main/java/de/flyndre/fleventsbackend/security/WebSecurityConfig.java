@@ -90,7 +90,16 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeRequests().requestMatchers("/api/accounts/login", "/api/accounts","/api/accounts/reset-password", "/api/organizations/{organizationId}/preview", "/api/events/{eventId}/preview").permitAll()
+                .authorizeRequests().requestMatchers(
+                        "/api/accounts/login"
+                        , "/api/accounts"
+                        ,"/api/accounts/reset-password"
+                        , "/api/organizations/*/preview"
+                        , "/api/events/*/preview"
+                        , "/api/events/*/accept-invitation/anonymously"
+                        ,"/api/platform/login",
+                        "/api/events/*/posts/attachments/*")
+                .permitAll()
                 .requestMatchers("/api/test/**").permitAll()
                 .anyRequest().authenticated();
 

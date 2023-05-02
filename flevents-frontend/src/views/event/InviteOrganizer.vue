@@ -7,12 +7,13 @@ import axios from "axios"
 import Heading from "@/components/Heading.vue";
 import {EventRole} from "@/models/eventRole";
 import {useEventStore} from "@/store/events";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
-const uuid = route.params.uuid as string;
+const eventUuid = route.params.uuid as string;
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
@@ -20,7 +21,9 @@ const tooltip = ref('');
 const appStore = useAppStore();
 
 const eventStore = useEventStore();
-const event = eventStore.getEventGetter(uuid);
+const event = eventStore.getEventGetter(eventUuid);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'organizers' } };
 
 function remove(item: any){
   chips.value.splice(chips.value.indexOf(item), 1)
@@ -29,20 +32,34 @@ function remove(item: any){
 // submit
 async function submit() {
   let failedInvitations = [];
+  let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
+    }
     try {
-      const response = await eventApi.inviteOrganizer(uuid, email);
+      const response = await eventApi.inviteOrganizer(eventUuid, email);
+      successfulInvitations.push(email);
     } catch (e) {
       console.log(`Invitation of ${email} failed.`);
       failedInvitations.push(email);
     }
   }
-  appStore.addToast({
-    text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
-    color: 'error',
-  });
-  await router.push( { name: 'events.event', params: { uuid: uuid } } );
+  if (failedInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen ist gescheitert: ${failedInvitations.join(', ')}`,
+      color: 'error',
+    });
+  }
+  if (successfulInvitations.length > 0) {
+    appStore.addToast({
+      text: `Das Einladen folgender E-Mail-Adressen war erfolgreich: ${successfulInvitations.join(', ')}`,
+      color: 'success',
+    });
+  }
+  await router.push(backRoute);
 }
 </script>
 
@@ -52,7 +69,7 @@ async function submit() {
 
   <v-card>
     <v-form validate-on="submit" @submit.prevent="submit()">
-      <v-container>
+      <v-container class="d-flex flex-column gap-3">
         <v-combobox
           v-model="chips"
           chips
@@ -61,6 +78,7 @@ async function submit() {
           closable-chips
           multiple
           prepend-inner-icon="mdi-account-multiple"
+          hide-details="auto"
         >
           <template v-slot:selection="{ attrs, select, selected }">
             <v-chip
@@ -81,7 +99,7 @@ async function submit() {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="flat"
-          :to="{ name: 'events.event', params: { uuid: uuid } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>

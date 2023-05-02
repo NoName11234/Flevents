@@ -4,5 +4,4 @@ export interface SingleChoiceQuestion {
   uuid: string;
   question: string;
   choices: string[];
-  type: QuestionType.SingleChoice;
 }

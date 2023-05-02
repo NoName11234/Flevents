@@ -29,5 +29,6 @@ public class AccountPreview {
 
     private boolean checkedIn;
 
+    private boolean isPlatformAdmin;
     private Boolean isActive;
 }

@@ -2,6 +2,39 @@
   <Heading
     :text="`Anmelden zu Organisation ${organization.name}`"
   />
+
+  <v-card>
+    <v-container
+      class="bg-gradient d-flex flex-column justify-center align-center"
+      cover
+    >
+      <v-avatar
+        :image="organization.icon"
+        size="180"
+      />
+    </v-container>
+    <template v-if="organization?.description">
+      <v-container>
+        {{ organization.description }}
+      </v-container>
+      <v-divider />
+    </template>
+    <v-list v-if="organization?.phoneContact || organization?.address">
+      <v-list-item
+        v-if="organization?.phoneContact"
+        prepend-icon="mdi-phone"
+      >
+        {{ organization?.phoneContact }}
+      </v-list-item>
+      <v-list-item
+        v-if="organization?.address"
+        prepend-icon="mdi-map-marker"
+      >
+        {{ organization?.address }}
+      </v-list-item>
+    </v-list>
+  </v-card>
+
   <v-card>
     <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
       <v-text-field
@@ -27,6 +60,7 @@
         {{tooltip}}
       </div>
     </v-container>
+    <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
         :to="{ name: 'accounts.create' }"
@@ -104,6 +138,7 @@ import {hydrateAll} from "@/service/storesService";
 import {Organization} from "@/models/organization";
 import {OrganizationPreview} from "@/models/organizationPreview";
 import organizationsApi from "@/api/organizationsApi";
+import DatetimeService from "@/service/datetimeService";
 
 const route = useRoute();
 const router = useRouter();

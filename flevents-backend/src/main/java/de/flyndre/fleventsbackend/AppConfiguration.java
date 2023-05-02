@@ -7,6 +7,7 @@ import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,10 @@ import java.util.stream.Collectors;
 @EnableAutoConfiguration
 @EnableScheduling
 public class AppConfiguration {
+    @Value("${application.baseurl}")
+    private String baseurl;
+    @Value("${server.port}")
+    private String serverPort;
     @Bean
     public ModelMapper modelMapper(){
         ModelMapper modelMapper = new ModelMapper();
@@ -85,6 +90,30 @@ public class AppConfiguration {
         modelMapper.typeMap(Event.class, EventInformation.class).addMappings(mapper ->mapper.using(convertEventRegistrationToAccountPreview).map(Event::getAttendees,EventInformation::setAccountPreviews));
 
         //modelMapper.typeMap(Post.class, PostInformation.class).addMapping(Post::getUuid,PostInformation::set)
+        Converter<List<Attachment>,List<AttachmentPreview>> convertAttachmentToAttachmentPreview = new AbstractConverter<List<Attachment>, List<AttachmentPreview>>() {
+            protected List<AttachmentPreview> convert(List<Attachment> attachments) {
+                return attachments.stream().map(attachment -> {
+                    AttachmentPreview preview = modelMapper.map(attachment, AttachmentPreview.class);
+                    preview.setUrl(baseurl+":"+serverPort+"/api/events/"+attachment.getPost().getEvent().getUuid()+"/posts/attachments/"+preview.getUuid());
+                    return preview;
+                }).collect(Collectors.toList());
+            }
+        };
+        modelMapper.typeMap(Post.class, PostInformation.class).addMappings(mapper -> mapper.using(convertAttachmentToAttachmentPreview).map(Post::getAttachments,PostInformation::setAttachments));
+
+        Converter<List<Post>,List<PostInformation>> convertPostToPostInformation = new AbstractConverter<List<Post>, List<PostInformation>>() {
+            protected List<PostInformation> convert(List<Post> posts) {
+                return posts.stream().map(post -> modelMapper.map(post, PostInformation.class)).collect(Collectors.toList());
+            }
+        };
+        modelMapper.typeMap(Event.class,EventInformation.class).addMappings(mapper -> mapper.using(convertPostToPostInformation).map(Event::getPosts,EventInformation::setPosts));
+
+        Converter<List<PostComment>,List<PostCommentInformation>> convertPostCommentToPostCommentInformation = new AbstractConverter<List<PostComment>, List<PostCommentInformation>>() {
+            protected List<PostCommentInformation> convert(List<PostComment> postComments) {
+                return postComments.stream().map(comment -> modelMapper.map(comment,PostCommentInformation.class)).collect(Collectors.toList());
+            }
+        };
+        modelMapper.typeMap(Post.class,PostInformation.class).addMappings(mapper -> mapper.using(convertPostCommentToPostCommentInformation).map(Post::getComments,PostInformation::setComments));
 
         return modelMapper;
     }

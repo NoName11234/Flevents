@@ -5,23 +5,22 @@ import {useRoute, useRouter} from "vue-router";
 import {Questionnaire} from "@/models/questionnaire";
 import {Question} from "@/models/question";
 import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
-import {FreeTextQuestion} from "@/models/freeTextQuestion";
 import {QuestionType} from "@/models/questionType";
-import axios from "axios";
+import questionnaireApi from "@/api/questionnaireApi";
+import {Choices} from "@/models/choices";
 
 const router = useRouter();
 const route = useRoute();
 const tooltip = ref("");
 const eventId = route.params.uuid;
 const questionnaire = ref({
-  uuid: '',
+  eventId:  eventId as string,
   creationDate: new Date().toISOString(),
   questions: [{
-    uuid: '0',
     question: '',
-    type: QuestionType.FreeText,
+    questionType: QuestionType.FreeText
   }] as Question[],
-} as Questionnaire);
+} as unknown as Questionnaire);
 
 const questionTypes = [
   QuestionType.SingleChoice,
@@ -42,21 +41,19 @@ async function addQuestion(type: QuestionType) {
   switch (type) {
     case QuestionType.SingleChoice:
       question = {
-        uuid: '',
         question: '',
         choices: [
-          '',
-          '',
+          {choice: ''} as Choices,
+          {choice: ''} as Choices,
         ],
-        type: QuestionType.SingleChoice,
-      } as SingleChoiceQuestion;
+        questionType: QuestionType.SingleChoice,
+      } as Question;
       break;
     case QuestionType.FreeText:
       question = {
-        uuid: '',
         question: '',
-        type: QuestionType.FreeText,
-      } as FreeTextQuestion;
+        questionType: QuestionType.FreeText,
+      } as Question;
       break;
   }
   questionnaire.value.questions.push(question);
@@ -70,11 +67,11 @@ async function removeQuestion(index: number) {
   questionnaire.value.questions.splice(index, 1);
 }
 
-async function addChoice(question: SingleChoiceQuestion) {
+async function addChoice(question: Question) {
   tooltip.value = '';
-  question.choices.push('');
+  question.choices.push({choice: ''} as Choices);
 }
-async function removeChoice(question: SingleChoiceQuestion, index: number) {
+async function removeChoice(question: any, index: number) {
   if (question.choices.length <= 2) {
     tooltip.value = 'Single-Choice-Fragen müssen mindestens zwei Antwortmöglichkeiten haben.';
     return;
@@ -83,18 +80,10 @@ async function removeChoice(question: SingleChoiceQuestion, index: number) {
 }
 
 async function submit(){
-  console.log(JSON.stringify(questionnaire.value));
+  console.log(questionnaire.value);
 
   try {
-    const response = await axios.post(
-      `http://h3005487.stratoserver.net:8082/api/questionnaires`,
-      questionnaire.value,
-      {
-        params: {
-          eventId: eventId,
-        }
-      }
-    );
+    const response = questionnaireApi.create( questionnaire.value, eventId as string)
     console.log(response);
   } catch (e) {
     console.error('Failed to save questionnaire.', e);
@@ -141,8 +130,8 @@ async function submit(){
             elevation="0"
           >
             <v-text-field
-              :label=" questionNames.get(question.type) + '-Frage'"
-              :prepend-inner-icon="questionIcons.get(question.type)"
+              :label=" questionNames.get(question.questionType) + '-Frage'"
+              :prepend-inner-icon="questionIcons.get(question.questionType)"
               hide-details="auto"
               v-model="question.question"
               bg-color="primary"
@@ -150,7 +139,7 @@ async function submit(){
 
             <!-- TYPE = SINGLE CHOICE -->
             <v-container
-              v-if="question.type === QuestionType.SingleChoice"
+              v-if="question.questionType === QuestionType.SingleChoice"
               class="d-flex flex-column gap-3"
             >
               <div
@@ -160,7 +149,7 @@ async function submit(){
               >
                 <v-radio disabled class="flex-grow-0"/>
                 <v-text-field
-                  v-model="question.choices[cIndex]"
+                  v-model="question.choices[cIndex].choice"
                   :label="`Option ${cIndex + 1}`"
                   variant="outlined"
                   density="compact"
@@ -176,9 +165,9 @@ async function submit(){
               </div>
             </v-container>
 
-            <!-- TYPE = SINGLE CHOICE -->
+            <!-- TYPE = FREE-TEXT -->
             <v-container
-              v-else-if="question.type === QuestionType.FreeText"
+              v-else-if="question.questionType === QuestionType.FreeText"
               class="d-flex flex-column gap-3"
             >
               <span class="text-grey">
@@ -191,7 +180,7 @@ async function submit(){
             <v-container>
               <div class="d-flex flex-column flex-sm-row justify-start gap">
                 <v-btn
-                  v-if="question.type === QuestionType.SingleChoice"
+                  v-if="question.questionType === QuestionType.SingleChoice"
                   prepend-icon="mdi-plus-circle-outline"
                   color="primary"
                   variant="text"

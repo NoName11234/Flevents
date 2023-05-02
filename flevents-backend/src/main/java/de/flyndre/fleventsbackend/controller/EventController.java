@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/events")
 public class EventController {
 
-private EventControllerService eventControllerService;
+private final EventControllerService eventControllerService;
 private final ModelMapper mapper;
    public EventController(EventControllerService eventControllerService, ModelMapper mapper){
       this.eventControllerService = eventControllerService;
@@ -40,8 +40,12 @@ private final ModelMapper mapper;
     * @return list of all events
     */
    @GetMapping
-   public List<EventInformation> getEvents() {
-      return eventControllerService.getEvents().stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+   public ResponseEntity getEvents() {
+      try{
+         return new ResponseEntity(eventControllerService.getEvents().stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -57,7 +61,11 @@ private final ModelMapper mapper;
 //      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
 //         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
 //      }
-      return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
+      try {
+         return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -72,6 +80,8 @@ private final ModelMapper mapper;
          return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
       }catch (InvalidAttributesException e){
          return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
    }
@@ -88,8 +98,12 @@ private final ModelMapper mapper;
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      eventControllerService.deleteEvent(eventId);
-      return new ResponseEntity<>(HttpStatus.OK);
+      try {
+         eventControllerService.deleteEvent(eventId);
+         return new ResponseEntity<>(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -104,8 +118,12 @@ private final ModelMapper mapper;
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer,EventRole.tutor))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity<>(eventControllerService.getAttendees(eventId).stream()
-              .map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
+      try {
+         return new ResponseEntity<>(eventControllerService.getAttendees(eventId).stream()
+                 .map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -120,7 +138,12 @@ private final ModelMapper mapper;
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity<>(eventControllerService.getOrganizers(eventId).stream().map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
+      try {
+         return new ResponseEntity<>(eventControllerService.getOrganizers(eventId).stream().
+                 map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
 
@@ -145,14 +168,14 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
-      Event event1 = eventControllerService.getEventById(eventId); //todo: find better way to authorize
-      if(
-              !eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))
-              &&!eventControllerService.getGranted(auth,event1.getOrganization().getUuid(),Arrays.asList(OrganizationRole.admin))
-      ){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
+      try {
+         return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -160,7 +183,7 @@ private final ModelMapper mapper;
     * Allows access for tutor and above of the specified event.
     * @param eventId the id of the event to send an invitation to
     * @param email the email to send the invitation link to
-    * @param role the role which gets assigend to the invited person
+    * @param role the role which gets assigned to the invited person
     * @param auth the Authentication generated out of a barer token.
     * @return ResponseEntity with the http status code and an optional error message
     */
@@ -197,6 +220,27 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Adds an Anonymous account identified by the given Email. Invalidates the invitation token to the event.
+    * Allows access for invited and above of the specified event.
+    * @implNote Does Method is for anonymous Accounts only
+    * @param eventId the id of the event to add the account to
+    * @param token the token in the invitation link to verify the invitation
+    * @param mailAddress the MailAddress of the anonymous Account.
+    * @return ResponseEntity with the http status code
+    */
+   @PostMapping("/{eventId}/accept-invitation/anonymously")
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, @RequestParam String mailAddress){
+      try{
+         eventControllerService.validateAndDeleteToken(token, eventId);
+         eventControllerService.registerAnonymousAccountToEvent(eventId, mailAddress);
+         return new ResponseEntity(HttpStatus.OK);
+
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+      }
+   }
+
+   /**
     * Adds an account as an attendee to the event if the account is in the organization of this event.
     * Allows access for member and above of the organization of the specified event.
     * @param eventId the id of the event to add the account to
@@ -205,13 +249,37 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId,Authentication auth){
-      Event event = eventControllerService.getEventById(eventId);
-      if(!eventControllerService.getGranted(auth,event.getOrganization().getUuid(),Arrays.asList(OrganizationRole.values()))){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-      eventControllerService.addAccountToEvent(eventId,details.getId());
-      return new ResponseEntity(HttpStatus.OK);
+      try {
+         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+         eventControllerService.addAccountToEvent(eventId,details.getId());
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+   }
+
+   /**
+    * Add an account directly to an event, if the account is a member or higher in the organization of the event.
+    * Allows access for tutor and above of the specified event.
+    * @param eventId the event to add to
+    * @param userId the account to add
+    * @param auth the Authentication generated out of a barer token.
+    * @return Ok if successful or an error if something went wrong.
+    */
+   @PostMapping("/{eventId}/book")
+   public ResponseEntity bookEvent(@PathVariable String eventId,@RequestParam String userId,Authentication auth){
+      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
+         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+      }
+      try{
+         eventControllerService.addAccountToEvent(eventId,userId);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.OK);
+      }
    }
 
    /**
@@ -229,16 +297,13 @@ private final ModelMapper mapper;
       if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      eventControllerService.changeRole(eventId, accountId, fromRole,toRole);
-      return new ResponseEntity(HttpStatus.OK);
+      try {
+         eventControllerService.changeRole(eventId, accountId, fromRole,toRole);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
-
-
-   //@PostMapping("/{eventId}/create-account")
-   /*public ResponseEntity createAndAddAccountToEvent(@PathVariable String eventId, @RequestBody String eMail){
-      return eventControllerService.createAndAddAccountToEvent(eventId, eMail);
-   }*/
-
 
    /**
     * Adds an anonymous account to an event.
@@ -253,8 +318,12 @@ private final ModelMapper mapper;
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
-      eventControllerService.addAnonymousAccountToEvent(eventId, account);
-      return new ResponseEntity(HttpStatus.OK);
+      try {
+         eventControllerService.addAnonymousAccountToEvent(eventId, account);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -273,30 +342,50 @@ private final ModelMapper mapper;
          return new ResponseEntity(HttpStatus.OK);
       }catch (NoSuchElementException ex){
          return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 
    /**
-    * not implemented yet
-    * Allows access for tutor and above of the specified event.
+    * Checks in the given Account
     * @param eventId the id of the event to check in
     * @param accountId the id of the account to be checked in
     * @param auth the Authentication generated out of a barer token.
     * @return HttpStatus whether the process was successfully or not
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
-   public ResponseEntity attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
+   public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
       if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
-         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+         return HttpStatus.UNAUTHORIZED;
       }
       try{
          eventControllerService.attendeesCheckIn(eventId,accountId);
-         return new ResponseEntity(HttpStatus.OK);
+         return HttpStatus.OK;
       }catch (Exception e){
-         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+         return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
 
+   /**
+    * Checks out the given Account
+    * @param eventId the id of the event to check in
+    * @param accountId the id of the account to be checked in
+    * @param auth the Authentication generated out of a barer token.
+    * @return HttpStatus whether the process was successfully or not
+    */
+   @PostMapping("/{eventId}/attendees/check-out/{accountId}")
+   public HttpStatus attendeesCheckOut(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
+      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+         return HttpStatus.UNAUTHORIZED;
+      }
+      try{
+         eventControllerService.attendeesCheckOut(eventId,accountId);
+         return HttpStatus.OK;
+      }catch (Exception e){
+         return HttpStatus.INTERNAL_SERVER_ERROR;
+      }
+   }
    /**
     * not implemented yet
     * @param eventId the id of the event to add an attachment to
@@ -333,7 +422,7 @@ private final ModelMapper mapper;
     * @return a list with the Uuid of all checked-In attendees
     */
    @GetMapping("/{eventId}/check-ins")
-   public ResponseEntity getCheckedIn(String eventId){
+   public ResponseEntity getCheckedIn(@PathVariable String eventId){
       try{
          List checkedIns = eventControllerService.getCheckedIn(eventId);
          return new ResponseEntity( checkedIns, HttpStatus.OK);

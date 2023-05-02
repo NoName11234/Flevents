@@ -1,20 +1,16 @@
 package de.flyndre.fleventsbackend.security.services;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.flyndre.fleventsbackend.Models.FleventsAccount;
+import de.flyndre.fleventsbackend.Models.PlatformAdminRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
-import de.flyndre.fleventsbackend.Models.OrganizationAccount;
-import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 /**
  * This Class contains Information of the Account, wich is encoded in the Token in the Backend but not in the Frontend.
@@ -52,6 +48,9 @@ public class UserDetailsImpl implements UserDetails {
         }
         for(int i = 0; i < user.getOrganisations().size(); i++){
             authorities.add(new SimpleGrantedAuthority(user.getOrganisations().get(i).getOrganization().getUuid().toLowerCase() + "." + user.getOrganisations().get(i).getRole().toString().toLowerCase()));
+        }
+        if(user.getIsPlatformAdmin()!=null&&user.getIsPlatformAdmin()){
+            authorities.add(new SimpleGrantedAuthority(PlatformAdminRole.platformAdmin.toString()));
         }
 
 

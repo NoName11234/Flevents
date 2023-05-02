@@ -8,12 +8,13 @@ import Heading from "@/components/Heading.vue";
 import {EventRole} from "@/models/eventRole";
 import {useEventStore} from "@/store/events";
 import api from "@/api/api";
-import eventApi from "@/api/eventApi";
+import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
+import {VALIDATION} from "@/constants";
 const route = useRoute()
 const router = useRouter();
 
-const uuid = route.params.uuid as string;
+const eventUuid = route.params.uuid as string;
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
@@ -22,7 +23,9 @@ const role = ref(EventRole.attendee) as Ref<EventRole.attendee|EventRole.tutor>;
 const appStore = useAppStore();
 
 const eventStore = useEventStore();
-const event = eventStore.getEventGetter(uuid);
+const event = eventStore.getEventGetter(eventUuid);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'attendees' } };
 
 const selectableRoles = [
   EventRole.attendee,
@@ -39,8 +42,12 @@ async function submit() {
   let successfulInvitations = [];
   for (let i in chips.value) {
     let email = chips.value[i];
+    if (!email.match(VALIDATION.EMAIL)) {
+      failedInvitations.push(email);
+      continue;
+    }
     try {
-      const response = await eventApi.inviteAttendee(uuid, email, role.value);
+      const response = await eventApi.inviteAttendee(eventUuid, email, role.value);
       successfulInvitations.push(email);
     } catch (e) {
       console.log(`Invitation of ${email} failed.`);
@@ -59,7 +66,7 @@ async function submit() {
       color: 'success',
     });
   }
-  await router.push( { name: 'events.event', params: { uuid: uuid } } );
+  await router.push(backRoute);
 }
 </script>
 
@@ -69,7 +76,7 @@ async function submit() {
 
   <v-card>
     <v-form validate-on="submit" @submit.prevent="submit()">
-      <v-container>
+      <v-container class="d-flex flex-column gap-3">
         <v-combobox
           v-model="chips"
           chips
@@ -78,6 +85,7 @@ async function submit() {
           closable-chips
           multiple
           prepend-inner-icon="mdi-account-multiple"
+          hide-details="auto"
         >
           <template v-slot:selection="{ attrs, select, selected }">
             <v-chip
@@ -97,6 +105,7 @@ async function submit() {
           hide-details="auto"
           :items="selectableRoles"
           v-model="role"
+          menu-icon="mdi-chevron-down"
         />
       </v-container>
 
@@ -105,7 +114,7 @@ async function submit() {
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="flat"
-          :to="{ name: 'events.event', params: { uuid: uuid } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>

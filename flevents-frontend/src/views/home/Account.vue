@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import accountApi from "@/api/accountApi";
+import accountApi from "@/api/accountsApi";
 import AccountInfo from "@/components/AccountInfo.vue";
 import Heading from "@/components/Heading.vue";
 import {useAccountStore} from "@/store/account";
@@ -123,17 +123,18 @@ async function leaveOrganization() {
     </v-card-title>
     <v-card-text class="d-flex flex-column gap-3">
       <div
-        v-for="orga in account?.organizationPreviews"
-        class="d-flex justify-space-between align-center gap-2"
+        v-for="(organization, index) in account?.organizationPreviews"
+        :key="index"
+        class="d-flex justify-space-between align-center gap-3"
       >
-        <h3>
-          {{orga.name}}
+        <h3 class="text-break">
+          {{organization.name}}
         </h3>
         <v-btn
           prepend-icon="mdi-exit-run"
           color="error"
           variant="tonal"
-          @click="selectedOrga = orga; showLeaveDialog = true;"
+          @click="selectedOrga = organization; showLeaveDialog = true;"
         >
           Verlassen
         </v-btn>
