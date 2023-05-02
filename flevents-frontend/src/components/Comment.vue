@@ -13,7 +13,7 @@ import {AxiosError} from "axios";
 const props = defineProps({
   comment: {
     required: true,
-    type: Object as () => Comment,
+    type: Object as () => any,
   },
   adminView: {
     required: false,

@@ -25,7 +25,7 @@ defineProps({
   >
     <v-icon
       icon="mdi-account"
-      :size="(size || defaultAvatarSize) * iconSizeMultiplier"
+      :size="(typeof size == 'string'? +size : size || defaultAvatarSize) * iconSizeMultiplier"
     />
   </v-avatar>
 </template>

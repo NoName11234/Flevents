@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.lang.Nullable;
 
 
@@ -20,10 +22,10 @@ public class AnsweredQuestionModel {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
     private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
-    @Nullable @OneToOne(cascade = CascadeType.ALL)
+    @Nullable @OneToOne(cascade = CascadeType.PERSIST, orphanRemoval = true)
     private ChoiceModel choiceModel;
     @Nullable
     private String answer;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private AnsweredQuestionnaireModel answeredQuestionnaireModel;
 }

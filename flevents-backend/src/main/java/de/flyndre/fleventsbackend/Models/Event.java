@@ -58,7 +58,7 @@ public class Event {
     @OneToMany(mappedBy = "event")
     private List<Post> posts =new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "event")
     private List<QuestionnaireModel> questionnaires = new ArrayList<>();
 
     public Event(String uuid){

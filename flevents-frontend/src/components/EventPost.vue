@@ -185,7 +185,7 @@ async function downloadAttachment(url: string) {
             :post-uuid="post.uuid"
           />
           <Comment
-            v-if="post.comments?.length > 0"
+            v-if="(post.comments?.length ?? 0) > 0"
             v-for="(comment, cIndex) in post.comments"
             :key="cIndex"
             :comment="comment"
