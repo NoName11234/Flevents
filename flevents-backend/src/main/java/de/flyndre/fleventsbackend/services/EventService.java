@@ -176,6 +176,9 @@ public class EventService {
      * @return the eventregistration object
      */
     public EventRegistration addAccountToEvent(Event event, FleventsAccount account, EventRole role){
+        if(!event.getOrganization().getAccounts().contains(account)){
+            throw new IllegalArgumentException("The given account is not a part of the organization of the event.");
+        }
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
             throw new IllegalArgumentException("this account is already registered in this event with the given role");
         }
