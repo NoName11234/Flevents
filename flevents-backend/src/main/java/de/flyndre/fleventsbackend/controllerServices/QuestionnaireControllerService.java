@@ -3,6 +3,7 @@ package de.flyndre.fleventsbackend.controllerServices;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.Models.questionnaire.*;
 import de.flyndre.fleventsbackend.dtos.questionnaire.*;
+import de.flyndre.fleventsbackend.dtos.questionnaire.statistics.Statistics;
 import de.flyndre.fleventsbackend.services.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -116,6 +117,17 @@ public class QuestionnaireControllerService {
         //for test purposes
         //fleventsAccountService.saveAnsweredQuestionnaire(newAqm, answeredQuestionnaire.getUserId());
         return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
+    }
+
+    public Statistics getStatistics(String questionnaireId){
+        Questionnaire questionnaire = getQuestionnaire(questionnaireId);
+        Statistics statistics = new Statistics();
+
+        AnsweredQuestionnaire answeredQuestionnaire =
+
+        for(int i=0;i<)
+
+        return statistics;
     }
 
     private QuestionnaireModel convertQuestionnaireToQuestionnaireModel(Questionnaire questionnaire){

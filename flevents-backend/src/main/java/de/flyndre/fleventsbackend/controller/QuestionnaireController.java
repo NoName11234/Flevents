@@ -99,4 +99,10 @@ public class QuestionnaireController {
         questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
         return new ResponseEntity(HttpStatus.OK);
     }
+
+    @GetMapping("/{questionnaireId}/statistics")
+    public ResponseEntity getStatistics(@PathVariable String questionnaireId, Authentication auth){
+        //TODO: Authentification if working again
+
+    }
 }

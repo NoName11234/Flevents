@@ -54,6 +54,10 @@ public class QuestionnaireService {
         return opt.get();
     }
 
+    public List<AnsweredQuestionnaireModel> getAnswersFromQuestionnaire(QuestionnaireModel questionnaireModel){
+        return 
+    }
+
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
         return questionnaireRepository.save(questionnaireModel);
     }

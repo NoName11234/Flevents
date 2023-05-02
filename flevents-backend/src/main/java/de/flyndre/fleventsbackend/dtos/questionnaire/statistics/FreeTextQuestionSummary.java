@@ -8,9 +8,6 @@ import java.util.List;
 
 @Getter
 @Setter
-public class FreeTextQuestionSummary implements QuestionSummary{
+public class FreeTextQuestionSummary extends QuestionSummary{
     List<String> answers = new ArrayList<>();
-    public FreeTextQuestionSummary(){
-
-    }
 }
