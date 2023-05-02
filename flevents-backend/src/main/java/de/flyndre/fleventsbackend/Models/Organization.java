@@ -33,6 +33,8 @@ public class Organization {
     private String description;
     private String address;
     private String phoneContact;
+    @Column(unique = true)
+    private String customerNumber;
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private String icon;
@@ -57,6 +59,9 @@ public class Organization {
         }
         if(organization.getPhoneContact()!=null){
             this.phoneContact=organization.getPhoneContact();
+        }
+        if(organization.getCustomerNumber()!=null){
+            this.customerNumber=organization.getCustomerNumber();
         }
     }
 }

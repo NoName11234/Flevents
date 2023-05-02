@@ -21,4 +21,5 @@ public class OrganizationPreview {
     private Role role;
     private String address;
     private String phoneContact;
+    private String customerNumber;
 }

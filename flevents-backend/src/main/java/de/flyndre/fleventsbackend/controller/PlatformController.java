@@ -55,6 +55,12 @@ public class PlatformController {
         if(organizationPreview.getName()==null||organizationPreview.getName().isBlank()){
             return new ResponseEntity("Please provide a name for the organization.",HttpStatus.BAD_REQUEST);
         }
+        if(organizationPreview.getCustomerNumber()==null||organizationPreview.getCustomerNumber().isBlank()){
+            return new ResponseEntity("Please provide a customer number",HttpStatus.BAD_REQUEST);
+        }
+        if(organizationPreview.getPhoneContact()==null||organizationPreview.getPhoneContact().isBlank()||!organizationPreview.getPhoneContact().matches("(0|\\+(9[976]\\d|8[987530]\\d|6[987]\\d|5[90]\\d|42\\d|3[875]\\d|2[98654321]\\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1))\\d{1,14}$")){
+            return new ResponseEntity("Please provide a valid phone contact",HttpStatus.BAD_REQUEST);
+        }
         try {
             return new ResponseEntity(
                     mapper.map(
