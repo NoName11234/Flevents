@@ -231,6 +231,27 @@ private final ModelMapper mapper;
    }
 
    /**
+    * Add an account directly to an event, if the account is a member or higher in the organization of the event.
+    * Allows access for tutor and above of the specified event.
+    * @param eventId the event to add to
+    * @param userId the account to add
+    * @param auth the Authentication generated out of a barer token.
+    * @return Ok if successful or an error if something went wrong.
+    */
+   @PostMapping("/{eventId}/book")
+   public ResponseEntity bookEvent(@PathVariable String eventId,@RequestParam String userId,Authentication auth){
+      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
+         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+      }
+      try{
+         eventControllerService.addAccountToEvent(eventId,userId);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity(e.getMessage(),HttpStatus.OK);
+      }
+   }
+
+   /**
     *Changes the role of a specified account in an event.
     * Allows access for tutor and above of the specified event.
     * @param eventId the id of the event with the account
