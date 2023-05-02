@@ -93,38 +93,4 @@ public class PlatformController {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    /**
-     * Logs in a platformAccount
-     * @param request the request with a username and a secret
-     * @return a valid jwt token alongside an Ok or an error if something went wrong
-     */
-    //@PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequest request){
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
-
-    }
-
-    /**
-     * Invalidate the given jwt token
-     * Allows only access if you are a platformAdmin
-     * @param request a LogoutRequest containing the jwt token
-     * @param auth the Authentication generated out of a barer token.
-     * @return an Ok or an error if something went wrong
-     */
-    //@PostMapping("/logout")
-    public ResponseEntity logout(@RequestBody LogoutRequest request,Authentication auth){
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    /**
-     * Refresh a token if its time is over.
-     * Allows only access if you are a platformAdmin
-     * @param auth the Authentication generated out of a barer token.
-     * @return a new token alongside an Ok or an error if something went wrong
-     */
-    //@PostMapping("/refresh")
-    public ResponseEntity refresh(Authentication auth){
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-    }
 }

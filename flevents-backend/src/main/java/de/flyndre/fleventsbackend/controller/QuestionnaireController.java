@@ -45,7 +45,11 @@ public class QuestionnaireController {
         if(!questionnaireControllerService.getGranted(auth,eventId, Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{questionnaireId}")
@@ -53,7 +57,11 @@ public class QuestionnaireController {
         if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(),Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-       return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{questionnaireId}/answers/{userId}")
@@ -62,7 +70,11 @@ public class QuestionnaireController {
         //if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee))){
         //    return new ResponseEntity(HttpStatus.UNAUTHORIZED);
        //}
-        return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping
@@ -70,14 +82,22 @@ public class QuestionnaireController {
         if(!questionnaireControllerService.getGranted(auth, eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(mapper.map(questionnaireControllerService.createQuestionnaire(eventId, bodyQuestionnaire), Questionnaire.class), HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(mapper.map(questionnaireControllerService.createQuestionnaire(eventId, bodyQuestionnaire), Questionnaire.class), HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     @PostMapping("/{questionnaireId}")
     public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
         if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/{questionnaireId}")
@@ -86,8 +106,12 @@ public class QuestionnaireController {
         //if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
         //    return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         //}
-        questionnaireControllerService.deleteQuestionnaire(questionnaireId);
-        return new ResponseEntity<>("Deleted.", HttpStatus.ACCEPTED);
+        try {
+            questionnaireControllerService.deleteQuestionnaire(questionnaireId);
+            return new ResponseEntity<>("Deleted.", HttpStatus.ACCEPTED);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/{questionnaireId}/answers")
@@ -96,7 +120,11 @@ public class QuestionnaireController {
         //if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor, EventRole.attendee, EventRole.guest))){
         //    return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         //}
-        questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
-        return new ResponseEntity(HttpStatus.OK);
+        try {
+            questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
+            return new ResponseEntity(HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
