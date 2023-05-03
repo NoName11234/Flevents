@@ -52,11 +52,13 @@ public class OrganizationController {
       boolean grantedAccess = organizationControllerService.getGranted(auth, organizationId, Arrays.asList(OrganizationRole.admin,OrganizationRole.organizer));
       UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
       if(grantedAccess){
-      return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
+         try {
+            return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
+         }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+         }
       }
-
       return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
-
    }
 
    /**
@@ -66,7 +68,11 @@ public class OrganizationController {
     */
    @GetMapping
    public ResponseEntity getOrganizations(Authentication auth){
-      return new ResponseEntity(organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      try {
+         return new ResponseEntity(organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -81,9 +87,13 @@ public class OrganizationController {
       if(!organizationControllerService.getGranted(auth,organizationId,Arrays.asList(OrganizationRole.admin,OrganizationRole.organizer,OrganizationRole.member))){
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
-      Organization organization= organizationControllerService.getOrganizationById(organizationId);
-      OrganizationInformation information = mapper.map(organization, OrganizationInformation.class);
-      return new ResponseEntity(information,HttpStatus.OK);
+      try {
+         Organization organization= organizationControllerService.getOrganizationById(organizationId);
+         OrganizationInformation information = mapper.map(organization, OrganizationInformation.class);
+         return new ResponseEntity(information,HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -98,7 +108,11 @@ public class OrganizationController {
       if(!organizationControllerService.getGranted(auth,organizationId,Arrays.asList(OrganizationRole.admin,OrganizationRole.organizer,OrganizationRole.member))){
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity<>(organizationControllerService.getEvents(organizationId).stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      try {
+         return new ResponseEntity<>(organizationControllerService.getEvents(organizationId).stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -114,6 +128,8 @@ public class OrganizationController {
          return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
       }catch (InvalidAttributesException e){
          return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 
@@ -129,7 +145,11 @@ public class OrganizationController {
       if(!organizationControllerService.getGranted(auth,organizationId,Arrays.asList(OrganizationRole.admin,OrganizationRole.organizer))){
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity(organizationControllerService.getAccounts(organizationId).stream().map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      try {
+         return new ResponseEntity(organizationControllerService.getAccounts(organizationId).stream().map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -145,7 +165,11 @@ public class OrganizationController {
       if(!organizationControllerService.getGranted(auth,organizationId,Arrays.asList(OrganizationRole.admin))){
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity<>(mapper.map(organizationControllerService.editOrganisation(organizationId, organisation), OrganizationInformation.class),HttpStatus.OK);
+      try {
+         return new ResponseEntity<>(mapper.map(organizationControllerService.editOrganisation(organizationId, organisation), OrganizationInformation.class),HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -201,8 +225,12 @@ public class OrganizationController {
       if(!organizationControllerService.getGranted(auth,organizationId,Arrays.asList(OrganizationRole.admin))){
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
-      organizationControllerService.removeAccount(organizationId, accountId);
-      return new ResponseEntity(HttpStatus.OK);
+      try {
+         organizationControllerService.removeAccount(organizationId, accountId);
+         return new ResponseEntity(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -220,8 +248,12 @@ public class OrganizationController {
       if(!organizationControllerService.getGranted(auth,organizationId,Arrays.asList(OrganizationRole.admin))){
          return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
-      organizationControllerService.changeRole(organizationId, accountId, fromRole,toRole);
-      return new ResponseEntity<>(HttpStatus.OK);
+      try {
+         organizationControllerService.changeRole(organizationId, accountId, fromRole,toRole);
+         return new ResponseEntity<>(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 
    /**
@@ -232,7 +264,11 @@ public class OrganizationController {
     */
    @PostMapping("/{organizationId}/leave-organization/{accountId}")
    public ResponseEntity leaveOrganization(@PathVariable String organizationId, @PathVariable String accountId, Authentication auth){
-      organizationControllerService.leaveOrganization(organizationId, accountId);
-      return new ResponseEntity<>(HttpStatus.OK);
+      try {
+         organizationControllerService.leaveOrganization(organizationId, accountId);
+         return new ResponseEntity<>(HttpStatus.OK);
+      }catch (Exception e){
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
    }
 }
