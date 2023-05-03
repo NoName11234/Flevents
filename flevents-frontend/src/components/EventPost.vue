@@ -11,6 +11,7 @@ import {storeToRefs} from "pinia";
 import {useAccountStore} from "@/store/account";
 import DatetimeService from "../service/datetimeService";
 import {useEventStore} from "@/store/events";
+import IconService from "@/service/iconService";
 
 const appStore = useAppStore();
 const eventStore = useEventStore();
@@ -163,10 +164,10 @@ async function downloadAttachment(url: string) {
                 v-for="(attachment, index) in post.attachments"
                 :key="index"
                 :text="attachment.filename"
-                prepend-icon="mdi-file"
+                :prepend-icon="IconService.getIconForFileType(attachment.filename)"
                 variant="tonal"
                 link
-                @click="downloadAttachment(attachment.url)"
+                :href="attachment.url"
               >
               </v-chip>
             </v-chip-group>
