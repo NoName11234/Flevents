@@ -3,6 +3,10 @@ package de.flyndre.fleventsbackend.controllerServices;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.Models.questionnaire.*;
 import de.flyndre.fleventsbackend.dtos.questionnaire.*;
+import de.flyndre.fleventsbackend.dtos.questionnaire.statistics.FreeTextQuestionSummary;
+import de.flyndre.fleventsbackend.dtos.questionnaire.statistics.QuestionSummary;
+import de.flyndre.fleventsbackend.dtos.questionnaire.statistics.SingleChoiceQuestionSummary;
+import de.flyndre.fleventsbackend.dtos.questionnaire.statistics.Statistics;
 import de.flyndre.fleventsbackend.services.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -116,6 +120,58 @@ public class QuestionnaireControllerService {
         //for test purposes
         //fleventsAccountService.saveAnsweredQuestionnaire(newAqm, answeredQuestionnaire.getUserId());
         return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
+    }
+
+    public Statistics getStatistics(String questionnaireId){
+        QuestionnaireModel questionnaireModel = questionnaireService.getQuestionnaire(questionnaireId);
+        Statistics statistics = new Statistics();
+
+        List<QuestionModel> questionModels = questionnaireModel.getQuestions();
+        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = questionnaireService.getAnswersFromQuestionnaire(questionnaireModel);
+
+        for(int i=0;i<questionModels.size();i++){
+            QuestionModel questionModel = questionModels.get(i);
+
+            for(int a=0;a<answeredQuestionnaireModels.size();a++){
+                AnsweredQuestionnaireModel answeredQuestionnaireModel = answeredQuestionnaireModels.get(a);
+                AnsweredQuestionModel answeredQuestionModel = answeredQuestionnaireModel.getAnswers().get(i);
+
+                if(questionModel.getChoiceModels().equals(null)){//FreeTextQuestion
+                    if(i == statistics.getQuestionSummaries().size()){
+                        List<QuestionSummary> summaries = statistics.getQuestionSummaries();
+                        FreeTextQuestionSummary freeTextQuestionSummary = new FreeTextQuestionSummary();
+                        summaries.add(freeTextQuestionSummary);
+                    }
+
+                    FreeTextQuestionSummary freeTextQuestionSummary = (FreeTextQuestionSummary) statistics.getQuestionSummaries().get(i);
+                    List<String> answers = freeTextQuestionSummary.getAnswers();
+                    answers.add(answeredQuestionModel.getAnswer());
+
+                }else{//SingleChoiceQuestion
+                    if(i == statistics.getQuestionSummaries().size()){
+                        List<QuestionSummary> summaries = statistics.getQuestionSummaries();
+                        SingleChoiceQuestionSummary singleChoiceQuestionSummary = new SingleChoiceQuestionSummary();
+                        for(int b=0;b<questionModel.getChoiceModels().size();b++){
+                            List<Integer> votes = singleChoiceQuestionSummary.getVotes();
+                            votes.add(Integer.valueOf(0));
+                        }
+                        summaries.add(singleChoiceQuestionSummary);
+                    }
+
+                    SingleChoiceQuestionSummary singleChoiceQuestionSummary = (SingleChoiceQuestionSummary) statistics.getQuestionSummaries().get(i);
+                    for(int b=0; b<questionModel.getChoiceModels().size();b++){
+                        if(questionModel.getChoiceModels().get(b).equals(answeredQuestionModel.getChoiceModel())){
+                            List<Integer> votes = singleChoiceQuestionSummary.getVotes();
+                            votes.set(b, votes.get(b)+1);
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+        return statistics;
     }
 
     private QuestionnaireModel convertQuestionnaireToQuestionnaireModel(Questionnaire questionnaire){

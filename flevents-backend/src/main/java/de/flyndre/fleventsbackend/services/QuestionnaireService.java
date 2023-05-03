@@ -54,6 +54,10 @@ public class QuestionnaireService {
         return opt.get();
     }
 
+    public List<AnsweredQuestionnaireModel> getAnswersFromQuestionnaire(QuestionnaireModel questionnaireModel){
+        return questionnaireRepository.findByUuid(questionnaireModel.getUuid());
+    }
+
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
         return questionnaireRepository.save(questionnaireModel);
     }

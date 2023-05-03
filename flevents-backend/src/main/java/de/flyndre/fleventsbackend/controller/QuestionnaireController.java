@@ -127,4 +127,10 @@ public class QuestionnaireController {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/{questionnaireId}/statistics")
+    public ResponseEntity getStatistics(@PathVariable String questionnaireId, Authentication auth){
+        //TODO: Authentification if working again
+        return new ResponseEntity(questionnaireControllerService.getStatistics(questionnaireId), HttpStatus.OK);
+    }
 }
