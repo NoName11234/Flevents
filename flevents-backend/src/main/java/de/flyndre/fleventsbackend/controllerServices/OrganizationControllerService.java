@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -177,4 +178,77 @@ public class OrganizationControllerService {
         organizationService.leaveOrganization(getOrganizationById(organizationId), fleventsAccountService.getAccountById(accountId));
     }
 
+    /**
+     * Sets the Email-Configuration for the organization invite in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @param mailConfig the text for the MailConfiguration to set
+     */
+    public void setMailConfigOrgaInvite(String organizationId, String mailConfig) {
+        organizationService.setMailConfigOrgaInvite(getOrganizationById(organizationId) , mailConfig);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event invite in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @param mailConfig the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventInvite(String organizationId, String mailConfig) {
+        organizationService.setMailConfigEventInvite(getOrganizationById(organizationId) , mailConfig);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event info in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @param mailConfig the text for the MailConfiguration to set
+     * @param localDateTime the time to set
+     */
+    public void setMailConfigEventInfo(String organizationId, String mailConfig, LocalDateTime localDateTime) {
+        organizationService.setMailConfigEventInfo(getOrganizationById(organizationId) , mailConfig, localDateTime);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event feedback in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @param mailConfig the text for the MailConfiguration to set
+     * @param localDateTime the time to set
+     */
+    public void setMailConfigEventFeedback(String organizationId, String mailConfig, LocalDateTime localDateTime) {
+        organizationService.setMailConfigEventFeedback(getOrganizationById(organizationId) , mailConfig, localDateTime);
+    }
+
+    /**
+     * Gets the Email-Configuration for the organization invite in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigOrgaInvite(String organizationId) {
+        return organizationService.getMailConfigOrgaInvite(getOrganizationById(organizationId));
+    }
+
+    /**
+     * Gets the Email-Configuration for the event invite in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigEventInvite(String organizationId) {
+        return organizationService.getMailConfigEventInvite(getOrganizationById(organizationId));
+    }
+
+    /**
+     * Gets the Email-Configuration for the event info in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigEventInfo(String organizationId) {
+        return organizationService.getMailConfigEventInfo(getOrganizationById(organizationId));
+    }
+
+    /**
+     * Gets the Email-Configuration for the event feedback in the specified organization.
+     * @param organizationId the id of the organization to set the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigEventFeedback(String organizationId) {
+        return organizationService.getMailConfigEventFeedback(getOrganizationById(organizationId));
+    }
 }

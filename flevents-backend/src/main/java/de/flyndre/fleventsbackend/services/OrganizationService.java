@@ -5,6 +5,7 @@ import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
 import de.flyndre.fleventsbackend.repositories.OrganizationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -149,11 +150,110 @@ public class OrganizationService {
         organizationRepository.delete(organization);
     }
 
+    /**
+     * Leaves a specified organization.
+     * @param organization the organzation to leave
+     * @param account the account who leaves the organization
+     */
     public void leaveOrganization(Organization organization, FleventsAccount account){
         Optional<OrganizationAccount> optional = organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)).findAny();
         if(!optional.isPresent()){
             throw new IllegalArgumentException("The given account is no part of the given organization");
         }
         organizationAccountRepository.delete(optional.get());
+    }
+
+    /**
+     * Sets the Email-Configuration for the organization invitation in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param mailConfig the text for the MailConfiguration to set
+     */
+    public void setMailConfigOrgaInvite(Organization organization, String mailConfig) {
+        if(mailConfig.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        organization.getMailConfig().setOrganizationInvitation(mailConfig);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event invitation in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param mailConfig the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventInvite(Organization organization, String mailConfig) {
+        if(mailConfig.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        organization.getMailConfig().setEventInvitation(mailConfig);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event info in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param localDateTime the time to set
+     * @param mailConfig the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventInfo(Organization organization, String mailConfig, LocalDateTime localDateTime) {
+        if(mailConfig.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        if(localDateTime == null){
+            throw new IllegalArgumentException("The LocalDateTime is null, cant change it");
+        }
+        organization.getMailConfig().setInfoMessage(mailConfig);
+        organization.getMailConfig().setInfoMessageTime(localDateTime);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event feedback in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param localDateTime the time to set
+     * @param mailConfig the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventFeedback(Organization organization, String mailConfig, LocalDateTime localDateTime) {
+        if(mailConfig.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        if(localDateTime == null){
+            throw new IllegalArgumentException("The LocalDateTime is null, cant change it");
+        }
+        organization.getMailConfig().setFeedbackMessage(mailConfig);
+        organization.getMailConfig().setInfoMessageTime(localDateTime);
+    }
+
+    /**
+     * Gets the Email-Configuration for the organization invitation in the specified organization.
+     * @param organization the organization to get the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigOrgaInvite(Organization organization) {
+        return organization.getMailConfig();
+    }
+
+    /**
+     * Gets the Email-Configuration for the event invitation in the specified organization.
+     * @param organization the organization to get the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigEventInvite(Organization organization) {
+        return organization.getMailConfig();
+    }
+
+    /**
+     * Gets the Email-Configuration for the event info in the specified organization.
+     * @param organization the organization to get the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigEventInfo(Organization organization) {
+        return organization.getMailConfig();
+    }
+
+    /**
+     * Gets the Email-Configuration for the event feedback in the specified organization.
+     * @param organization the organization to get the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfigEventFeedback(Organization organization) {
+        return organization.getMailConfig();
     }
 }
