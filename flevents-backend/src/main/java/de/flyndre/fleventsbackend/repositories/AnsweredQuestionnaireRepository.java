@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface AnsweredQuestionnaireRepository extends JpaRepository<AnsweredQuestionnaireModel,String> {
 
     public Optional<AnsweredQuestionnaireModel> findByUserAndQuestionnaireModel(FleventsAccount user, QuestionnaireModel questionnaire);
+
 }

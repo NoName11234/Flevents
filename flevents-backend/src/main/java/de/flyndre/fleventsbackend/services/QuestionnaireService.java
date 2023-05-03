@@ -55,7 +55,7 @@ public class QuestionnaireService {
     }
 
     public List<AnsweredQuestionnaireModel> getAnswersFromQuestionnaire(QuestionnaireModel questionnaireModel){
-        return 
+        return questionnaireRepository.findByUuid(questionnaireModel.getUuid());
     }
 
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){

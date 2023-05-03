@@ -21,7 +21,7 @@ public class AnsweredQuestionModel {
     @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
-    private enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
+    public enum QuestionType {FreeTextQuestion, SingleChoiceQuestion}
     @Nullable @OneToOne(cascade = CascadeType.PERSIST, orphanRemoval = true)
     private ChoiceModel choiceModel;
     @Nullable
