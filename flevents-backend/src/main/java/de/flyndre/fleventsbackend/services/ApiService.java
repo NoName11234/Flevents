@@ -32,9 +32,9 @@ public class ApiService {
      * @throws IOException
      */
     public FleventsAccount initDB() throws IOException{
-        Organization flyndre = new Organization(null,"Flyndre","the best organization of the world",null,null,null,null,null,null);
+        Organization flyndre = new Organization(null,"Flyndre","the best organization of the world",null,null,null,null,null,null,null);
         flyndre = organizationRepository.save(flyndre);
-        Organization dhbw = new Organization(null,"DHBW","not so the best university of the world",null,null,null,null,null,null);
+        Organization dhbw = new Organization(null,"DHBW","not so the best university of the world",null,null,null,null,null,null,null);
         dhbw = organizationRepository.save(dhbw);
 
         FleventsAccount lukas = fleventsAccountRepository.save(new FleventsAccount(null,"Lukas","Burkhardt",true,false,"i21005@hb.dhbw-stuttgart.de",null,"You'll never gona gues this!!",null,null,null));
