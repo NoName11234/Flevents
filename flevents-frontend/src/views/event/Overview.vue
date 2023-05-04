@@ -453,18 +453,21 @@ onMounted(async () => {
           <v-list-item
             v-if="event?.startTime && event?.endTime"
             prepend-icon="mdi-clock"
+            subtitle="Zeitraum"
           >
             {{parseDate(event?.startTime, event?.endTime)}}
           </v-list-item>
           <v-list-item
             v-if="event?.location"
             prepend-icon="mdi-map-marker"
+            subtitle="Ort"
           >
             {{event?.location}}
           </v-list-item>
           <v-list-item
             v-if="event?.organizationPreview?.name"
             prepend-icon="mdi-account-group"
+            subtitle="Organisation"
           >
             {{event?.organizationPreview?.name}}
           </v-list-item>

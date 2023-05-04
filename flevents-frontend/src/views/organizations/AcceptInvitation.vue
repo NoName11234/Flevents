@@ -23,12 +23,14 @@
       <v-list-item
         v-if="organization?.phoneContact"
         prepend-icon="mdi-phone"
+        subtitle="Telefonnummer"
       >
         {{ organization?.phoneContact }}
       </v-list-item>
       <v-list-item
         v-if="organization?.address"
         prepend-icon="mdi-map-marker"
+        subtitle="Adresse"
       >
         {{ organization?.address }}
       </v-list-item>
