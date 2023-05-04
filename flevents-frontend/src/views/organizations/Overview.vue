@@ -33,6 +33,12 @@
         <template v-if="organization.address || organization.phoneContact">
           <v-list>
             <v-list-item
+              v-if="organization?.customerNumber"
+              prepend-icon="mdi-identifier"
+            >
+              {{ organization?.customerNumber}}
+            </v-list-item>
+            <v-list-item
               v-if="organization?.phoneContact"
               prepend-icon="mdi-phone"
             >
