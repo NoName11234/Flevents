@@ -3,7 +3,7 @@ import Heading from "@/components/Heading.vue";
 import {useAppStore} from "@/store/app";
 import {usePlatformStore} from "@/store/platform";
 import {storeToRefs} from "pinia";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {Organization} from "@/models/organization";
 import {AxiosError} from "axios";
 import {VALIDATION} from "@/constants";
@@ -114,6 +114,21 @@ function checkmacher(string : string | undefined) : string{
   }
   return "";
 }
+
+const searchTerm = ref('');
+const filteredOrganizations = computed(() => {
+  const term = searchTerm.value.toLowerCase();
+  return organizations.value.filter(o => (
+    o.description?.toLowerCase().includes(term)
+      || o.name?.toLowerCase().includes(term)
+      || o.uuid?.toLowerCase().includes(term)
+      || o.customerNumber?.toLowerCase().includes(term)
+      || o.address?.toLowerCase().includes(term)
+      || o.phoneContact?.toLowerCase().includes(term)
+    )
+  ).sort();
+});
+
 </script>
 
 <template>
@@ -197,15 +212,32 @@ function checkmacher(string : string | undefined) : string{
   </v-card>
 
   <v-card>
+
     <v-card-title>
       Bestehende Organisationen
     </v-card-title>
+
     <v-divider />
+
+    <v-container>
+      <v-text-field
+        v-model="searchTerm"
+        type="search"
+        hide-details="auto"
+        variant="outlined"
+        label="Suche"
+        append-inner-icon="mdi-magnify"
+        density="compact"
+      />
+    </v-container>
+
+    <v-divider />
+
     <v-expansion-panels
       variant="accordion"
     >
       <v-expansion-panel
-        v-for="(o, oI) in organizations"
+        v-for="(o, oI) in filteredOrganizations"
         :key="oI"
         elevation="0"
       >
@@ -278,6 +310,7 @@ function checkmacher(string : string | undefined) : string{
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
+
   </v-card>
 
 </template>
