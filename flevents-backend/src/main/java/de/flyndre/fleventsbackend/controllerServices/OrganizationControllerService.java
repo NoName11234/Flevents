@@ -1,6 +1,7 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.dtos.MailConfigPreview;
 import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import de.flyndre.fleventsbackend.services.*;
 import org.springframework.security.core.Authentication;
@@ -181,74 +182,58 @@ public class OrganizationControllerService {
     /**
      * Sets the Email-Configuration for the organization invite in the specified organization.
      * @param organizationId the id of the organization to set the Email-Configuration
-     * @param mailConfig the text for the MailConfiguration to set
+     * @param mailText the text for the MailConfiguration to set
      */
-    public void setMailConfigOrgaInvite(String organizationId, String mailConfig) {
-        organizationService.setMailConfigOrgaInvite(getOrganizationById(organizationId) , mailConfig);
+    public void setMailConfigOrgaInvite(String organizationId, String mailText) {
+        organizationService.setMailConfigOrgaInvite(getOrganizationById(organizationId) , mailText);
     }
 
     /**
      * Sets the Email-Configuration for the event invite in the specified organization.
      * @param organizationId the id of the organization to set the Email-Configuration
-     * @param mailConfig the text for the MailConfiguration to set
+     * @param mailText the text for the MailConfiguration to set
      */
-    public void setMailConfigEventInvite(String organizationId, String mailConfig) {
-        organizationService.setMailConfigEventInvite(getOrganizationById(organizationId) , mailConfig);
+    public void setMailConfigEventInvite(String organizationId, String mailText) {
+        organizationService.setMailConfigEventInvite(getOrganizationById(organizationId) , mailText);
     }
 
     /**
      * Sets the Email-Configuration for the event info in the specified organization.
      * @param organizationId the id of the organization to set the Email-Configuration
-     * @param mailConfig the text for the MailConfiguration to set
+     * @param mailText the text for the MailConfiguration to set
      * @param localDateTime the time to set
      */
-    public void setMailConfigEventInfo(String organizationId, String mailConfig, LocalDateTime localDateTime) {
-        organizationService.setMailConfigEventInfo(getOrganizationById(organizationId) , mailConfig, localDateTime);
+    public void setMailConfigEventInfo(String organizationId, String mailText, LocalDateTime localDateTime) {
+        organizationService.setMailConfigEventInfo(getOrganizationById(organizationId) , mailText, localDateTime);
     }
 
     /**
      * Sets the Email-Configuration for the event feedback in the specified organization.
      * @param organizationId the id of the organization to set the Email-Configuration
-     * @param mailConfig the text for the MailConfiguration to set
+     * @param mailText the text for the MailConfiguration to set
      * @param localDateTime the time to set
      */
-    public void setMailConfigEventFeedback(String organizationId, String mailConfig, LocalDateTime localDateTime) {
-        organizationService.setMailConfigEventFeedback(getOrganizationById(organizationId) , mailConfig, localDateTime);
+    public void setMailConfigEventFeedback(String organizationId, String mailText, LocalDateTime localDateTime) {
+        organizationService.setMailConfigEventFeedback(getOrganizationById(organizationId) , mailText, localDateTime);
     }
 
     /**
-     * Gets the Email-Configuration for the organization invite in the specified organization.
+     * Gets the Email-Configuration for the specified organization.
      * @param organizationId the id of the organization to set the Email-Configuration
      * @return the mail configuration
      */
-    public MailConfig getMailConfigOrgaInvite(String organizationId) {
-        return organizationService.getMailConfigOrgaInvite(getOrganizationById(organizationId));
+    public MailConfig getMailConfig(String organizationId) {
+        return organizationService.getMailConfig(getOrganizationById(organizationId));
     }
 
     /**
-     * Gets the Email-Configuration for the event invite in the specified organization.
+     * Sets the Email-Configuration for the specified organization.
      * @param organizationId the id of the organization to set the Email-Configuration
-     * @return the mail configuration
+     * @param mailConfig the mail configuration of the organization
      */
-    public MailConfig getMailConfigEventInvite(String organizationId) {
-        return organizationService.getMailConfigEventInvite(getOrganizationById(organizationId));
+    public void setMailConfig(String organizationId, MailConfig mailConfig) {
+        organizationService.setMailConfig(getOrganizationById(organizationId), mailConfig);
     }
 
-    /**
-     * Gets the Email-Configuration for the event info in the specified organization.
-     * @param organizationId the id of the organization to set the Email-Configuration
-     * @return the mail configuration
-     */
-    public MailConfig getMailConfigEventInfo(String organizationId) {
-        return organizationService.getMailConfigEventInfo(getOrganizationById(organizationId));
-    }
 
-    /**
-     * Gets the Email-Configuration for the event feedback in the specified organization.
-     * @param organizationId the id of the organization to set the Email-Configuration
-     * @return the mail configuration
-     */
-    public MailConfig getMailConfigEventFeedback(String organizationId) {
-        return organizationService.getMailConfigEventFeedback(getOrganizationById(organizationId));
-    }
 }

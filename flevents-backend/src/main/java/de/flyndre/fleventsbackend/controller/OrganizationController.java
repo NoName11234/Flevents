@@ -7,6 +7,7 @@ import de.flyndre.fleventsbackend.Models.OrganizationRole;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
+import de.flyndre.fleventsbackend.dtos.MailConfigPreview;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.modelmapper.ModelMapper;
@@ -277,13 +278,13 @@ public class OrganizationController {
    /**
     * Sets the Email-Configuration for the organization invitation in the specified organization.
     * @param organizationId the id of the organization to set the Email-Configuration
-    * @param MailConfig the text for the MailConfiguration to set
+    * @param mailConfigPreview the mailConfigPreview filled with all information for the mail configuration
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{organizationId}/mailConfigOrgaInvite")
-   public ResponseEntity setMailConfigOrgaInvite(@PathVariable String organizationId, String MailConfig){
+   public ResponseEntity setMailConfigOrgaInvite(@PathVariable String organizationId,@RequestBody MailConfigPreview mailConfigPreview){
       try{
-         organizationControllerService.setMailConfigOrgaInvite(organizationId, MailConfig);
+         organizationControllerService.setMailConfigOrgaInvite(organizationId, mailConfigPreview.getMailText());
          return new ResponseEntity<>(HttpStatus.OK);
       }
       catch (Exception e){
@@ -294,13 +295,13 @@ public class OrganizationController {
    /**
     * Sets the Email-Configuration for the event invitation in the specified organization.
     * @param organizationId the id of the organization to set the Email-Configuration
-    * @param mailConfig the text for the MailConfiguration to set
+    * @param mailConfigPreview the mailConfigPreview filled with all information for the mail configuration
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{organizationId}/mailConfigEventInvite")
-   public ResponseEntity setMailConfigEventInvite(@PathVariable String organizationId, String mailConfig){
+   public ResponseEntity setMailConfigEventInvite(@PathVariable String organizationId,@RequestBody MailConfigPreview mailConfigPreview){
       try{
-         organizationControllerService.setMailConfigEventInvite(organizationId, mailConfig);
+         organizationControllerService.setMailConfigEventInvite(organizationId, mailConfigPreview.getMailText());
          return new ResponseEntity<>(HttpStatus.OK);
       }
       catch (Exception e){
@@ -311,14 +312,13 @@ public class OrganizationController {
    /**
     * Sets the Email-Configuration for the event information in the specified organization.
     * @param organizationId the id of the organization to set the Email-Configuration
-    * @param mailConfig the text for the MailConfiguration to set
-    * @param localDateTime the time to set
+    * @param mailConfigPreview the mailConfigPreview filled with all information for the mail configuration
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{organizationId}/mailConfigEventInfo")
-   public ResponseEntity setMailConfigEventInfo(@PathVariable String organizationId, String mailConfig, LocalDateTime localDateTime){
+   public ResponseEntity setMailConfigEventInfo(@PathVariable String organizationId,@RequestBody MailConfigPreview mailConfigPreview){
       try{
-         organizationControllerService.setMailConfigEventInfo(organizationId, mailConfig, localDateTime);
+         organizationControllerService.setMailConfigEventInfo(organizationId, mailConfigPreview.getMailText(), mailConfigPreview.getLocalDateTime());
          return new ResponseEntity<>(HttpStatus.OK);
       }
       catch (Exception e){
@@ -329,14 +329,13 @@ public class OrganizationController {
    /**
     * Sets the Email-Configuration for the event feedback in the specified organization.
     * @param organizationId the id of the organization to set the Email-Configuration
-    * @param mailConfig the text for the MailConfiguration to set
-    * @param  localDateTime the time to set
+    * @param mailConfigPreview the mailConfigPreview filled with all information for the mail configuration
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{organizationId}/mailConfigFeedback")
-   public ResponseEntity setMailConfigEventFeedback(@PathVariable String organizationId, String mailConfig, LocalDateTime localDateTime){
+   public ResponseEntity setMailConfigEventFeedback(@PathVariable String organizationId,@RequestBody MailConfigPreview mailConfigPreview){
       try{
-         organizationControllerService.setMailConfigEventFeedback(organizationId, mailConfig, localDateTime);
+         organizationControllerService.setMailConfigEventFeedback(organizationId, mailConfigPreview.getMailText(), mailConfigPreview.getLocalDateTime());
          return new ResponseEntity<>(HttpStatus.OK);
       }
       catch (Exception e){
@@ -349,10 +348,10 @@ public class OrganizationController {
     * @param organizationId the id of the organization to get the Email-Configuration
     * @return ResponseEntity with the http status code
     */
-   @GetMapping("/{organizationId}/mailConfigOrgaInvite")
-   public ResponseEntity getMailConfigOrgaInvite(@PathVariable String organizationId){
+   @GetMapping("/{organizationId}/mailConfig")
+   public ResponseEntity getMailConfig(@PathVariable String organizationId){
       try{
-         MailConfig mailconfig = organizationControllerService.getMailConfigOrgaInvite(organizationId);
+         MailConfig mailconfig = organizationControllerService.getMailConfig(organizationId);
          return new ResponseEntity<>(mailconfig, HttpStatus.OK);
       }
       catch (Exception e){
@@ -361,50 +360,21 @@ public class OrganizationController {
    }
 
    /**
-    * Gets the Email-Configuration for the event invitation in the specified organization.
-    * @param organizationId the id of the organization to get the Email-Configuration
+    * sets the Email-Configuration for the specified organization.
+    * @param organizationId the id of the organization to set the Email-Configuration
+    *
+    * @param mailConfig the mail configuration of the organization
     * @return ResponseEntity with the http status code
     */
-   @GetMapping("/{organizationId}/mailConfigEventInvite")
-   public ResponseEntity GetMailConfigEventInvite(@PathVariable String organizationId){
+   @PostMapping("/{organizationId}/mailConfig")
+   public ResponseEntity setMailConfig(@PathVariable String organizationId,@RequestBody MailConfig mailConfig){
       try{
-         MailConfig mailConfig = organizationControllerService.getMailConfigEventInvite(organizationId);
-         return new ResponseEntity<>(mailConfig, HttpStatus.OK);
+         organizationControllerService.setMailConfig(organizationId, mailConfig);
+         return new ResponseEntity<>(HttpStatus.OK);
       }
       catch (Exception e){
          return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 
-   /**
-    * Sets the Email-Configuration for the event information in the specified organization.
-    * @param organizationId the id of the organization to set the Email-Configuration
-    * @return ResponseEntity with the http status code
-    */
-   @GetMapping("/{organizationId}/mailConfigEventInfo")
-   public ResponseEntity getMailConfigEventInfo(@PathVariable String organizationId){
-      try{
-         MailConfig mailConfig = organizationControllerService.getMailConfigEventInfo(organizationId);
-         return new ResponseEntity<>(mailConfig,HttpStatus.OK);
-      }
-      catch (Exception e){
-         return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-   }
-
-   /**
-    * Sets the Email-Configuration for the event feedback in the specified organization.
-    * @param organizationId the id of the organization to set the Email-Configuration
-    * @return ResponseEntity with the http status code
-    */
-   @GetMapping("/{organizationId}/mailConfigFeedback")
-   public ResponseEntity setMailConfigFeedback(@PathVariable String organizationId){
-      try{
-         MailConfig mailConfig = organizationControllerService.getMailConfigEventFeedback(organizationId);
-         return new ResponseEntity<>(mailConfig,HttpStatus.OK);
-      }
-      catch (Exception e){
-         return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-   }
 }

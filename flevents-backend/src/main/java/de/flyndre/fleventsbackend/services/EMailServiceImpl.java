@@ -99,7 +99,10 @@ public class EMailServiceImpl implements EMailService{
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Invitation to be a part of "+organization.getName());
         MailConfig mailConfig = organization.getMailConfig();
-        if (mailConfig.getOrganizationInvitation()==null) {
+        if (
+            mailConfig == null
+            || mailConfig.getOrganizationInvitation() == null
+            || mailConfig.getOrganizationInvitation().isEmpty()) {
             details.setMsgBody("You are invited to join the organization " + organization.getName() + " at the flevents event manage platform. To join click the following link: " + baseurl + ":" + frontendPort + "/organizations/join/" + organization.getUuid() + "?token=" + token);
         }else {
             details.setMsgBody(organization.getMailConfig().getOrganizationInvitation().replace("<token>",token).replace("<organizationId>",organization.getUuid()));
@@ -124,9 +127,8 @@ public class EMailServiceImpl implements EMailService{
 
         if (
             mailConfig == null
-            || mailConfig.getInfoMessage() == null
-            || mailConfig.getFeedbackMessage() == null
-            || mailConfig.getRegisterMessage() == null
+            || mailConfig.getEventInvitation() == null
+            || mailConfig.getEventInvitation().isEmpty()
         ) {
             details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+":"+frontendPort+"/join/" +event.getUuid()+"?token="+token);
         } else {
@@ -183,8 +185,12 @@ public class EMailServiceImpl implements EMailService{
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Thank you for your participation at "+event.getName());
-
-        if(event.getMailConfig().equals(null)){
+        MailConfig mailConfig = event.getMailConfig();
+        if(
+            mailConfig == null
+            || mailConfig.getFeedbackMessage() == null
+            || mailConfig.getFeedbackMessage().isEmpty()
+        ){
             details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
         }else{
             details.setMsgBody(event.getMailConfig().getFeedbackMessage());
