@@ -1,15 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <configuration>
+    <property scope="context" name="LOG_LEVEL" value="INFO"/>
+    <property scope="context" name="LOG_FILE" value="../log.log"/>
+    <include file="../logback.xml"/>
     <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>log.log</file>
+        <file>${LOG_FILE}</file>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"application":"flevents"}</customFields>
         </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+        <fileNamePattern>${LOG_FILE}.%i</fileNamePattern>
+        <minIndex>1</minIndex>
+        <maxIndex>10</maxIndex>
+    </rollingPolicy>
+    <triggeringPolicy
+        class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+        <MaxFileSize>10MB</MaxFileSize>
+    </triggeringPolicy>
     </appender>
-    <root level="INFO">
+    <root level="${LOG_LEVEL}">
         <appender-ref ref="jsonConsoleAppender"/>
         <appender-ref ref="FILE"/>
     </root>
