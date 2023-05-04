@@ -6,6 +6,8 @@ import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.controllerServices.EventControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -30,9 +31,11 @@ public class EventController {
 
 private final EventControllerService eventControllerService;
 private final ModelMapper mapper;
+private final Logger logger = LoggerFactory.getLogger(EventController.class);
    public EventController(EventControllerService eventControllerService, ModelMapper mapper){
       this.eventControllerService = eventControllerService;
       this.mapper = mapper;
+
    }
 
    /**
@@ -44,6 +47,7 @@ private final ModelMapper mapper;
       try{
          return new ResponseEntity(eventControllerService.getEvents().stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -64,6 +68,7 @@ private final ModelMapper mapper;
       try {
          return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -81,6 +86,7 @@ private final ModelMapper mapper;
       }catch (InvalidAttributesException e){
          return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
@@ -102,6 +108,7 @@ private final ModelMapper mapper;
          eventControllerService.deleteEvent(eventId);
          return new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -122,6 +129,7 @@ private final ModelMapper mapper;
          return new ResponseEntity<>(eventControllerService.getAttendees(eventId).stream()
                  .map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -142,6 +150,7 @@ private final ModelMapper mapper;
          return new ResponseEntity<>(eventControllerService.getOrganizers(eventId).stream().
                  map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -162,6 +171,7 @@ private final ModelMapper mapper;
       try {
          return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -183,8 +193,9 @@ private final ModelMapper mapper;
       try{
          eventControllerService.inviteToEvent(eventId, email, role);
          return new ResponseEntity<>(HttpStatus.OK);
-      }catch (Exception ex){
-         return new ResponseEntity(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }catch (Exception e){
+         logger.error("Internal Error",e);
+         return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 
@@ -203,6 +214,7 @@ private final ModelMapper mapper;
          eventControllerService.acceptInvitation(eventId, details.getId(), token);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -224,6 +236,7 @@ private final ModelMapper mapper;
          return new ResponseEntity(HttpStatus.OK);
 
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -245,6 +258,7 @@ private final ModelMapper mapper;
          eventControllerService.addAccountToEvent(eventId,details.getId());
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -266,6 +280,7 @@ private final ModelMapper mapper;
          eventControllerService.addAccountToEvent(eventId,userId);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.OK);
       }
    }
@@ -289,6 +304,7 @@ private final ModelMapper mapper;
          eventControllerService.changeRole(eventId, accountId, fromRole,toRole);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -310,6 +326,7 @@ private final ModelMapper mapper;
          eventControllerService.addAnonymousAccountToEvent(eventId, account);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -329,8 +346,10 @@ private final ModelMapper mapper;
          eventControllerService.removeAccountFromEvent(eventId,accountId,role);
          return new ResponseEntity(HttpStatus.OK);
       }catch (NoSuchElementException ex){
+         logger.error("Not Found",ex);
          return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -351,6 +370,7 @@ private final ModelMapper mapper;
          eventControllerService.attendeesCheckIn(eventId,accountId);
          return HttpStatus.OK;
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
@@ -371,6 +391,7 @@ private final ModelMapper mapper;
          eventControllerService.attendeesCheckOut(eventId,accountId);
          return HttpStatus.OK;
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
@@ -385,8 +406,9 @@ private final ModelMapper mapper;
       try{
          List checkedIns = eventControllerService.getCheckedIn(eventId);
          return new ResponseEntity( checkedIns, HttpStatus.OK);
-      }catch (Exception ex){
-         return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+      }catch (Exception e){
+         logger.error("Internal Error",e);
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
       }
    }
 

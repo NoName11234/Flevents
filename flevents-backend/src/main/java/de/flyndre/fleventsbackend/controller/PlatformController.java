@@ -10,10 +10,13 @@ import de.flyndre.fleventsbackend.security.payload.request.LogoutRequest;
 import de.flyndre.fleventsbackend.services.AuthService;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 
@@ -31,6 +34,7 @@ public class PlatformController {
 
     private final PlatformControllerService platformControllerService;
     private final ModelMapper mapper;
+    private final Logger logger = LoggerFactory.getLogger(PlatformController.class);
     public PlatformController(PlatformControllerService platformControllerService, ModelMapper mapper) {
 
         this.platformControllerService = platformControllerService;
@@ -68,6 +72,7 @@ public class PlatformController {
                             , OrganizationInformation.class)
                     , HttpStatus.CREATED);
         } catch (Exception e) {
+            logger.error("Internal Error",e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -88,8 +93,10 @@ public class PlatformController {
             platformControllerService.deleteOrganization(organizationId);
             return new ResponseEntity(HttpStatus.OK);
         }catch (NoSuchElementException e){
+            logger.error("Not Found",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
