@@ -3,6 +3,7 @@ package de.flyndre.fleventsbackend.controller;
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.Organization;
 import de.flyndre.fleventsbackend.Models.OrganizationRole;
+import de.flyndre.fleventsbackend.Models.PlatformAdminRole;
 import de.flyndre.fleventsbackend.controllerServices.OrganizationControllerService;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.EventInformation;
@@ -12,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.directory.InvalidAttributesException;
@@ -68,6 +70,9 @@ public class OrganizationController {
     */
    @GetMapping
    public ResponseEntity getOrganizations(Authentication auth){
+      if(!auth.getAuthorities().contains(new SimpleGrantedAuthority(PlatformAdminRole.platformAdmin.toString()))){
+         return new ResponseEntity("The given user is not a platform admin",HttpStatus.UNAUTHORIZED);
+      }
       try {
          return new ResponseEntity(organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
