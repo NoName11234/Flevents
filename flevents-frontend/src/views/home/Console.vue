@@ -9,6 +9,12 @@ import {AxiosError} from "axios";
 import {VALIDATION} from "@/constants";
 import ConsoleApi from "@/api/consoleApi";
 import {el} from "vuetify/locale";
+import IconService from "@/service/iconService";
+import DatetimeService from "@/service/datetimeService";
+import Comment from "@/components/Comment.vue";
+import CommentForm from "@/components/CommentForm.vue";
+import AccountAvatar from "@/components/AccountAvatar.vue";
+import {OrganizationRole} from "@/models/organizationRole";
 
 const appStore = useAppStore();
 
@@ -195,36 +201,83 @@ function checkmacher(string : string | undefined) : string{
       Bestehende Organisationen
     </v-card-title>
     <v-divider />
-    <v-container class="d-flex flex-column gap-3">
-      <v-card
+    <v-expansion-panels
+      variant="accordion"
+    >
+      <v-expansion-panel
         v-for="(o, oI) in organizations"
         :key="oI"
         elevation="0"
-        border
       >
-        <v-container
-          class="d-flex flex-row align-center gap-3"
-        >
-          <v-avatar
-            :image="o.icon"
-            :icon="o.icon ? '' : 'mdi-account-group'"
-            class="bg-gradient"
-            size="80"
-          />
-          <div class="flex-grow-1 d-flex flex-column justify-start">
-            <small class="text-grey text-break">ID: {{ o.uuid }}</small>
-            {{ o.name }}
+        <v-expansion-panel-title>
+          <div
+            class="d-flex flex-row align-center gap-3"
+          >
+            <v-avatar
+              :image="o.icon"
+              :icon="o.icon ? '' : 'mdi-account-group'"
+              class="bg-gradient"
+            />
+            <div class="flex-grow-1 d-flex flex-column justify-start">
+              {{ o.name }}
+            </div>
           </div>
-          <v-btn
-            icon="mdi-delete"
-            size="small"
-            variant="text"
-            color="error"
-            @click="deleteOrganization(o)"
-          />
-        </v-container>
-      </v-card>
-    </v-container>
+        </v-expansion-panel-title>
+
+        <v-expansion-panel-text>
+          <div class="mx-n6 mt-n2 mb-n4">
+            <template v-if="o.description">
+              <v-container>
+                {{ o.description }}
+              </v-container>
+              <v-divider />
+            </template>
+            <v-list>
+              <v-list-item
+                prepend-icon="mdi-database"
+                subtitle="Datenbank-UUID"
+              >
+                {{ o?.uuid}}
+              </v-list-item>
+              <v-list-item
+                v-if="o?.customerNumber"
+                prepend-icon="mdi-identifier"
+                subtitle="Kundennummer"
+              >
+                {{ o?.customerNumber}}
+              </v-list-item>
+              <v-list-item
+                v-if="o?.phoneContact"
+                prepend-icon="mdi-phone"
+                subtitle="Telefonnummer"
+              >
+                {{ o?.phoneContact}}
+              </v-list-item>
+              <v-list-item
+                v-if="o?.address"
+                prepend-icon="mdi-map-marker"
+                subtitle="Adresse"
+              >
+                {{ o?.address }}
+              </v-list-item>
+            </v-list>
+            <v-divider />
+            <v-container
+              class="d-flex flex-column flex-sm-row justify-end gap"
+            >
+              <v-btn
+                variant="text"
+                prepend-icon="mdi-delete"
+                color="error"
+                @click="deleteOrganization(o)"
+              >
+                Löschen
+              </v-btn>
+            </v-container>
+          </div>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-card>
 
 </template>
