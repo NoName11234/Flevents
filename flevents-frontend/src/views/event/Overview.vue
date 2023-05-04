@@ -554,6 +554,7 @@ onMounted(async () => {
             :event-uuid="eventUuid"
             :post="post"
             :admin-view="validateRole === EventRole.organizer"
+            :show-comment-form="isAttending"
             :key="pIndex"
           />
         </v-expansion-panels>
