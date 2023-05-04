@@ -386,35 +386,6 @@ private final ModelMapper mapper;
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
-   /**
-    * not implemented yet
-    * @param eventId the id of the event to add an attachment to
-    * @return HttpStatus whether the process was successfully or not
-    */
-   @PostMapping("/{eventId}/attachments")
-   public HttpStatus addAttachment(@PathVariable String eventId){
-      try{
-         //TODO: Implement
-         return HttpStatus.OK;
-      }catch (Exception e){
-         return HttpStatus.INTERNAL_SERVER_ERROR;
-      }
-   }
-
-   /**
-    * not implemented yet
-    * @param eventId the id of the event to delete an attachment from
-    * @return HttpStatus whether the process was successfully or not
-    */
-   @DeleteMapping("/{eventId}/attachments")
-   public HttpStatus deleteAttachment(@PathVariable String eventId){
-      try{
-         //TODO: Implement
-         return HttpStatus.OK;
-      }catch (Exception e){
-         return HttpStatus.INTERNAL_SERVER_ERROR;
-      }
-   }
 
    /**
     * Gets all checked-In attendees
