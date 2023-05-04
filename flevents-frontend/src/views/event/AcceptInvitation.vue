@@ -31,12 +31,14 @@
       <v-list-item
         v-if="event?.startTime && event?.endTime"
         prepend-icon="mdi-clock"
+        subtitle="Zeitraum"
       >
         {{ DatetimeService.formatDateRange(event?.startTime, event?.endTime)}}
       </v-list-item>
       <v-list-item
         v-if="event?.location"
         prepend-icon="mdi-map-marker"
+        subtitle="Ort"
       >
         {{event?.location}}
       </v-list-item>
@@ -75,9 +77,11 @@
         @click="anon = true"
         target="_blank"
         variant="text"
+        prepend-icon="mdi-incognito"
       >
-        Nur mit meiner Mail-Adresse anmelden
+        Nur mit Mail-Adresse anmelden
       </v-btn>
+      <v-spacer />
       <v-btn
         :to="{ name: 'accounts.create' }"
         target="_blank"
@@ -117,9 +121,11 @@
         @click="anon = false"
         target="_blank"
         variant="text"
+        prepend-icon="mdi-account"
       >
         Mit Flevents-Account anmelden
       </v-btn>
+      <v-spacer />
       <v-btn
         :to="{ name: 'accounts.create' }"
         target="_blank"
