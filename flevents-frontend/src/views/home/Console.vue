@@ -135,7 +135,7 @@ function checkmacher(string : string | undefined) : string{
         <v-text-field
           v-model="organization.customerNumber"
           label="Kundennummer"
-          prepend-inner-icon="mdi-numeric"
+          prepend-inner-icon="mdi-identifier"
           :rules="[() => organization.customerNumber !== '' || 'Dieses Feld wird benötigt.']"
           messages="Ist unveränderbar und muss einzigartig sein."
           required
