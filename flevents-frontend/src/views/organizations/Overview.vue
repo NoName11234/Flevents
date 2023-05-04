@@ -196,7 +196,7 @@ import router from "@/router";
 
 const route = useRoute();
 const tab = computed({
-  get: () => route.query.tab,
+  get: () => route.query.tab ?? 'info',
   set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
