@@ -27,7 +27,7 @@ const route = useRoute();
 const eventUuid = route.params.uuid as string;
 
 const tab = computed({
-  get: () => route.query.tab ?? 'info',
+  get: () => route.query.tab,
   set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
