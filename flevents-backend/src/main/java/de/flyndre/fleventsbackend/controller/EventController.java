@@ -6,13 +6,14 @@ import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.controllerServices.EventControllerService;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.directory.InvalidAttributesException;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,11 @@ public class EventController {
 
 private final EventControllerService eventControllerService;
 private final ModelMapper mapper;
+private final Logger logger = LoggerFactory.getLogger(EventController.class);
    public EventController(EventControllerService eventControllerService, ModelMapper mapper){
       this.eventControllerService = eventControllerService;
       this.mapper = mapper;
+
    }
 
    /**
@@ -44,26 +47,28 @@ private final ModelMapper mapper;
       try{
          return new ResponseEntity(eventControllerService.getEvents().stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 
    /**
     * Returns the event with the given id.
-    * Allows access for invited or above in the specified event.
+    * Allows access for invited or above in the specified event and all members and above of the organization of the event.
     * @param eventId the id of the event
     * @param auth the Authentication generated out of a barer token.
     * @return event with the given id
     */
    @GetMapping("/{eventId}")
    public ResponseEntity getEventById(@PathVariable String eventId, Authentication auth){
-      // TODO: In below out-commented code also check if in organization of event
-//      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
-//         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-//      }
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.values()))&&
+         !eventControllerService.grandOrganizationRole(auth,eventId,Arrays.asList(OrganizationRole.values()))){
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+      }
       try {
          return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -81,6 +86,7 @@ private final ModelMapper mapper;
       }catch (InvalidAttributesException e){
          return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
@@ -95,13 +101,14 @@ private final ModelMapper mapper;
     */
    @DeleteMapping("/{eventId}")
    public ResponseEntity deleteEvent(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
          eventControllerService.deleteEvent(eventId);
          return new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -115,13 +122,14 @@ private final ModelMapper mapper;
     */
    @GetMapping("/{eventId}/attendees")
    public ResponseEntity getAttendees(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer,EventRole.tutor))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.organizer,EventRole.tutor))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
          return new ResponseEntity<>(eventControllerService.getAttendees(eventId).stream()
                  .map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -135,27 +143,16 @@ private final ModelMapper mapper;
     */
    @GetMapping("/{eventId}/organizers")
    public ResponseEntity getOrganizers(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
          return new ResponseEntity<>(eventControllerService.getOrganizers(eventId).stream().
                  map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
-   }
-
-
-   /**
-    * not implemented yet
-    * @param eventId the id of the event to get the attachments from
-    * @return a list with the URIs of the attachments
-    */
-   @GetMapping("/{eventId}/attachments")
-   public List<URI> getAttachment(@PathVariable String eventId){
-      //TODO: Implement
-      return new ArrayList<>();
    }
 
    /**
@@ -168,12 +165,13 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
          return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -189,14 +187,15 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/invite")
    public ResponseEntity inviteToEvent(@PathVariable String eventId, @RequestParam() String email,@RequestParam EventRole role,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try{
          eventControllerService.inviteToEvent(eventId, email, role);
          return new ResponseEntity<>(HttpStatus.OK);
-      }catch (Exception ex){
-         return new ResponseEntity(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }catch (Exception e){
+         logger.error("Internal Error",e);
+         return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 
@@ -209,12 +208,13 @@ private final ModelMapper mapper;
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/accept-invitation")
-   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, Authentication auth){
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam String token, Authentication auth){
       try{
          UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
          eventControllerService.acceptInvitation(eventId, details.getId(), token);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -229,13 +229,14 @@ private final ModelMapper mapper;
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/accept-invitation/anonymously")
-   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, @RequestParam String mailAddress){
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam String token, @RequestParam String mailAddress){
       try{
          eventControllerService.validateAndDeleteToken(token, eventId);
          eventControllerService.registerAnonymousAccountToEvent(eventId, mailAddress);
          return new ResponseEntity(HttpStatus.OK);
 
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -249,7 +250,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
+      if(!eventControllerService.grandOrganizationRole(auth,eventId,Arrays.asList(OrganizationRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -257,6 +258,7 @@ private final ModelMapper mapper;
          eventControllerService.addAccountToEvent(eventId,details.getId());
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -271,13 +273,14 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/book")
    public ResponseEntity bookEvent(@PathVariable String eventId,@RequestParam String userId,Authentication auth){
-      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
+      if (!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try{
          eventControllerService.addAccountToEvent(eventId,userId);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.OK);
       }
    }
@@ -294,13 +297,14 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole fromRole, @RequestParam EventRole toRole,Authentication auth){
-      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
+      if (!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
          eventControllerService.changeRole(eventId, accountId, fromRole,toRole);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -315,13 +319,14 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account/add-anonymous")
    public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody FleventsAccount account,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
          eventControllerService.addAnonymousAccountToEvent(eventId, account);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -341,8 +346,10 @@ private final ModelMapper mapper;
          eventControllerService.removeAccountFromEvent(eventId,accountId,role);
          return new ResponseEntity(HttpStatus.OK);
       }catch (NoSuchElementException ex){
+         logger.error("Not Found",ex);
          return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -356,13 +363,14 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
    public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return HttpStatus.UNAUTHORIZED;
       }
       try{
          eventControllerService.attendeesCheckIn(eventId,accountId);
          return HttpStatus.OK;
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
@@ -376,13 +384,14 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/attendees/check-out/{accountId}")
    public HttpStatus attendeesCheckOut(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return HttpStatus.UNAUTHORIZED;
       }
       try{
          eventControllerService.attendeesCheckOut(eventId,accountId);
          return HttpStatus.OK;
       }catch (Exception e){
+         logger.error("Internal Error",e);
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
@@ -397,8 +406,9 @@ private final ModelMapper mapper;
       try{
          List checkedIns = eventControllerService.getCheckedIn(eventId);
          return new ResponseEntity( checkedIns, HttpStatus.OK);
-      }catch (Exception ex){
-         return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
+      }catch (Exception e){
+         logger.error("Internal Error",e);
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
       }
    }
 

@@ -243,15 +243,28 @@ public class EventControllerService {
 
     /**
      * Validate if the given Authentication matches to the given roles for the given event id.
+     * Also including the role of an admin of the Organization of the event.
      * @param auth the Authentication to validate.
-     * @param uuid the id of the event in which context the validation should be done.
+     * @param eventid the id of the event in which context the validation should be done.
      * @param roles the event roles that should match.
      * @return true if the given parameters match, false if not.
      */
-    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
-        Event event = getEventById(uuid);
-        return authService.validateRights(auth, roles, uuid)
+    public boolean grandEventRole(Authentication auth, String eventid, List<Role> roles){
+        Event event = getEventById(eventid);
+        return authService.validateRights(auth, roles, eventid)
                 || authService.validateRights(auth, List.of(OrganizationRole.admin), event.getOrganization().getUuid());
+    }
+
+    /**
+     * Validate if the given {@link Authentication} contains the given roles in the Organization of the given event.
+     * @param auth the Authentication to validate
+     * @param eventId the id of the event in which context the validation should occur
+     * @param roles the OrganizationRoles that should get granted.
+     * @return
+     */
+    public boolean grandOrganizationRole(Authentication auth, String eventId, List<Role> roles){
+        Event event = getEventById(eventId);
+        return authService.validateRights(auth,roles,event.getOrganization().getUuid());
     }
 
     /**

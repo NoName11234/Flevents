@@ -7,6 +7,8 @@ import de.flyndre.fleventsbackend.controllerServices.QuestionnaireControllerServ
 import de.flyndre.fleventsbackend.dtos.questionnaire.AnsweredQuestionnaire;
 import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,7 +30,7 @@ public class QuestionnaireController {
 
     private final QuestionnaireControllerService questionnaireControllerService;
     private final ModelMapper mapper;
-
+    private final Logger logger = LoggerFactory.getLogger(QuestionnaireController.class);
     public QuestionnaireController(QuestionnaireControllerService questionnaireControllerService, ModelMapper mapper) {
         this.questionnaireControllerService = questionnaireControllerService;
         this.mapper = mapper;
@@ -48,6 +50,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId), HttpStatus.OK);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -60,6 +63,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -73,6 +77,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -85,6 +90,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.createQuestionnaire(eventId, bodyQuestionnaire), Questionnaire.class), HttpStatus.CREATED);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -96,6 +102,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -110,6 +117,7 @@ public class QuestionnaireController {
             questionnaireControllerService.deleteQuestionnaire(questionnaireId);
             return new ResponseEntity<>("Deleted.", HttpStatus.ACCEPTED);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -124,6 +132,7 @@ public class QuestionnaireController {
             questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
             return new ResponseEntity(HttpStatus.OK);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -131,6 +140,7 @@ public class QuestionnaireController {
     @GetMapping("/{questionnaireId}/statistics")
     public ResponseEntity getStatistics(@PathVariable String questionnaireId, Authentication auth){
         //TODO: Authentification if working again
+        //Todo: Errorhandling and Logging
         return new ResponseEntity(questionnaireControllerService.getStatistics(questionnaireId), HttpStatus.OK);
     }
 }
