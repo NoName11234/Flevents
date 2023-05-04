@@ -18,25 +18,33 @@ platformStore.hydrate();
 
 const tooltip = ref('');
 const loading = ref(false);
-const organization = ref({ name: '' } as Organization);
+const organization = ref({
+  name: '',
+  customerNumber: '',
+  phoneContact: ''
+} as Organization);
 const firstAdminEmail = ref('');
 const form = ref({} as any);
 
 function resetValues() {
   form.value.reset();
-  organization.value = { name: '' } as Organization;
+  organization.value = {
+    name: '',
+    customerNumber: '',
+    phoneContact: ''
+  } as Organization;
   firstAdminEmail.value = '';
 }
 
-async function createOrganization() {
+async function createOrganization(pendingValidation: Promise<any>) {
   tooltip.value = '';
-  if (organization.value.name === '') {
-    return;
-  }
-  if (firstAdminEmail.value === '' || !firstAdminEmail.value.match(VALIDATION.EMAIL)) {
-    return;
-  }
   loading.value = true;
+  const validation = await pendingValidation;
+  if (validation?.valid != true) {
+    tooltip.value = 'Eine oder mehrere Angaben sind fehlerhaft.';
+    loading.value = false;
+    return;
+  }
   try {
     const response = await ConsoleApi.createOrganization(organization.value, firstAdminEmail.value);
     resetValues();
@@ -65,7 +73,7 @@ async function deleteOrganization(organization: Organization) {
   ok = confirm(
     `Sind Sie sicher, dass Sie die Organisation ${organization.name} löschen wollen?`
     + ` Damit löschen Sie ${organization.eventPreviews.length} zugehörige Events und deren zugehörige Daten wie Posts und Umfragen.`
-    + ` Außerdem löschen Sie die Verbindugen zu ${organization.accountPreviews.length} Accounts.`
+    + ` Außerdem löschen Sie die Verbindungen zu ${organization.accountPreviews.length} Accounts.`
     + ` Diese Daten sind danach verloren und können nicht wiederhergestellt werden.`
   );
   if (!ok) return;
@@ -113,22 +121,45 @@ function checkmacher(string : string | undefined) : string{
     <v-form
       ref="form"
       validate-on="submit"
-      @submit.prevent="createOrganization()"
+      @submit.prevent="createOrganization"
     >
       <v-container class="d-flex flex-column gap-3">
         <v-text-field
           v-model="organization.name"
-          label="Name der Organisation"
+          label="Name"
           prepend-inner-icon="mdi-account-group"
           :rules="[() => organization.name !== '' || 'Dieses Feld wird benötigt.']"
           required
           hide-details="auto"
         />
         <v-text-field
+          v-model="organization.customerNumber"
+          label="Kundennummer"
+          prepend-inner-icon="mdi-numeric"
+          :rules="[() => organization.customerNumber !== '' || 'Dieses Feld wird benötigt.']"
+          messages="Ist unveränderbar und muss einzigartig sein."
+          required
+          hide-details="auto"
+        />
+        <v-text-field
+          v-model="organization.phoneContact"
+          label="Telefonnummer"
+          prepend-inner-icon="mdi-phone"
+          :rules="[
+            () => organization.phoneContact !== '' || 'Dieses Feld wird benötigt.',
+            () => organization.phoneContact?.match(VALIDATION.PHONE)?.length > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
+            ]"
+          required
+          hide-details="auto"
+        />
+        <v-text-field
           v-model="firstAdminEmail"
           label="E-Mail-Adresse des ersten Administrators"
-          prepend-inner-icon="mdi-at"
-          :rules="[() => firstAdminEmail !== '' || 'Dieses Feld wird benötigt.', () => (firstAdminEmail?.match(VALIDATION.EMAIL)?.length ?? 0) > 0 || 'Muss eine gültige E-Mail-Adresse sein.']"
+          prepend-inner-icon="mdi-account-tie"
+          :rules="[
+            () => firstAdminEmail !== '' || 'Dieses Feld wird benötigt.',
+            () => firstAdminEmail?.match(VALIDATION.EMAIL)?.length > 0 || 'Muss eine gültige E-Mail-Adresse sein.'
+            ]"
           required
           hide-details="auto"
         />

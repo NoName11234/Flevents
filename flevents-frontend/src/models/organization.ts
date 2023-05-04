@@ -6,8 +6,9 @@ export interface Organization {
   name: string;
   description: string;
   address: string;
-  icon: string;
   phoneContact: string;
+  customerNumber: string;
+  icon: string;
   accountPreviews: AccountPreview[];
   eventPreviews: FleventsEventPreview[];
 }
