@@ -50,17 +50,17 @@ private final ModelMapper mapper;
 
    /**
     * Returns the event with the given id.
-    * Allows access for invited or above in the specified event.
+    * Allows access for invited or above in the specified event and all members and above of the organization of the event.
     * @param eventId the id of the event
     * @param auth the Authentication generated out of a barer token.
     * @return event with the given id
     */
    @GetMapping("/{eventId}")
    public ResponseEntity getEventById(@PathVariable String eventId, Authentication auth){
-      // TODO: In below out-commented code also check if in organization of event
-//      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
-//         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-//      }
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.values()))&&
+         !eventControllerService.grandOrganizationRole(auth,eventId,Arrays.asList(OrganizationRole.values()))){
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+      }
       try {
          return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
@@ -95,7 +95,7 @@ private final ModelMapper mapper;
     */
    @DeleteMapping("/{eventId}")
    public ResponseEntity deleteEvent(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -115,7 +115,7 @@ private final ModelMapper mapper;
     */
    @GetMapping("/{eventId}/attendees")
    public ResponseEntity getAttendees(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer,EventRole.tutor))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.organizer,EventRole.tutor))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -135,7 +135,7 @@ private final ModelMapper mapper;
     */
    @GetMapping("/{eventId}/organizers")
    public ResponseEntity getOrganizers(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -144,18 +144,6 @@ private final ModelMapper mapper;
       }catch (Exception e){
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
-   }
-
-
-   /**
-    * not implemented yet
-    * @param eventId the id of the event to get the attachments from
-    * @return a list with the URIs of the attachments
-    */
-   @GetMapping("/{eventId}/attachments")
-   public List<URI> getAttachment(@PathVariable String eventId){
-      //TODO: Implement
-      return new ArrayList<>();
    }
 
    /**
@@ -168,7 +156,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}")
    public ResponseEntity setEventById(@PathVariable String eventId, @RequestBody Event event, Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -189,7 +177,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/invite")
    public ResponseEntity inviteToEvent(@PathVariable String eventId, @RequestParam() String email,@RequestParam EventRole role,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try{
@@ -209,7 +197,7 @@ private final ModelMapper mapper;
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/accept-invitation")
-   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, Authentication auth){
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam String token, Authentication auth){
       try{
          UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
          eventControllerService.acceptInvitation(eventId, details.getId(), token);
@@ -229,7 +217,7 @@ private final ModelMapper mapper;
     * @return ResponseEntity with the http status code
     */
    @PostMapping("/{eventId}/accept-invitation/anonymously")
-   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam(required = false) String token, @RequestParam String mailAddress){
+   public ResponseEntity acceptInvitation(@PathVariable String eventId, @RequestParam String token, @RequestParam String mailAddress){
       try{
          eventControllerService.validateAndDeleteToken(token, eventId);
          eventControllerService.registerAnonymousAccountToEvent(eventId, mailAddress);
@@ -249,7 +237,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account")
    public ResponseEntity addAccountToEvent(@PathVariable String eventId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.values()))){
+      if(!eventControllerService.grandOrganizationRole(auth,eventId,Arrays.asList(OrganizationRole.values()))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -271,7 +259,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/book")
    public ResponseEntity bookEvent(@PathVariable String eventId,@RequestParam String userId,Authentication auth){
-      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
+      if (!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try{
@@ -294,7 +282,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/change-role/{accountId}")
    public ResponseEntity changeRole(@PathVariable String eventId, @PathVariable() String accountId,@RequestParam EventRole fromRole, @RequestParam EventRole toRole,Authentication auth){
-      if (!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
+      if (!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))) {
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -315,7 +303,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/add-account/add-anonymous")
    public ResponseEntity addAnonymousAccountToEvent(@PathVariable String eventId, @RequestBody FleventsAccount account,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return new ResponseEntity(HttpStatus.UNAUTHORIZED);
       }
       try {
@@ -356,7 +344,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/attendees/check-in/{accountId}")
    public HttpStatus attendeesCheckIn(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return HttpStatus.UNAUTHORIZED;
       }
       try{
@@ -376,7 +364,7 @@ private final ModelMapper mapper;
     */
    @PostMapping("/{eventId}/attendees/check-out/{accountId}")
    public HttpStatus attendeesCheckOut(@PathVariable String eventId, @PathVariable String accountId,Authentication auth){
-      if(!eventControllerService.getGranted(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
+      if(!eventControllerService.grandEventRole(auth,eventId,Arrays.asList(EventRole.tutor,EventRole.organizer))){
          return HttpStatus.UNAUTHORIZED;
       }
       try{
