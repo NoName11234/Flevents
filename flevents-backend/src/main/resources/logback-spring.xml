@@ -2,8 +2,8 @@
 
 <configuration>
     <property scope="context" name="LOG_LEVEL" value="INFO"/>
-    <property scope="context" name="LOG_FILE" value="../log.log"/>
-    <include file="../logback.xml"/>
+    <property scope="context" name="LOG_FILE" value="log.log"/>
+    <include file="logback.xml"/>
     <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
