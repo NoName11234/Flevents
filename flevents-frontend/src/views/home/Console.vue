@@ -153,7 +153,7 @@ function checkmacher(string : string | undefined) : string{
           prepend-inner-icon="mdi-phone"
           :rules="[
             () => organization.phoneContact !== '' || 'Dieses Feld wird benötigt.',
-            () => organization.phoneContact?.match(VALIDATION.PHONE)?.length > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
+            () => (organization.phoneContact?.match(VALIDATION.PHONE)?.length ?? 0) > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
             ]"
           required
           hide-details="auto"
@@ -164,7 +164,7 @@ function checkmacher(string : string | undefined) : string{
           prepend-inner-icon="mdi-account-tie"
           :rules="[
             () => firstAdminEmail !== '' || 'Dieses Feld wird benötigt.',
-            () => firstAdminEmail?.match(VALIDATION.EMAIL)?.length > 0 || 'Muss eine gültige E-Mail-Adresse sein.'
+            () => (firstAdminEmail?.match(VALIDATION.EMAIL)?.length ?? 0) > 0 || 'Muss eine gültige E-Mail-Adresse sein.'
             ]"
           required
           hide-details="auto"

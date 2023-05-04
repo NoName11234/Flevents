@@ -197,7 +197,7 @@ async function submit() {
       <v-container class="d-flex flex-column gap-3">
 
         <small
-          v-if="remainingExistingAttachments?.length > 0"
+          v-if="(remainingExistingAttachments?.length ?? 0) > 0"
           class="text-grey"
         >
           Neue Anhänge

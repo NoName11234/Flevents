@@ -115,7 +115,7 @@ async function submit(pendingValidation: Promise<any>) {
           prepend-inner-icon="mdi-phone"
           :rules="[
             () => organization.phoneContact !== '' || 'Dieses Feld wird benötigt.',
-            () => organization.phoneContact?.match(VALIDATION.PHONE)?.length > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
+            () => (organization.phoneContact?.match(VALIDATION.PHONE)?.length ?? 0) > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
             ]"
           required
           hide-details="auto"
