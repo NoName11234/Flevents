@@ -65,6 +65,14 @@
         hide-details="auto"
         required
       />
+      <div>
+        <v-btn
+          :to="{ name: 'accounts.forget', query: route.query }"
+          variant="plain"
+        >
+          Passwort zurücksetzen
+        </v-btn>
+      </div>
       <div
         v-if="tooltip !== ''"
         class="text-error">
@@ -73,6 +81,7 @@
     </v-container>
     <v-divider />
     <v-container  class="d-flex flex-column flex-sm-row justify-end gap">
+
       <v-btn
         @click="anon = true"
         target="_blank"

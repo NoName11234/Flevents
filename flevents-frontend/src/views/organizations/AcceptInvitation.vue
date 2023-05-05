@@ -65,6 +65,12 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
+        :to="{ name: 'accounts.forget', query: route.query }"
+        variant="text"
+      >
+        Passwort vergessen
+      </v-btn>
+      <v-btn
         :to="{ name: 'accounts.create' }"
         variant="text"
         target="_blank"
