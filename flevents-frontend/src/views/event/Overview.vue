@@ -366,9 +366,7 @@ function reducelist(uuid: string){
 }
 onMounted(async () => {
   questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
-  console.log(event);
-  console.log(questionnaires);
-})
+});
 </script>
 
 <template>
