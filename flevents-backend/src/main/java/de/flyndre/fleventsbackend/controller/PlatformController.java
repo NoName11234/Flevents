@@ -10,10 +10,13 @@ import de.flyndre.fleventsbackend.security.payload.request.LogoutRequest;
 import de.flyndre.fleventsbackend.services.AuthService;
 import jakarta.validation.constraints.NotNull;
 import org.modelmapper.ModelMapper;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.NoSuchElementException;
 
@@ -31,6 +34,7 @@ public class PlatformController {
 
     private final PlatformControllerService platformControllerService;
     private final ModelMapper mapper;
+    private final Logger logger = LoggerFactory.getLogger(PlatformController.class);
     public PlatformController(PlatformControllerService platformControllerService, ModelMapper mapper) {
 
         this.platformControllerService = platformControllerService;
@@ -55,6 +59,12 @@ public class PlatformController {
         if(organizationPreview.getName()==null||organizationPreview.getName().isBlank()){
             return new ResponseEntity("Please provide a name for the organization.",HttpStatus.BAD_REQUEST);
         }
+        if(organizationPreview.getCustomerNumber()==null||organizationPreview.getCustomerNumber().isBlank()){
+            return new ResponseEntity("Please provide a customer number",HttpStatus.BAD_REQUEST);
+        }
+        if(organizationPreview.getPhoneContact()==null||organizationPreview.getPhoneContact().isBlank()||!organizationPreview.getPhoneContact().matches("(0|\\+(9[976]\\d|8[987530]\\d|6[987]\\d|5[90]\\d|42\\d|3[875]\\d|2[98654321]\\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1))\\d{1,14}$")){
+            return new ResponseEntity("Please provide a valid phone contact",HttpStatus.BAD_REQUEST);
+        }
         try {
             return new ResponseEntity(
                     mapper.map(
@@ -62,6 +72,7 @@ public class PlatformController {
                             , OrganizationInformation.class)
                     , HttpStatus.CREATED);
         } catch (Exception e) {
+            logger.error("Internal Error",e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -82,43 +93,11 @@ public class PlatformController {
             platformControllerService.deleteOrganization(organizationId);
             return new ResponseEntity(HttpStatus.OK);
         }catch (NoSuchElementException e){
+            logger.error("Not Found",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * Logs in a platformAccount
-     * @param request the request with a username and a secret
-     * @return a valid jwt token alongside an Ok or an error if something went wrong
-     */
-    //@PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequest request){
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
-
-    }
-
-    /**
-     * Invalidate the given jwt token
-     * Allows only access if you are a platformAdmin
-     * @param request a LogoutRequest containing the jwt token
-     * @param auth the Authentication generated out of a barer token.
-     * @return an Ok or an error if something went wrong
-     */
-    //@PostMapping("/logout")
-    public ResponseEntity logout(@RequestBody LogoutRequest request,Authentication auth){
-        return new ResponseEntity(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    /**
-     * Refresh a token if its time is over.
-     * Allows only access if you are a platformAdmin
-     * @param auth the Authentication generated out of a barer token.
-     * @return a new token alongside an Ok or an error if something went wrong
-     */
-    //@PostMapping("/refresh")
-    public ResponseEntity refresh(Authentication auth){
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }

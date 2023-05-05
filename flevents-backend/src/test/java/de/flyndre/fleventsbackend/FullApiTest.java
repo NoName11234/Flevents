@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.InvitationToken;
+import de.flyndre.fleventsbackend.Models.Organization;
 import de.flyndre.fleventsbackend.Models.OrganizationRole;
 import de.flyndre.fleventsbackend.dtos.AccountInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationInformation;
 import de.flyndre.fleventsbackend.dtos.OrganizationPreview;
 import de.flyndre.fleventsbackend.repositories.InvitationTokenRepository;
+import de.flyndre.fleventsbackend.security.payload.request.LoginRequest;
+import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,11 +46,13 @@ public class FullApiTest {
         testGetAllOrganizations();
         testGetOrganization(testOrga);
         AccountInformation testAcc = testCreateAccount();
-        testAddAccountToOrga(testAcc,testOrga,OrganizationRole.admin);
+        InvitationToken token = testInviteAccountToOrga(testAcc,testOrga,OrganizationRole.admin);
+        //JwtResponse jwt = testLogin(testAcc);
+        testAcceptOrganizationInvitation(token);
+
+
+
         testDeleteOrganization(testOrga);
-
-
-
     }
 
     public OrganizationInformation testCreateOrganization() throws Exception {
@@ -83,7 +88,7 @@ public class FullApiTest {
         accPre.setEmail("test@flyndre.de");
         accPre.setFirstname("Olaf");
         accPre.setLastname("Müller");
-        accPre.setSecret("TopSecret");
+        accPre.setSecret("1");
         var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/accounts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(accPre)))
@@ -91,12 +96,28 @@ public class FullApiTest {
                 .andReturn();
         return mapper.readValue(result.getResponse().getContentAsString(),AccountInformation.class);
     }
-    public void testAddAccountToOrga(AccountInformation testAcc, OrganizationInformation testOrga, OrganizationRole role)throws Exception{
+    public InvitationToken testInviteAccountToOrga(AccountInformation testAcc, OrganizationInformation testOrga, OrganizationRole role)throws Exception{
         mockMvc.perform(MockMvcRequestBuilders.post("/api/organizations/"+testOrga.getUuid()+"/invite?email=test@flyndre.de&role="+role.toString()))
                 .andExpect(status().isOk());
         InvitationToken token = tokenRepository.findAll().stream().findFirst().get();
         assertThat(token.getInvitedToId().equals(testOrga.getUuid()));
         assertThat(token.getRole().equals(role));
+        return token;
     }
 
+    public JwtResponse testLogin(AccountInformation testAcc) throws Exception {
+        LoginRequest request = new LoginRequest();
+        request.setUsername(testAcc.getEmail());
+        request.setPassword("TopSecret");
+        var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/accounts/login").
+                contentType(MediaType.APPLICATION_JSON).
+                content(mapper.writeValueAsString(request))).
+                andExpect(status().isOk()).
+                andReturn();
+        return mapper.readValue(result.getResponse().getContentAsString(),JwtResponse.class);
+    }
+
+    public void testAcceptOrganizationInvitation(InvitationToken token) throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/organizations/"+token.getInvitedToId()+"/add-account").param("token", token.getId())).andExpect(status().isOk());
+    }
 }

@@ -8,5 +8,5 @@ export interface AccountPreview {
   email: string;
   icon: string;
   role: Role;
-
+  checkedIn: boolean
 }

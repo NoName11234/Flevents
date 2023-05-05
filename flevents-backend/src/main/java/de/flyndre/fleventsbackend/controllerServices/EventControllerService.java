@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -159,6 +158,16 @@ public class EventControllerService {
     }
 
     /**
+     * invalidates the given InvitationToken
+     * @param token the InvitationToken to a specific event
+     * @param eventId the EventUuid to the Event
+     * */
+
+    public void validateAndDeleteToken(String token, String eventId) throws InvalidAttributesException {
+        InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
+        invitationTokenService.deleteToken(invitationToken);
+    }
+    /**
      * Changes the role of a specified account in an event.
      * @param eventId the id of the event with the account
      * @param accountId the id of the account which role has to be changed
@@ -180,8 +189,18 @@ public class EventControllerService {
      * @param account the anonymous account to be added
      */
     public void addAnonymousAccountToEvent(String eventId, FleventsAccount account){
-        account = accountService.createAccount(account);
+        account = accountService.createAnonymousAccountWithName(account.getEmail(), account.getFirstname(), account.getLastname());
         eventService.addAccountToEvent(getEventById(eventId),account,EventRole.guest);
+    }
+
+    /**
+     * Registers an anonymous Account to an Event.
+     * @param eventId the id of the event to add the anonymous account to
+     * @param mailAddress the mail adr ess to be added
+     */
+    public void registerAnonymousAccountToEvent(String eventId, String mailAddress){
+        FleventsAccount account = accountService.createAnonymousAccount(mailAddress);
+        eventService.addAccountToEvent(getEventById(eventId),account,EventRole.attendee);
     }
 
     /**
@@ -224,15 +243,28 @@ public class EventControllerService {
 
     /**
      * Validate if the given Authentication matches to the given roles for the given event id.
+     * Also including the role of an admin of the Organization of the event.
      * @param auth the Authentication to validate.
-     * @param uuid the id of the event in which context the validation should be done.
+     * @param eventid the id of the event in which context the validation should be done.
      * @param roles the event roles that should match.
      * @return true if the given parameters match, false if not.
      */
-    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
-        Event event = getEventById(uuid);
-        return authService.validateRights(auth, roles, uuid)
+    public boolean grandEventRole(Authentication auth, String eventid, List<Role> roles){
+        Event event = getEventById(eventid);
+        return authService.validateRights(auth, roles, eventid)
                 || authService.validateRights(auth, List.of(OrganizationRole.admin), event.getOrganization().getUuid());
+    }
+
+    /**
+     * Validate if the given {@link Authentication} contains the given roles in the Organization of the given event.
+     * @param auth the Authentication to validate
+     * @param eventId the id of the event in which context the validation should occur
+     * @param roles the OrganizationRoles that should get granted.
+     * @return
+     */
+    public boolean grandOrganizationRole(Authentication auth, String eventId, List<Role> roles){
+        Event event = getEventById(eventId);
+        return authService.validateRights(auth,roles,event.getOrganization().getUuid());
     }
 
     /**
@@ -242,6 +274,15 @@ public class EventControllerService {
      */
     public void attendeesCheckIn(String eventId, String accountId){
         eventService.attendeesCheckIn(getEventById(eventId), accountService.getAccountById(accountId));
+    }
+
+    /**
+     * Sets the attendees status to checkedOut.
+     * @param eventId the id of the event to check in
+     * @param accountId the id of the account to be checked in
+     */
+    public void attendeesCheckOut(String eventId, String accountId){
+        eventService.attendeesCheckOut(getEventById(eventId), accountService.getAccountById(accountId));
     }
 
     /**

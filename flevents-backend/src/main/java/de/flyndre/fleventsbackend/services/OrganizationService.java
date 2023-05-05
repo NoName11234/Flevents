@@ -1,10 +1,12 @@
 package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.repositories.MailConfigRepository;
 import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
 import de.flyndre.fleventsbackend.repositories.OrganizationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationAccountRepository organizationAccountRepository;
-    public OrganizationService(OrganizationRepository organizationRepository, OrganizationAccountRepository organizationAccountRepository){
+    private final MailConfigRepository mailConfigRepository;
+    public OrganizationService(OrganizationRepository organizationRepository, OrganizationAccountRepository organizationAccountRepository, MailConfigRepository mailConfigRepository){
         this.organizationRepository = organizationRepository;
         this.organizationAccountRepository = organizationAccountRepository;
+        this.mailConfigRepository = mailConfigRepository;
     }
 
     /**
@@ -65,6 +69,10 @@ public class OrganizationService {
      */
     public Organization createOrganisation(Organization organisation){
         organisation.setUuid(null);
+        LocalDateTime localDateTime = LocalDateTime.now();
+        MailConfig mailConfig = new MailConfig(null, "","", localDateTime ,"", localDateTime,"","");
+        mailConfigRepository.save(mailConfig);
+        organisation.setMailConfig(mailConfig);
         return organizationRepository.save(organisation);
     }
 
@@ -149,6 +157,11 @@ public class OrganizationService {
         organizationRepository.delete(organization);
     }
 
+    /**
+     * Leaves a specified organization.
+     * @param organization the organzation to leave
+     * @param account the account who leaves the organization
+     */
     public void leaveOrganization(Organization organization, FleventsAccount account){
         Optional<OrganizationAccount> optional = organization.getAccounts().stream().filter(organizationAccount -> organizationAccount.getAccount().equals(account)).findAny();
         if(!optional.isPresent()){
@@ -156,4 +169,97 @@ public class OrganizationService {
         }
         organizationAccountRepository.delete(optional.get());
     }
+
+    /**
+     * Sets the Email-Configuration for the organization invitation in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param mailText the text for the MailConfiguration to set
+     */
+    public void setMailConfigOrgaInvite(Organization organization, String mailText) {
+        if(mailText.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        MailConfig mailConfig = organization.getMailConfig();
+        mailConfig.setOrganizationInvitation(mailText);
+        mailConfigRepository.save(mailConfig);
+        organization.setMailConfig(mailConfig);
+        organizationRepository.save(organization);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event invitation in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param mailText the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventInvite(Organization organization, String mailText) {
+        if(mailText.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        MailConfig mailConfig = organization.getMailConfig();
+        mailConfig.setEventInvitation(mailText);
+        mailConfigRepository.save(mailConfig);
+        organization.setMailConfig(mailConfig);
+        organizationRepository.save(organization);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event info in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param localDateTime the time to set
+     * @param mailText the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventInfo(Organization organization, String mailText, LocalDateTime localDateTime) {
+        if(mailText.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+        if(localDateTime == null){
+            throw new IllegalArgumentException("The LocalDateTime is null, cant change it");
+        }
+        MailConfig mailConfig = organization.getMailConfig();
+        mailConfig.setInfoMessage(mailText);
+        mailConfig.setInfoMessageTime(localDateTime);
+        mailConfigRepository.save(mailConfig);
+        organization.setMailConfig(mailConfig);
+        organizationRepository.save(organization);
+    }
+
+    /**
+     * Sets the Email-Configuration for the event feedback in the specified organization.
+     * @param organization the organization to set the Email-Configuration
+     * @param localDateTime the time to set
+     * @param mailText the text for the MailConfiguration to set
+     */
+    public void setMailConfigEventFeedback(Organization organization, String mailText, LocalDateTime localDateTime) {
+        if(mailText.isEmpty()){
+            throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
+        }
+
+        MailConfig mailConfig = organization.getMailConfig();
+        mailConfig.setFeedbackMessage(mailText);
+        mailConfig.setInfoMessageTime(localDateTime);
+        mailConfigRepository.save(mailConfig);
+        organization.setMailConfig(mailConfig);
+        organizationRepository.save(organization);
+    }
+
+    /**
+     * Gets the Email-Configuration for the specified organization.
+     * @param organization the organization to get the Email-Configuration
+     * @return the mail configuration
+     */
+    public MailConfig getMailConfig(Organization organization) {
+        return organization.getMailConfig();
+    }
+
+    /**
+     * Sets the Email-Configuration for the specified organization.
+     * @param organization the organization to get the Email-Configuration
+     * @param mailConfig the mail configuration of the organization
+     */
+    public void setMailConfig(Organization organization, MailConfig mailConfig) {
+        organization.setMailConfig(mailConfig);
+        mailConfigRepository.save(mailConfig);
+        organizationRepository.save(organization);
+    }
+
 }

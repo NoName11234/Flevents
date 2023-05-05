@@ -23,12 +23,14 @@
       <v-list-item
         v-if="organization?.phoneContact"
         prepend-icon="mdi-phone"
+        subtitle="Telefonnummer"
       >
         {{ organization?.phoneContact }}
       </v-list-item>
       <v-list-item
         v-if="organization?.address"
         prepend-icon="mdi-map-marker"
+        subtitle="Adresse"
       >
         {{ organization?.address }}
       </v-list-item>
@@ -62,6 +64,12 @@
     </v-container>
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
+      <v-btn
+        :to="{ name: 'accounts.forget', query: route.query }"
+        variant="text"
+      >
+        Passwort vergessen
+      </v-btn>
       <v-btn
         :to="{ name: 'accounts.create' }"
         variant="text"

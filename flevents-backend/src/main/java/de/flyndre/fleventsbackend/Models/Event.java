@@ -14,6 +14,7 @@ import java.net.URI;
 import java.sql.Blob;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -44,6 +45,8 @@ public class Event {
 
     private LocalDateTime startTime;
 
+    private Period period;
+
     private LocalDateTime endTime;
     private String location;
     @OneToOne
@@ -58,7 +61,7 @@ public class Event {
     @OneToMany(mappedBy = "event")
     private List<Post> posts =new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "event")
     private List<QuestionnaireModel> questionnaires = new ArrayList<>();
 
     public Event(String uuid){
@@ -92,6 +95,9 @@ public class Event {
                 this.mailConfig=new MailConfig();
             }
             this.mailConfig.merge(event.getMailConfig());
+        }
+        if(event.getPeriod()!=null){
+            this.period=event.getPeriod();
         }
     }
 

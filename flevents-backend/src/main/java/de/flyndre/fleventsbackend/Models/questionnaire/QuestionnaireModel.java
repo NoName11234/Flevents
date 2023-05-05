@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -22,14 +24,15 @@ public class QuestionnaireModel {
     @Id @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.REFRESH)
+
     private Event event;
     private String title;
     private Timestamp creationDate;
     private Timestamp closingDate;
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true, mappedBy = "questionnaire")
     private List<QuestionModel> questions = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.PERSIST, orphanRemoval = true, mappedBy = "questionnaireModel")
     private List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = new ArrayList<>();
 
     public void merge(QuestionnaireModel questionnaireModel){

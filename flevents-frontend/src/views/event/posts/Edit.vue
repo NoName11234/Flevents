@@ -9,6 +9,7 @@ import {useEventStore} from "@/store/events";
 import attachmentsApi from "@/api/attachmentsApi";
 import {Attachment} from "@/models/attachment";
 import {useAppStore} from "@/store/app";
+import IconService from "@/service/iconService";
 
 const router = useRouter();
 const route = useRoute();
@@ -33,6 +34,7 @@ const loading = ref(false);
 const inputFiles = ref([] as File[]);
 const files = ref([] as File[]);
 const deletedAttachments = ref([] as Attachment[]);
+const attachmentsInput = ref();
 const remainingExistingAttachments = computed(() => post.value.attachments?.filter(a => !deletedAttachments.value.includes(a)));
 
 async function removeAttachment(index: number) {
@@ -152,7 +154,7 @@ async function submit() {
 
       </v-container>
 
-      <template v-if="remainingExistingAttachments.length > 0">
+      <template v-if="(remainingExistingAttachments?.length ?? 0) > 0">
         <v-divider />
         <v-container class="d-flex flex-column gap-3">
           <small class="text-grey">
@@ -170,7 +172,7 @@ async function submit() {
                 class="d-flex flex-row align-center"
               >
                 <v-avatar
-                  icon="mdi-file"
+                  :icon="IconService.getIconForFileType(attachment.filename)"
                 />
                 <span
                   class="flex-grow-1"
@@ -194,7 +196,12 @@ async function submit() {
 
       <v-container class="d-flex flex-column gap-3">
 
-        <small class="text-grey">Neue Anhänge</small>
+        <small
+          v-if="(remainingExistingAttachments?.length ?? 0) > 0"
+          class="text-grey"
+        >
+          Neue Anhänge
+        </small>
 
         <div
           v-for="(attachment, aIndex) in files"
@@ -208,7 +215,7 @@ async function submit() {
               class="d-flex flex-row align-center"
             >
               <v-avatar
-                icon="mdi-file"
+                :icon="IconService.getIconForFileType(attachment.name)"
               />
               <span
                 class="flex-grow-1"
@@ -226,31 +233,30 @@ async function submit() {
           </v-card>
         </div>
 
-        <v-btn-group
-          border
-          class="align-center overflow-x-auto"
-          density="default"
-        >
-            <v-file-input
-              label="Anhänge auswählen..."
-              prepend-inner-icon="mdi-file"
-              hide-details="auto"
-              prepend-icon=""
-              class="text-no-wrap w-custom overflow-hidden"
-              v-model="inputFiles"
-              multiple
-            />
-            <v-divider vertical />
-            <v-btn
-              prepend-icon="mdi-plus-circle-outline"
-              color="primary"
-              variant="text"
-              class="h-100"
-              @click="addAttachment()"
-            >
-              Hinzufügen
-            </v-btn>
-        </v-btn-group>
+        <div class="d-flex flex-column flex-sm-row justify-start gap">
+          <v-file-input
+            v-show="false"
+            label="Anhänge auswählen..."
+            prepend-inner-icon="mdi-plus"
+            color="primary"
+            hide-details="auto"
+            prepend-icon=""
+            class="text-no-wrap"
+            v-model="inputFiles"
+            @change="addAttachment()"
+            ref="attachmentsInput"
+            multiple
+          />
+          <v-btn
+            prepend-icon="mdi-plus-circle"
+            color="primary"
+            variant="text"
+            @click="attachmentsInput.click()"
+          >
+            Anhänge hinzufügen
+          </v-btn>
+        </div>
+
 
         <div
           v-if="tooltip !== ''"
@@ -284,9 +290,5 @@ async function submit() {
 </template>
 
 <style scoped>
-
-.w-custom {
-  min-width: 250px;
-}
 
 </style>

@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.dtos;
 
+import de.flyndre.fleventsbackend.dtos.questionnaire.AnsweredQuestionnaire;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
@@ -21,5 +22,8 @@ public class AccountInformation extends AccountPreview{
     @Getter
     @Setter
     private List<EventPreview> eventPreviews;
+    @Getter
+    @Setter
+    private List<AnsweredQuestionnaire> answeredQuestionnaires;
 
 }

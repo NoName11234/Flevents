@@ -5,7 +5,8 @@ export interface OrganizationPreview {
   name: string;
   description: string;
   icon: string;
-  role?: Role;
+  role: Role;
   address: string;
   phoneContact: string;
+  customerNumber: string;
 }

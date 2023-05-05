@@ -151,9 +151,10 @@ public class FleventsAccountControllerService {
      */
     public void resetPassword(String email) throws MessagingException {
         FleventsAccount account = fleventsAccountService.getAccountByMail(email);
-        account.setSecret(UUID.randomUUID().toString());
+        String newPw = UUID.randomUUID().toString();
+        account.setSecret(newPw);
         account = fleventsAccountService.editAccount(account.getUuid(),account);
-        eMailService.sendNewPassword(email,account.getSecret());
+        eMailService.sendNewPassword(email,newPw);
     }
 
     /**

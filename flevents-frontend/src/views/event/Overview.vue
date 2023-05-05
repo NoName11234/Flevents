@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, onMounted, Ref, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {AxiosError} from "axios";
@@ -20,6 +20,9 @@ import {useOrganizationStore} from "@/store/organizations";
 import MailConfigCard from "@/components/MailConfigCard.vue";
 import {MailConfig} from "@/models/mailConfig";
 import {FleventsEvent} from "@/models/fleventsEvent";
+import QuestionnaireApi from "@/api/questionnaireApi";
+import api from "@/api/api";
+import {OrganizationRole} from "@/models/organizationRole";
 
 const openContext = ref(false);
 const address = ref("");
@@ -42,10 +45,10 @@ const posts = computed(() => event.value
   .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
-const questionnaires = computed(() => surveyStore.getSurveys(eventUuid) as Questionnaire[]);
-
+const questionnaires : any = ref(null);
+const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
 const organizationStore = useOrganizationStore();
-
+const addAnon = ref(false);
 const enrollLoading = ref(false);
 const organizersLoading = ref(false);
 const attendeesLoading = ref(false);
@@ -54,7 +57,7 @@ const storesLoading = computed(() =>
 );
 
 const attendees = computed(() => {
-  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor].includes(a.role as EventRole)) as AccountPreview[];
+  return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor, EventRole.guest].includes(a.role as EventRole)) as AccountPreview[];
 });
 const organizers = computed(() => {
   return event?.value?.accountPreviews.filter(a => [EventRole.organizer].includes(a.role as EventRole)) as AccountPreview[]
@@ -66,7 +69,6 @@ const isAttending = computed(() => {
 });
 
 const validateRole = computed(() => {
-  //TODO: Ändern in JWT
 
   // If admin in event's organization then show everything
   if (organizationStore.managedOrganizations.find(o => o.uuid === event.value.organizationPreview.uuid)) {
@@ -98,6 +100,28 @@ const eventStatus = computed(() => {
       return {text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick"};
   }
 });
+async function addAnonAcc(){
+  enrollLoading.value = true;
+  try {
+    const response = await eventApi.acceptAnonymousInvitation(eventUuid, anonAcc.value);
+    await eventStore.hydrateSpecific(eventUuid);
+    appStore.addToast({
+      text: 'Unangemeldeter Nutzer angemeldet.',
+      color: 'success',
+    });
+  } catch (e) {
+    // already enrolled
+    console.error("Enrollment failed, probably already enrolled.", e);
+    appStore.addToast({
+      text: 'Anmelden des unangemeldeten Nutzers fehlgeschlagen. Versuchen Sie die Seite neu zu laden.',
+      color: 'error',
+    });
+  }
+  anonAcc.value = {email: '', firstname: '', lastname: ''} as AccountPreview
+  addAnon.value = false;
+  enrollLoading.value = false;
+  eventStore.hydrate();
+}
 
 async function enroll(){
   enrollLoading.value = true;
@@ -338,6 +362,16 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
+function reducelist(uuid: string){
+  questionnaires.value.filter((qeuestionair : Questionnaire) => {
+      return qeuestionair.uuid != uuid
+  })
+}
+onMounted(async () => {
+  questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
+  console.log(event);
+  console.log(questionnaires);
+})
 async function updateMailConfig(config: MailConfig) {
   const newEvent = { ...event.value, mailConfig: config } as FleventsEvent;
   try {
@@ -395,12 +429,14 @@ async function updateMailConfig(config: MailConfig) {
       >
         Posts
       </v-tab>
-<!--      <v-tab-->
-<!--        value="polls"-->
-<!--        :disabled="storesLoading"-->
-<!--        >-->
-<!--        Umfragen-->
-<!--      </v-tab>-->
+      <!-- TODO: hier eventuell anpassen, weil ja auch Orgaleute die Umfrage sehen dürfen -->
+      <v-tab
+       value="polls"
+      :disabled="storesLoading"
+       v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer || validateRole === EventRole.attendee || validateRole === OrganizationRole.organizer || validateRole === OrganizationRole.admin"
+        >
+       Umfragen
+      </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="mails"
@@ -443,18 +479,21 @@ async function updateMailConfig(config: MailConfig) {
           <v-list-item
             v-if="event?.startTime && event?.endTime"
             prepend-icon="mdi-clock"
+            subtitle="Zeitraum"
           >
             {{parseDate(event?.startTime, event?.endTime)}}
           </v-list-item>
           <v-list-item
             v-if="event?.location"
             prepend-icon="mdi-map-marker"
+            subtitle="Ort"
           >
             {{event?.location}}
           </v-list-item>
           <v-list-item
             v-if="event?.organizationPreview?.name"
             prepend-icon="mdi-account-group"
+            subtitle="Organisation"
           >
             {{event?.organizationPreview?.name}}
           </v-list-item>
@@ -541,6 +580,7 @@ async function updateMailConfig(config: MailConfig) {
             :event-uuid="eventUuid"
             :post="post"
             :admin-view="validateRole === EventRole.organizer"
+            :show-comment-form="isAttending"
             :key="pIndex"
           />
         </v-expansion-panels>
@@ -562,14 +602,17 @@ async function updateMailConfig(config: MailConfig) {
         <v-divider />
 
         <v-expansion-panels
+          v-if="questionnaires"
           variant="accordion"
           multiple
         >
           <QuestionnaireDisplay
+            v-if="questionnaires != null"
             v-for="(questionnaire, index) in questionnaires"
             :key="index"
             :questionnaire="questionnaire"
             :event="event"
+            @update="reducelist"
           />
         </v-expansion-panels>
       </v-window-item>
@@ -603,7 +646,9 @@ async function updateMailConfig(config: MailConfig) {
             Teilnehmer einladen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
         fixed-header>
           <thead>
@@ -629,6 +674,7 @@ async function updateMailConfig(config: MailConfig) {
             <tr
              v-for="(item, index) in attendees"
              :key="index"
+             v-show="item.role !== EventRole.guest"
             >
               <td>
                 {{item.firstname}}&nbsp;{{item.lastname}}
@@ -638,13 +684,13 @@ async function updateMailConfig(config: MailConfig) {
               </td>
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
                 <v-btn
+                  v-if="item.role !== EventRole.guest"
                   append-icon="mdi-chevron-down"
                   variant="text"
                   class="d-flex flex-row justify-space-between"
                   block
                 >
                   {{ item.role }}
-
                   <v-menu activator="parent">
                     <v-list>
                       <v-list-subheader>
@@ -690,11 +736,14 @@ async function updateMailConfig(config: MailConfig) {
             prepend-icon="mdi-account-plus"
             color="primary"
             variant="tonal"
+            @click="addAnon = true"
           >
             Unangemeldeten Teilnehmer hinzufügen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
           fixed-header>
           <thead>
@@ -721,11 +770,14 @@ async function updateMailConfig(config: MailConfig) {
               <v-checkbox
                 hide-details="auto"
                 density="compact"
+                v-model="item.checkedIn"
+                @click="item.checkedIn ? eventApi.attendeeCheckOut(eventUuid, item.uuid) : eventApi.attendeeCheckIn(eventUuid, item.uuid)"
               />
             </td>
           </tr>
           </tbody>
         </v-table>
+
       </v-window-item>
 
       <v-window-item value="organizers" :disabled="organizersLoading">
@@ -747,7 +799,9 @@ async function updateMailConfig(config: MailConfig) {
             Verwalter einladen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
           fixed-header>
           <thead>
@@ -783,6 +837,57 @@ async function updateMailConfig(config: MailConfig) {
 
     </v-window>
   </v-card>
+
+  <v-dialog
+    v-model="addAnon"
+    persistent
+    width="30rem"
+  >
+    <v-card>
+      <v-card-title class="text-h5">
+        Account hinzufügen
+      </v-card-title>
+      <v-card-text>
+        <v-text-field
+          class="mt-2"
+          v-model="anonAcc.firstname"
+          label="Vorname"
+          prepend-inner-icon="mdi-account"
+          :rules="[() => anonAcc.firstname !== '' || 'Dieses Feld wird benötigt.']"
+          required
+        ></v-text-field>
+        <v-text-field
+          class="mt-2"
+          v-model="anonAcc.lastname"
+          label="Nachname"
+          prepend-inner-icon="mdi-account"
+          :rules="[() => anonAcc.lastname !== '' || 'Dieses Feld wird benötigt.']"
+          required
+        ></v-text-field>
+        <v-text-field
+          class="mt-2"
+          v-model="anonAcc.email"
+          label="Mailadresse"
+          prepend-inner-icon="mdi-email"
+          :rules="[() => anonAcc.email !== '' || 'Dieses Feld wird benötigt.']"
+          required
+        ></v-text-field>
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn
+          variant="flat"
+          @click="addAnon = false"
+        >Schließen
+        </v-btn>
+        <v-btn
+          color="primary"
+          variant="flat"
+          @click="addAnonAcc()"
+        >Hinzufügen
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

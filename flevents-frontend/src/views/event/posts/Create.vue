@@ -6,6 +6,7 @@ import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
 import {useEventStore} from "@/store/events";
+import IconService from "@/service/iconService";
 
 const router = useRouter();
 const route = useRoute();
@@ -17,6 +18,7 @@ const loading = ref(false);
 const eventUuid = route.params.uuid as string;
 const inputFiles = ref([] as File[]);
 const files = ref([] as File[]);
+const attachmentsInput = ref();
 const post = ref({
   title: '',
   content: '',
@@ -28,7 +30,7 @@ async function removeAttachment(index: number) {
   files.value.splice(index, 1);
 }
 
-async function addAttachment() {
+async function addAttachments() {
   tooltip.value = '';
   if (inputFiles.value.length < 1) {
     tooltip.value = 'Es ist keine Datei ausgewählt.';
@@ -131,7 +133,7 @@ async function submit() {
               class="d-flex flex-row align-center"
             >
               <v-avatar
-                icon="mdi-file"
+                :icon="IconService.getIconForFileType(attachment.name)"
               />
               <span
                 class="flex-grow-1"
@@ -149,31 +151,29 @@ async function submit() {
           </v-card>
         </div>
 
-        <v-btn-group
-          border
-          class="align-center overflow-x-auto"
-          density="default"
-        >
-            <v-file-input
-              label="Anhänge auswählen..."
-              prepend-inner-icon="mdi-file"
-              hide-details="auto"
-              prepend-icon=""
-              class="text-no-wrap w-custom overflow-hidden"
-              v-model="inputFiles"
-              multiple
-            />
-            <v-divider vertical />
-            <v-btn
-              prepend-icon="mdi-plus-circle-outline"
-              color="primary"
-              variant="text"
-              class="h-100"
-              @click="addAttachment()"
-            >
-              Hinzufügen
-            </v-btn>
-        </v-btn-group>
+        <div class="d-flex flex-column flex-sm-row justify-start gap">
+          <v-file-input
+            v-show="false"
+            label="Anhänge auswählen..."
+            prepend-inner-icon="mdi-plus"
+            color="primary"
+            hide-details="auto"
+            prepend-icon=""
+            class="text-no-wrap"
+            v-model="inputFiles"
+            @change="addAttachments()"
+            ref="attachmentsInput"
+            multiple
+          />
+          <v-btn
+            prepend-icon="mdi-plus-circle"
+            color="primary"
+            variant="text"
+            @click="attachmentsInput.click()"
+          >
+            Anhänge hinzufügen
+          </v-btn>
+        </div>
 
         <div
           v-if="tooltip !== ''"

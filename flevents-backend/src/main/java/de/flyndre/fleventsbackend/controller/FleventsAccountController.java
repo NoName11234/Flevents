@@ -12,6 +12,8 @@ import de.flyndre.fleventsbackend.security.payload.response.JwtResponse;
 import de.flyndre.fleventsbackend.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,7 @@ public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;
     private final ModelMapper mapper;
     private final JwtUtils jwtUtils;
+    private final Logger logger = LoggerFactory.getLogger(FleventsAccountController.class);
 
     public FleventsAccountController(FleventsAccountControllerService fleventsAccountControllerService, ModelMapper mapper, JwtUtils jwtUtils){
         this.fleventsAccountControllerService = fleventsAccountControllerService;
@@ -50,8 +53,13 @@ public class FleventsAccountController {
      */
     @PostMapping("/login")
     public ResponseEntity getAccountPreview(@Valid @RequestBody LoginRequest loginRequest){
-        JwtResponse token = fleventsAccountControllerService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        return ResponseEntity.ok(token);
+        try {
+            JwtResponse token = fleventsAccountControllerService.login(loginRequest.getUsername(), loginRequest.getPassword());
+            return ResponseEntity.ok(token);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     /**
      * @param auth The AuthenticationToken of the current logged-in User
@@ -59,13 +67,23 @@ public class FleventsAccountController {
      */
     @PostMapping("/refresh")
     public ResponseEntity getnewToken(Authentication auth){
-        JwtResponse token = fleventsAccountControllerService.reevaluate(auth);
-        return ResponseEntity.ok(token);
+        try {
+            JwtResponse token = fleventsAccountControllerService.reevaluate(auth);
+            return ResponseEntity.ok(token);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     @PostMapping("/logout")
     public ResponseEntity logout(@RequestBody LogoutRequest request){
-        jwtUtils.invalidateToken(request.getToken());
-        return new ResponseEntity(HttpStatus.OK);
+        try {
+            jwtUtils.invalidateToken(request.getToken());
+            return new ResponseEntity(HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -74,9 +92,14 @@ public class FleventsAccountController {
      * @return AccountInformation of the specified account
      */
     @GetMapping()
-    public AccountInformation getAccountInfo(Authentication auth){
-        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        return mapper.map(fleventsAccountControllerService.getAccountById(details.getId()), AccountInformation.class);
+    public ResponseEntity getAccountInfo(Authentication auth){
+        try {
+            UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+            return new ResponseEntity(mapper.map(fleventsAccountControllerService.getAccountById(details.getId()), AccountInformation.class),HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -85,10 +108,16 @@ public class FleventsAccountController {
      * @return List<EventInformation> list with the booked events of the given account
      */
     @GetMapping("/booked-events")
-    public List<EventInformation> getBookedEvents(Authentication auth){
-        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        return fleventsAccountControllerService.getBookedEvents(details.getId()).stream()
-                .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+    public ResponseEntity getBookedEvents(Authentication auth){
+        try {
+            UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+            return new ResponseEntity(fleventsAccountControllerService.getBookedEvents(details.getId()).stream()
+                        .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()),
+                    HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -97,10 +126,15 @@ public class FleventsAccountController {
      * @return List<EventInformation> list with the managed events of the given account
      */
     @GetMapping("/managed-events")
-    public List<EventInformation> getManagedEvents(Authentication auth){
-        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        return fleventsAccountControllerService.getManagedEvents(details.getId()).stream()
-                .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+    public ResponseEntity getManagedEvents(Authentication auth){
+        try {
+            UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+            return new ResponseEntity(fleventsAccountControllerService.getManagedEvents(details.getId()).stream()
+                    .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -109,10 +143,15 @@ public class FleventsAccountController {
      * @return List<EventInformation> list with events to explore for the specified account
      */
     @GetMapping("/explore-events")
-    public List<EventInformation> getExploreEvents(Authentication auth){
-        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        return fleventsAccountControllerService.getExploreEvents(details.getId()).stream()
-                .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList());
+    public ResponseEntity getExploreEvents(Authentication auth){
+        try {
+            UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+            return new ResponseEntity(fleventsAccountControllerService.getExploreEvents(details.getId()).stream()
+                    .map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -121,9 +160,16 @@ public class FleventsAccountController {
      * @return List<OrganizationInformation> list with the organizations where the account is administrator
      */
     @GetMapping("/managed-organizations")
-    public List<OrganizationInformation> getManagedOrganization(Authentication auth){
+    public ResponseEntity getManagedOrganization(Authentication auth){
         UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        return fleventsAccountControllerService.getManagedOrganization(details.getId()).stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList());
+        try {
+            return new ResponseEntity(fleventsAccountControllerService.getManagedOrganization(details.getId()).stream()
+                    .map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),
+                    HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -136,6 +182,7 @@ public class FleventsAccountController {
         try {
             return new ResponseEntity<>(mapper.map(fleventsAccountControllerService.createAccount(account), AccountInformation.class), HttpStatus.CREATED);
         }catch (Exception e){
+            logger.error("Internal Error",e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -150,8 +197,9 @@ public class FleventsAccountController {
         try{
             fleventsAccountControllerService.resetPassword(email);
             return new ResponseEntity(HttpStatus.OK);
-        }catch (Exception ex){
-            return new ResponseEntity(ex.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -163,8 +211,13 @@ public class FleventsAccountController {
      */
     @PutMapping()
     public ResponseEntity editAccount(@RequestBody FleventsAccount account, Authentication auth){
-        UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
-        return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(details.getId(), account), AccountInformation.class),HttpStatus.OK);
+        try {
+            UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
+            return new ResponseEntity(mapper.map(fleventsAccountControllerService.editAccount(details.getId(), account), AccountInformation.class),HttpStatus.OK);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -178,8 +231,9 @@ public class FleventsAccountController {
             UserDetailsImpl details = (UserDetailsImpl) auth.getPrincipal();
             fleventsAccountControllerService.deleteAccount(details.getId());
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (Exception ex){
-            return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            logger.error("Internal Error",e);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 

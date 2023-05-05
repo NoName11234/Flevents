@@ -39,7 +39,7 @@ public class QuestionnaireService {
     }
 
     public QuestionnaireModel getQuestionnaire(String questionnaireId){
-        Optional<QuestionnaireModel> optional = questionnaireRepository.findById(questionnaireId);
+        Optional<QuestionnaireModel> optional = questionnaireRepository.findAllByUuid(questionnaireId);
         if(!optional.isPresent()){
             throw new NoSuchElementException("Could not find a questionnaire with this id");
         }
@@ -47,7 +47,15 @@ public class QuestionnaireService {
     }
 
     public AnsweredQuestionnaireModel getAnswerFromUser(FleventsAccount user, QuestionnaireModel questionnaireModel){
-        return answeredQuestionnaireRepository.findByUserAndQuestionnaireModel(user, questionnaireModel);
+        Optional<AnsweredQuestionnaireModel> opt = answeredQuestionnaireRepository.findByUserAndQuestionnaireModel(user, questionnaireModel);
+        if(opt.isEmpty()){
+            throw new NoSuchElementException("Could not find AnsweredQuestionnaireModel.");
+        }
+        return opt.get();
+    }
+
+    public List<AnsweredQuestionnaireModel> getAnswersFromQuestionnaire(QuestionnaireModel questionnaireModel){
+        return questionnaireRepository.findByUuid(questionnaireModel.getUuid());
     }
 
     public QuestionnaireModel saveNewQuestionnaireModel(QuestionnaireModel questionnaireModel){
@@ -68,8 +76,8 @@ public class QuestionnaireService {
         return answeredQuestionnaireRepository.findById(answeredQuestionnaireId).get();
     }
 
-    public void deleteAnsweredQuestionnaire(String answeredQuestionnaireId){
-        answeredQuestionnaireRepository.delete(getAnsweredQuestionnaireById(answeredQuestionnaireId));
+    public void deleteAnsweredQuestionnaire(AnsweredQuestionnaireModel answeredQuestionnaire){
+        answeredQuestionnaireRepository.delete(answeredQuestionnaire);
     }
 
     public void deleteQuestionnaire(String questionnaireId){

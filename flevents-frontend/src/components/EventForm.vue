@@ -37,7 +37,7 @@ const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
 const loading = ref(false);
-const fleventsEvent = ref( { ...props.presetEvent } as FleventsEvent || {
+const fleventsEvent = ref( { ...props.presetEvent } as FleventsEvent ?? {
   name: "",
   description: "",
   location: "",

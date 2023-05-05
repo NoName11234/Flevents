@@ -11,7 +11,7 @@ on:
 
 
 jobs:
-  test:
+  test_backend:
     name: Unittest
     continue-on-error: true
     runs-on: ubuntu-latest
@@ -68,9 +68,9 @@ jobs:
       - name: Test with Maven - all
         run: mvn test --file flevents-backend/pom.xml
 
-  build:
+  build_backend:
     name: Build Artifact
-    needs: test
+    needs: test_backend
     continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
@@ -101,10 +101,10 @@ jobs:
             spring.mail.properties.mail.smtp.starttls.enable=true
             spring.datasource.hikari.auto-commit=false
             server.port=8082
-            frontend.port=3000
+            frontend.port=8080
             application.baseurl=http://flevents.flyndre.de
             application.jwtSecret=${{secrets.MAILSECRETPRD}}
-            application.jwtExpirationMs=86400000
+            application.jwtExpirationMs=6300000
           write-mode: overwrite
                
       #Set up JDK 17
@@ -122,21 +122,35 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
         run: mvn -B package -DskipTests --file flevents-backend/pom.xml
+      - name: Upload JAR
+        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
+        uses: actions/upload-artifact@v2
+        with:
+          name: Backend
+          path: flevents-backend/target/flevents-backend-0.0.1-SNAPSHOT.jar
+  build_frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
       # Build Frontend
+      - uses: actions/checkout@v1
+      - name: Set Config
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "http://localhost:8082/api"
+          replace: "http://flevents.flyndre.de:8082/api"
+          regex: false
+          include: "flevents-frontend/src/constants.ts"
       - name: setup node
         uses: actions/setup-node@master
       - name: npm install 
         run: npm --prefix ./flevents-frontend install ./flevents-frontend
       - name: npm build
         run: npm run --prefix ./flevents-frontend build      
-      - name: Upload JAR
-        #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
-        uses: actions/upload-artifact@v2
-        with:
-          #Set artifact name
-          name: Backend
-          #From this path
-          path: flevents-backend/target/flevents-backend-0.0.1-SNAPSHOT.jar
+      
       - name: Upload Frontend
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v2

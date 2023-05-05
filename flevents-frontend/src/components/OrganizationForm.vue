@@ -5,6 +5,7 @@ import {RouteLocationRaw, useRoute, useRouter} from "vue-router";
 import axios, {AxiosError} from "axios";
 import {useOrganizationStore} from "@/store/organizations";
 import organizationsApi from "@/api/organizationsApi";
+import {VALIDATION} from "@/constants";
 const props = defineProps({
   backRoute: {
     required: true,
@@ -44,9 +45,15 @@ function getBase64(file : any) {
     reader.readAsDataURL(file);
   });
 }
-async function submit() {
+async function submit(pendingValidation: Promise<any>) {
+  loading.value = true;
+  const validation = await pendingValidation;
+  if (validation?.valid != true) {
+    tooltip.value = 'Eine oder mehrere Angaben sind fehlerhaft.';
+    loading.value = false;
+    return;
+  }
   try {
-    loading.value = true;
     if (imageFile.value.length != 0) {
       const file = imageFile.value[0]
       organization.value.icon = await getBase64(file) as string;
@@ -74,8 +81,9 @@ async function submit() {
 <template>
   <v-card :loading="loading" :disabled="loading">
     <v-form
+      ref="form"
       validate-on="submit"
-      @submit.prevent="submit()"
+      @submit.prevent="submit"
     >
       <v-container class="d-flex flex-column gap-3">
         <v-text-field
@@ -105,7 +113,10 @@ async function submit() {
           v-model="organization.phoneContact"
           label="Telefonkontakt"
           prepend-inner-icon="mdi-phone"
-          :rules="[() => organization.phoneContact !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[
+            () => organization.phoneContact !== '' || 'Dieses Feld wird benötigt.',
+            () => (organization.phoneContact?.match(VALIDATION.PHONE)?.length ?? 0) > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
+            ]"
           required
           hide-details="auto"
         />

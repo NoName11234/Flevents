@@ -28,6 +28,7 @@
     </v-tabs>
 
     <v-window v-model="tab">
+
       <v-window-item value="info">
         <template v-if="organization?.description">
           <v-container>
@@ -38,14 +39,23 @@
         <template v-if="organization.address || organization.phoneContact">
           <v-list>
             <v-list-item
+              v-if="organization?.customerNumber"
+              prepend-icon="mdi-identifier"
+              subtitle="Kundennummer"
+            >
+              {{ organization?.customerNumber}}
+            </v-list-item>
+            <v-list-item
               v-if="organization?.phoneContact"
               prepend-icon="mdi-phone"
+              subtitle="Telefonnummer"
             >
               {{ organization?.phoneContact}}
             </v-list-item>
             <v-list-item
               v-if="organization?.address"
               prepend-icon="mdi-map-marker"
+              subtitle="Adresse"
             >
               {{ organization?.address }}
             </v-list-item>
@@ -98,7 +108,9 @@
             Mitglieder hinzufügen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
           fixed-header
         >
@@ -185,6 +197,7 @@
           </tbody>
         </v-table>
       </v-window-item>
+
     </v-window>
   </v-card>
 </template>
@@ -229,7 +242,6 @@ const loading = computed(() =>
   || organizationStore.specificLoading.get(route.params.uuid as string)
 );
 
-// TODO: replace authorization with token auth
 const currentAccountRole = computed(() => {
   return organization.value?.accountPreviews?.find(a => a.uuid === account.value!.uuid)?.role as OrganizationRole;
 });

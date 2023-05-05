@@ -11,6 +11,7 @@ import {storeToRefs} from "pinia";
 import {useAccountStore} from "@/store/account";
 import DatetimeService from "../service/datetimeService";
 import {useEventStore} from "@/store/events";
+import IconService from "@/service/iconService";
 
 const appStore = useAppStore();
 const eventStore = useEventStore();
@@ -30,7 +31,12 @@ const props = defineProps({
     required: false,
     type: Boolean,
     default: false,
-  }
+  },
+  showCommentForm: {
+    required: false,
+    type: Boolean,
+    default: true,
+  },
 });
 
 const canDeleteAndEdit = computed(() => {
@@ -163,10 +169,10 @@ async function downloadAttachment(url: string) {
                 v-for="(attachment, index) in post.attachments"
                 :key="index"
                 :text="attachment.filename"
-                prepend-icon="mdi-file"
+                :prepend-icon="IconService.getIconForFileType(attachment.filename)"
                 variant="tonal"
                 link
-                @click="downloadAttachment(attachment.url)"
+                :href="attachment.url"
               >
               </v-chip>
             </v-chip-group>
@@ -181,11 +187,12 @@ async function downloadAttachment(url: string) {
           density="compact"
         >
           <CommentForm
+            v-if="showCommentForm"
             :event-uuid="eventUuid"
             :post-uuid="post.uuid"
           />
           <Comment
-            v-if="post.comments?.length > 0"
+            v-if="(post.comments?.length ?? 0) > 0"
             v-for="(comment, cIndex) in post.comments"
             :key="cIndex"
             :comment="comment"
