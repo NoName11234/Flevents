@@ -1,6 +1,5 @@
 import api from "@/api/api";
 import {Account} from "@/models/account";
-import axios, {AxiosResponse} from "axios/index";
 
 const base = `/accounts`
 
@@ -18,6 +17,8 @@ class AccountsApi {
    * @param account the account to be created
    */
   create(account: Account) {
+    if (account.email)
+      account.email = account.email.toLowerCase();
     return api.post(`${base}`, account);
   }
 
@@ -59,6 +60,8 @@ class AccountsApi {
    * @param account the modified account
    */
   editMe(account: Account) {
+    if (account.email)
+      account.email = account.email.toLowerCase();
     return api.put(`${base}`, account);
   }
 
@@ -79,6 +82,8 @@ class AccountsApi {
    * @param secret a the corresponding encoded password
    */
   login(email: string, secret: string) {
+    if (email)
+      email = email.toLowerCase();
     return api.post(`${base}/login`, {
       username: email,
       password: secret
