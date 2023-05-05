@@ -35,7 +35,7 @@ const accountStore = useAccountStore();
 const router = useRouter();
 const isDelete = ref(false);
 const tooltip = ref('');
-const user = security.getAccount()!;
+const user = accountStore.currentAccount;
 const aq = ref({
   uuid: '',
   questionnaireId: props.questionnaire.uuid,
@@ -110,7 +110,7 @@ function hasRights() {
     OrganizationRole.admin,
     OrganizationRole.organizer,
   ];
-  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview.uuid && organizationRoles.includes(o.role as OrganizationRole));
+  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
   if (hasOrganizationRights) return true;
   return false;
 }

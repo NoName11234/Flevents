@@ -1,6 +1,21 @@
 <template>
 
-  <Heading text="Login" />
+  <Heading text="Passwort zurücksetzen" />
+
+  <v-alert
+    v-show="alert == 1"
+    type="success"
+    title="Neues Passwort versendet"
+    text="Sofern sie die korrekte Mail zu ihrem Account eingegeben haben, erhalten sie eine Mail mit einem neuen Passwort!"
+  ></v-alert>
+  <v-alert
+    v-show="alert == -1"
+    type="success"
+    title="Fehler"
+    text="Es ist etwas schief gelaufen! Versuchen sie es nochmal."
+  ></v-alert>
+
+
 
   <v-card :loading="loading" :disabled="loading">
     <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
@@ -9,17 +24,6 @@
         prepend-inner-icon="mdi-email"
         v-model="account.email"
         hide-details="auto"
-      />
-      <v-text-field
-        label="Passwort"
-        v-model="account.secret"
-        :append-inner-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
-        :type="showPass ? 'text' : 'password'"
-        @click:append-inner="showPass = !showPass"
-        prepend-inner-icon="mdi-lock"
-        :rules="[() => account.secret !== '' || 'Dieses Feld wird benötigt.']"
-        hide-details="auto"
-        required
       />
       <div
         v-if="tooltip !== ''"
@@ -30,23 +34,11 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
-        :to="{ name: 'accounts.forget', query: route.query }"
-        variant="text"
-      >
-        Passwort vergessen
-      </v-btn>
-      <v-btn
-        :to="{ name: 'accounts.create', query: route.query }"
-        variant="text"
-      >
-        Registrieren
-      </v-btn>
-      <v-btn
-        @click="performLogin()"
+        @click="performReset()"
         color="primary"
         prepend-icon="mdi-login-variant"
       >
-        Login
+        neues Einmalpasswort versenden
       </v-btn>
     </v-container>
   </v-card>
@@ -60,35 +52,29 @@ import Heading from "@/components/Heading.vue";
 import {useRoute, useRouter} from "vue-router";
 import {login} from "@/service/authService";
 import {load} from "webfontloader";
+import accountsApi from "@/api/accountsApi";
 const route = useRoute();
 const showPass = ref(false);
 const loading = ref(false);
 const tooltip = ref("");
 const router = useRouter();
+const alert = ref(0);
 const account : Ref<Partial<Account>> = ref({
   email: "",
   secret: ""
 });
 
-async function performLogin() {
+async function performReset() {
   loading.value = true;
   tooltip.value = '';
   try {
-    await login(account.value.email!, account.value.secret!);
-    await router.push(decodeURIComponent(route.query.location as string || '/'));
+    await accountsApi.resetPassword(account.value.email!);
+   alert.value = 1;
   } catch (e) {
-    if (e instanceof AxiosError) {
-      if (e.code === AxiosError.ERR_BAD_REQUEST) {
-        tooltip.value = 'Ungültige Anmeldedaten';
-      }
-      else if (e.code === AxiosError.ERR_NETWORK) {
-        tooltip.value = 'Netzwerkfehler';
-      }
-    } else {
-      tooltip.value = `Unerwarteter Fehler: ${e}`;
-    }
+    alert.value = -1;
   }
   loading.value = false;
+
 }
 </script>
 

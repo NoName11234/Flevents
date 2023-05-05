@@ -172,7 +172,6 @@ async function submit(pendingValidation: Promise<any>) {
         </div>
 
         <v-textarea
-          name="input-7-1"
           label="Beschreibung"
           hide-details="auto"
           no-resize

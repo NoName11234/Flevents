@@ -112,12 +112,11 @@ class AccountsApi {
 
   /**
    * Sends a password-reset mail for the given account.
-   * @param uuid the uuid of the account
+   * @param mailAddress the mailAddress of the account
    */
-  resetPassword(uuid: string) {
-    return api.post(`${base}/${uuid}`);
+  resetPassword(mailAddress: string) {
+    return api.post(`${base}/reset-password`, {}, {params : {email: mailAddress}});
   }
-
 
 
   // Collections
@@ -153,6 +152,8 @@ class AccountsApi {
   getManagedOrganizations(uuid: string) {
     return api.get(`${base}/managed-organizations`);
   }
+
+
 }
 
 export default new AccountsApi();

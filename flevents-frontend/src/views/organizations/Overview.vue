@@ -16,6 +16,11 @@
         Informationen
       </v-tab>
       <v-tab
+        value="mails"
+      >
+        E-Mail-Vorlagen
+      </v-tab>
+      <v-tab
         value="members"
       >
         Mitglieder
@@ -69,6 +74,24 @@
             Bearbeiten
           </v-btn>
         </v-container>
+      </v-window-item>
+
+      <v-window-item value="mails">
+        <v-expansion-panels
+          variant="accordion"
+          multiple
+        >
+          <MailConfigCard
+            v-for="(c, i) in [
+              {
+                name: 'Einladungs-E-Mails',
+                text: 'Herzlich willkommen\nHeude dies das',
+              },
+            ]"
+            :key="i"
+            :config="c"
+          />
+        </v-expansion-panels>
       </v-window-item>
 
       <v-window-item value="members">
@@ -192,6 +215,7 @@ import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import {useAppStore} from "@/store/app";
 import {EventRole} from "@/models/eventRole";
+import MailConfigCard from "@/components/MailConfigCard.vue";
 import router from "@/router";
 
 const route = useRoute();
