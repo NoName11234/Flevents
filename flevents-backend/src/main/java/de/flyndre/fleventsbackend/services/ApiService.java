@@ -1,9 +1,6 @@
 package de.flyndre.fleventsbackend.services;
 
-import de.flyndre.fleventsbackend.Models.FleventsAccount;
-import de.flyndre.fleventsbackend.Models.Organization;
-import de.flyndre.fleventsbackend.Models.OrganizationAccount;
-import de.flyndre.fleventsbackend.Models.OrganizationRole;
+import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.repositories.*;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +29,9 @@ public class ApiService {
      * @throws IOException
      */
     public FleventsAccount initDB() throws IOException{
-        Organization flyndre = new Organization(null,"Flyndre","the best organization of the world",null,null,null,null,null,null);
+        Organization flyndre = new Organization(null,"Flyndre","the best organization of the world",null,null,null,null,null,null,null);
         flyndre = organizationRepository.save(flyndre);
-        Organization dhbw = new Organization(null,"DHBW","not so the best university of the world",null,null,null,null,null,null);
+        Organization dhbw = new Organization(null,"DHBW","not so the best university of the world",null,null,null,null,new MailConfig(),null,null);
         dhbw = organizationRepository.save(dhbw);
 
         FleventsAccount lukas = fleventsAccountRepository.save(new FleventsAccount(null,"Lukas","Burkhardt",true,false,"i21005@hb.dhbw-stuttgart.de",null,"You'll never gona gues this!!",null,null,null));

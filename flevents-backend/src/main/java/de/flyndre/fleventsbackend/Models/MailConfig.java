@@ -33,6 +33,10 @@ public class MailConfig {
     private LocalDateTime infoMessageTime;
     private String feedbackMessage;
     private LocalDateTime feedbackMessageTime;
+    private String organizationInvitation;
+    private String eventInvitation;
+
+
 
     public void merge(MailConfig mailConfig){
         if(mailConfig.registerMessage!=null){
@@ -44,11 +48,18 @@ public class MailConfig {
         if(mailConfig.infoMessageTime !=null){
             this.infoMessageTime =mailConfig.getInfoMessageTime();
         }
-        if(mailConfig.feedbackMessageTime !=null){
+        if(mailConfig.feedbackMessage !=null){
             this.feedbackMessage =mailConfig.getFeedbackMessage();
         }
         if(mailConfig.feedbackMessageTime !=null){
             this.feedbackMessageTime =mailConfig.getFeedbackMessageTime();
         }
+        if(mailConfig.organizationInvitation !=null){
+            this.organizationInvitation =mailConfig.getOrganizationInvitation();
+        }
+        if(mailConfig.eventInvitation !=null){
+            this.eventInvitation =mailConfig.getEventInvitation();
+        }
+
     }
 }
