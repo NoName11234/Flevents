@@ -2,7 +2,9 @@
 Flevents is a Event-Managment Software that is beeing developted as a student project at DHBW Stuttgart Campus Horb. 
 
 ## The Developers 
+
 | Role in the Project | Name |
+|---|---|---|
 | Projektleiter | Lukas&nbsp;Burkhardt |
 | Technischer Assistent | Paul&nbsp;Lehmann | 
 | Recherche- und Testbeauftrager | Pascal&nbsp;Fuchs | 
