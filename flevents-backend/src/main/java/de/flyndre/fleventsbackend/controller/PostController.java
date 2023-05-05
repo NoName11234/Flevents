@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +37,8 @@ public class PostController {
     private  final PostControllerService postControllerService;
     private final ModelMapper mapper;
     private final Logger logger = LoggerFactory.getLogger(PostController.class);
+
+    private static ResourceBundle strings = ResourceBundle.getBundle("strings.properties");
     public PostController(PostControllerService postControllerService, ModelMapper mapper) {
         this.postControllerService = postControllerService;
         this.mapper = mapper;
@@ -57,7 +60,7 @@ public class PostController {
             return new ResponseEntity<>(postControllerService.getPosts(eventId).stream()
                     .map(post -> mapper.map(post, PostInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -79,7 +82,7 @@ public class PostController {
             PostInformation information = mapper.map(postControllerService.getPost(postId),PostInformation.class);
             return new ResponseEntity(information,HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -109,7 +112,7 @@ public class PostController {
                     mapper.map(postControllerService.createPost(eventId,authUser.getId(),post,attachments), PostInformation.class),
                     HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -138,7 +141,7 @@ public class PostController {
                     PostInformation.class
             ),HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -160,7 +163,7 @@ public class PostController {
             postControllerService.deletePost(postId);
             return new ResponseEntity(HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -185,7 +188,7 @@ public class PostController {
                     mapper.map(postControllerService.createComment(postId,eventId,userDetails.getId(),comment), PostInformation.class),
                     HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -204,7 +207,7 @@ public class PostController {
             postControllerService.deleteComment(commentId);
             return new ResponseEntity(HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -221,7 +224,7 @@ public class PostController {
             Attachment attachment = postControllerService.getAttachment(attachmentId);
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+attachment.getFilename()+"\"").body(attachment.getData());
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -242,7 +245,7 @@ public class PostController {
         try{
             return new ResponseEntity(mapper.map(postControllerService.addAttachment(postId,attachment), PostInformation.class),HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -262,7 +265,7 @@ public class PostController {
             postControllerService.deleteAttachment(attachmentId);
             return new ResponseEntity(HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
