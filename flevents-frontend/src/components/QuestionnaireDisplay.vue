@@ -1,23 +1,16 @@
 <script setup lang="ts">
 import {Questionnaire} from "@/models/questionnaire";
 import {computed, onMounted, ref} from "vue";
-import {QuestionType} from "@/models/questionType";
-import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {AnsweredQuestionnaire} from "@/models/answeredQuestionnaire";
-import security from "@/service/security";
-import {AnsweredSingleChoiceQuestion} from "@/models/answeredSingleChoiceQuestion";
-import {AnsweredFreeTextQuestion} from "@/models/answeredFreeTextQuestion";
-import axios from "axios";
 import {useRouter} from "vue-router";
 import {EventRole} from "@/models/eventRole";
 import {OrganizationRole} from "@/models/organizationRole";
 import {FleventsEvent} from "@/models/fleventsEvent";
-import {Question} from "@/models/question";
 import {AnsweredQuestion} from "@/models/answeredQuestion";
 import {useAccountStore} from "@/store/account";
 import QuestionnaireApi from "@/api/questionnaireApi";
-import AccountsApi from "@/api/accountsApi";
-import {Choices} from "@/models/choices";
+import DatetimeService from "../service/datetimeService";
+import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
 
 const props = defineProps({
   questionnaire: {
@@ -35,7 +28,7 @@ const accountStore = useAccountStore();
 const router = useRouter();
 const isDelete = ref(false);
 const tooltip = ref('');
-const user = accountStore.currentAccount;
+const user = accountStore.currentAccount!;
 const aq = ref({
   uuid: '',
   questionnaireId: props.questionnaire.uuid,
@@ -50,6 +43,16 @@ const aq = ref({
 } as AnsweredQuestionnaire);
 const alreadyVoted = ref(false);
 const loading = ref(true);
+
+const statisticsStore = useSurveyStatisticsStore();
+let statistics = ref({} as Object);
+let statisticsLoading = ref(false as Boolean|undefined);
+let statisticsError = ref(false as Boolean|undefined);
+if (hasRights()) {
+  statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
+  statisticsLoading = computed(() => statisticsStore.specificLoading.get(props.questionnaire.uuid));
+  statisticsError = computed(() => statisticsStore.specificError.get(props.questionnaire.uuid));
+}
 
 onMounted(setup);
 async function setup() {
@@ -134,46 +137,93 @@ function hasRights() {
 
     <v-expansion-panel-text>
       <div class="d-flex flex-column gap-3 my-3">
-      <v-card
-        v-for="(question, index) in questionnaire.questions"
-        :key="index"
-        elevation="0"
-        border
-      >
-        <v-container>
-          <strong>
-            {{ `Frage ${index + 1}: ${question.question}` }}
-          </strong>
-        </v-container>
 
-        <v-divider />
-
-        <v-textarea
-          v-if="question.choices.length == 0"
-          hide-details="auto"
-          label="Eigene Antwort"
-          variant="solo"
-          :disabled="alreadyVoted || loading"
-          v-model="(aq.answers[index]).answer"
+        <v-card
+          :loading="statisticsLoading"
+          v-if="hasRights()"
+          elevation="0"
+          border
+          class="border-dashed"
         >
-        </v-textarea>
 
-        <v-radio-group
-          v-if="question.choices.length != 0"
-          hide-details="auto"
-          class="pa-2"
-          :disabled="alreadyVoted || loading"
-          v-model="(aq.answers[index]).choice"
+          <v-list>
+            <v-list-item
+              prepend-icon="mdi-star-four-points-outline"
+              subtitle="Erstelldatum"
+            >
+              {{ DatetimeService.getDateTime(new Date(questionnaire.creationDate)) }}
+            </v-list-item>
+            <v-list-item
+              prepend-icon="mdi-timer-sand-complete"
+              subtitle="Einsendeschluss"
+            >
+              {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
+            </v-list-item>
+            <template v-if="!statisticsError">
+              <v-list-item
+                prepend-icon="mdi-file-document-multiple-outline"
+                subtitle="Anzahl der Einsendungen"
+              >
+                {{ statistics.value }}
+              </v-list-item>
+            </template>
+          </v-list>
+
+          <v-divider class="border-dashed" />
+
+          <v-container class="d-flex flex-column flex-sm-row justify-end gap">
+            <v-spacer/>
+            <v-btn
+              variant="tonal"
+              color="primary"
+              append-icon="mdi-chevron-right"
+            >
+              Ergebnisse ansehen
+            </v-btn>
+          </v-container>
+
+        </v-card>
+
+        <v-card
+          v-for="(question, index) in questionnaire.questions"
+          :key="index"
+          elevation="0"
+          border
         >
-          <v-radio
-            v-for="(option, oIndex) in question.choices"
-            :key="oIndex"
-            :value="option"
-            :label="option.choice"
-          />
-        </v-radio-group>
+          <v-container>
+            <strong>
+              {{ `Frage ${index + 1}: ${question.question}` }}
+            </strong>
+          </v-container>
 
-      </v-card>
+          <v-divider />
+
+          <v-textarea
+            v-if="question.choices.length == 0"
+            hide-details="auto"
+            label="Eigene Antwort"
+            variant="solo"
+            :disabled="alreadyVoted || loading"
+            v-model="(aq.answers[index]).answer"
+          >
+          </v-textarea>
+
+          <v-radio-group
+            v-if="question.choices.length != 0"
+            hide-details="auto"
+            class="pa-2"
+            :disabled="alreadyVoted || loading"
+            v-model="(aq.answers[index]).choice"
+          >
+            <v-radio
+              v-for="(option, oIndex) in question.choices"
+              :key="oIndex"
+              :value="option"
+              :label="option.choice"
+            />
+          </v-radio-group>
+
+        </v-card>
 
         <div
           v-if="tooltip !== ''"
