@@ -1,5 +1,7 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
+import de.flyndre.fleventsbackend.Models.Event;
+import de.flyndre.fleventsbackend.Models.OrganizationRole;
 import de.flyndre.fleventsbackend.Models.Role;
 import de.flyndre.fleventsbackend.Models.questionnaire.*;
 import de.flyndre.fleventsbackend.dtos.questionnaire.*;
@@ -12,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -46,7 +49,9 @@ public class QuestionnaireControllerService {
      * @return true if the given parameters match, false if not.
      */
     public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
-        return authService.validateRights(auth, roles, uuid);
+        Event event = eventService.getEventById(uuid);
+        return authService.validateRights(auth, roles, uuid)||
+                authService.validateRights(auth, Arrays.asList(OrganizationRole.admin),event.getOrganization().getUuid());
     }
 
     public List<Questionnaire> getQuestionnaires(String eventId){

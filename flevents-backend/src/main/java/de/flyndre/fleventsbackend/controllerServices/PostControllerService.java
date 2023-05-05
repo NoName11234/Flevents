@@ -133,8 +133,9 @@ public class PostControllerService {
      * @return true if the given parameters match, false if not.
      */
     public boolean getGranted(Authentication auth, String eventId, List<Role> roles){
+        Event event = eventService.getEventById(eventId);
         return authService.validateRights(auth, roles, eventId)||
-                authService.validateRights(auth,Arrays.asList(OrganizationRole.admin),eventId);
+                authService.validateRights(auth,Arrays.asList(OrganizationRole.admin),event.getOrganization().getUuid());
     }
 
     /**
