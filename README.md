@@ -3,13 +3,14 @@ Flevents is a Event-Managment Software that is beeing developted as a student pr
 
 ## The Developers 
 
-| Role in the Project | Name |
-|---|---|---|
+
+| Rolle | Name |
+| --- | --- |
 | Projektleiter | Lukas&nbsp;Burkhardt |
-| Technischer Assistent | Paul&nbsp;Lehmann | 
-| Recherche- und Testbeauftrager | Pascal&nbsp;Fuchs | 
-| Modellierungs- und Implementierungsbeauftrager | Ruben&nbsp;Kraft | 
-| Qualitätssicherungs- und Dokumentationsbeauftrager | David&nbsp;Maier | 
+| Technischer Assistent | Paul&nbsp;Lehmann |
+| Recherche- und Testbeauftrager | Pascal&nbsp;Fuchs |
+| Modellierungs- und Implementierungsbeauftrager | Ruben&nbsp;Kraft |
+| Qualitätssicherungs- und Dokumentationsbeauftrager | David&nbsp;Maier |
 
 ## Techstack 
 
