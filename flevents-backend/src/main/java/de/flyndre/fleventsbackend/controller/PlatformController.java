@@ -52,16 +52,16 @@ public class PlatformController {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         if(!email.matches(".*@.*\\..*")){
-            return new ResponseEntity<>(strings.getString("platform.NoValidMail"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(strings.getString("platformController.NoValidMail"),HttpStatus.BAD_REQUEST);
         }
         if(organizationPreview.getName()==null||organizationPreview.getName().isBlank()){
-            return new ResponseEntity(strings.getString("platform.NoValidOrganizationName"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(strings.getString("platformController.NoValidOrganizationName"),HttpStatus.BAD_REQUEST);
         }
         if(organizationPreview.getCustomerNumber()==null||organizationPreview.getCustomerNumber().isBlank()){
-            return new ResponseEntity(strings.getString("platform.NoValidCustomerNumber"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(strings.getString("platformController.NoValidCustomerNumber"),HttpStatus.BAD_REQUEST);
         }
         if(organizationPreview.getPhoneContact()==null||organizationPreview.getPhoneContact().isBlank()||!organizationPreview.getPhoneContact().matches("(0|\\+(9[976]\\d|8[987530]\\d|6[987]\\d|5[90]\\d|42\\d|3[875]\\d|2[98654321]\\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1))\\d{1,14}$")){
-            return new ResponseEntity(strings.getString("platform.NoValidPhoneContact"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(strings.getString("platformController.NoValidPhoneContact"),HttpStatus.BAD_REQUEST);
         }
         try {
             return new ResponseEntity(
@@ -91,7 +91,7 @@ public class PlatformController {
             platformControllerService.deleteOrganization(organizationId);
             return new ResponseEntity(HttpStatus.OK);
         }catch (NoSuchElementException e){
-            logger.error(strings.getString("platform.OrganizationToDeleteNotFound"),e);
+            logger.error(strings.getString("platformController.OrganizationToDeleteNotFound"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }catch (Exception e){
             logger.error(strings.getString("logger.InternalError"),e);

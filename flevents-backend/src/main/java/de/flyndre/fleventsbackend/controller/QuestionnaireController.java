@@ -1,8 +1,6 @@
 package de.flyndre.fleventsbackend.controller;
 
 import de.flyndre.fleventsbackend.Models.EventRole;
-import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionModel;
-import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
 import de.flyndre.fleventsbackend.controllerServices.QuestionnaireControllerService;
 import de.flyndre.fleventsbackend.dtos.questionnaire.AnsweredQuestionnaire;
 import de.flyndre.fleventsbackend.dtos.questionnaire.Questionnaire;
@@ -15,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This Class is the Controller for the REST-API path "/api/questionnaires".
@@ -116,7 +113,7 @@ public class QuestionnaireController {
         //}
         try {
             questionnaireControllerService.deleteQuestionnaire(questionnaireId);
-            return new ResponseEntity<>(strings.getString("questionnaire.QuestionnaireDeleted"), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(strings.getString("questionnaireController.QuestionnaireDeleted"), HttpStatus.ACCEPTED);
         }catch (Exception e){
             logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);

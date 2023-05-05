@@ -79,7 +79,7 @@ public class OrganizationController {
    @GetMapping
    public ResponseEntity getOrganizations(Authentication auth){
       if(!auth.getAuthorities().contains(new SimpleGrantedAuthority(PlatformAdminRole.platformAdmin.toString()))){
-         return new ResponseEntity(strings.getString("organization.GivenUserNoAdmin"),HttpStatus.UNAUTHORIZED);
+         return new ResponseEntity(strings.getString("organizationController.GivenUserNoAdmin"),HttpStatus.UNAUTHORIZED);
       }
       try {
          return new ResponseEntity(organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
@@ -143,7 +143,7 @@ public class OrganizationController {
       try{
          return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
       }catch (InvalidAttributesException e){
-         return new ResponseEntity<>(strings.getString("organization.TokenNotValid"),HttpStatus.BAD_REQUEST);
+         return new ResponseEntity<>(strings.getString("organizationController.TokenNotValid"),HttpStatus.BAD_REQUEST);
       }catch (Exception e){
          logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);

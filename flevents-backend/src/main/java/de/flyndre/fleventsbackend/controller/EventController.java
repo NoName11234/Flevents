@@ -87,7 +87,7 @@ private static ResourceBundle strings = ResourceBundle.getBundle("strings.proper
       try{
          return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
       }catch (InvalidAttributesException e){
-         return new ResponseEntity<>(strings.getString("event.TokenNotValid"),HttpStatus.BAD_REQUEST);
+         return new ResponseEntity<>(strings.getString("eventController.TokenNotValid"),HttpStatus.BAD_REQUEST);
       }catch (Exception e){
          logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
