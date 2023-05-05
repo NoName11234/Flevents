@@ -113,6 +113,14 @@ const routes = [
         component: () => import(/* webpackChunkName: "accounts" */ '@/views/accounts/Create.vue'),
       },
       {
+        path: 'forgetpassword',
+        name: 'accounts.forget',
+        meta: {
+          public: true,
+        },
+        component: () => import(/* webpackChunkName: "accounts" */ '@/views/accounts/ForgetPassword.vue'),
+      },
+      {
         path: 'edit',
         name: 'accounts.edit',
         component: () => import(/* webpackChunkName: "accounts" */ '@/views/accounts/Edit.vue'),
