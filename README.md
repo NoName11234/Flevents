@@ -27,7 +27,7 @@ The Frontend ist written in Vue.js. TypeScript is beeing used as Scripting-Langu
 As Object-Relational Mapper Hibernate is beeing used, this enables many Databases wich can be configured in the applications.properties. 
 
 ## Structure of the software
-the Software consists off of 2 main folders. 
+the Software consists off of two main folders. 
 
 #### /flevents-backend
 Contains the Backend-Application 
