@@ -1,40 +1,37 @@
 <script setup lang="ts">
 
 import {computed, onMounted, Ref, ref} from "vue";
-import {FleventsEvent} from "@/models/fleventsEvent";
 import {useRoute, useRouter} from 'vue-router';
-import axios from "axios"
-import {Organization} from "@/models/organization";
-import security from "@/service/security";
-import {Account} from "@/models/account";
+import {AxiosError} from "axios"
 import Heading from "@/components/Heading.vue";
 import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
 import {useEventStore} from "@/store/events";
 import eventApi from "@/api/eventsApi";
+import FileService from "@/service/fileService";
 const router = useRouter()
 const route = useRoute();
 
 const eventUuid = route.params.uuid as string;
 
 const selectedOrga = ref();
-const files = ref([new Array<any>()]);
-const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
-const base64String : any = ref();
 
 const eventStore = useEventStore();
-const { loading: storeLoading } = storeToRefs(eventStore);
-const fleventsEvent = eventStore.getEventGetter(route.params.uuid as string);
+const storeLoading = computed(() => eventStore.specificLoading.get(eventUuid));
+const fleventsEvent = eventStore.getEventGetter(eventUuid);
 
 const organizationStore = useOrganizationStore();
 const { managedOrganizations: organizations } = storeToRefs(organizationStore);
 
 const formLoading = ref(false);
-const loading = computed(() => formLoading.value||storeLoading.value);
+const loading = computed(() =>
+  formLoading.value
+  || storeLoading.value
+);
 
-const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'posts' } };
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'info' } };
 
 const imageFile: Ref<Array<File>> = ref([]);
 // image
@@ -52,45 +49,13 @@ function convertTZ(date : any, tzString: any) {
 
 onMounted(async () =>{
   selectedOrga.value = fleventsEvent.value?.organizationPreview;
-  let start = convertTZ(new Date(fleventsEvent.value?.startTime as string), "Europe/Berlin");
-  let end = convertTZ(new Date(fleventsEvent.value?.endTime as string), "Europe/Berlin");
-
-  if (start >= new Date(`${start.getFullYear()}-03-26`) && start <= new Date(`${start.getFullYear()}-10-29`)){
-    start.setHours(start.getHours() + 2)
-  } else {
-    start.setHours(start.getHours() + 1)
-  }
-
-  if (end >= new Date(`${end.getFullYear()}-03-26`) && end <= new Date(`${end.getFullYear()}-10-29`)){
-    end.setHours(end.getHours() + 2)
-  } else {
-    end.setHours(end.getHours() + 1)
-  }
-
-  fleventsEvent.value.startTime = start.toISOString().replace(":00.000Z", "");
-
-  fleventsEvent.value.endTime = end.toISOString().replace(":00.000Z", "");
-
   imgUrl.value = fleventsEvent.value?.image == null ? "" : fleventsEvent.value.image;
-  console.log(fleventsEvent.value);
 })
 
-function getBase64(file : any) {
-  return new Promise(function (resolve, reject) {
-    let reader = new FileReader();
-    reader.onload = function () { resolve(reader.result); };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// submit
-// TODO: properly post to backend (including image file)
-async function submit() {
-  if (
-    fleventsEvent.value.name === ''
-    || fleventsEvent.value.location === ''
-  ) {
+async function submit(pendingValidation: Promise<any>) {
+  tooltip.value = '';
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
@@ -99,21 +64,24 @@ async function submit() {
     return;
   }
   formLoading.value = true;
-  if (imageFile.value.length != 0) {
-    const file = imageFile.value[0]
-    fleventsEvent.value.image = await getBase64(file) as string;
-    console.log(base64String.value);
+  if (imageFile.value.length > 0) {
+    const file = imageFile.value[0];
+    fleventsEvent.value.image = await FileService.encodeFile(file);
   }
-  let start = convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
-  let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
-  fleventsEvent.value.startTime = start.toISOString();
-  fleventsEvent.value.endTime = end.toISOString();
   try {
-    console.log(selectedOrga.value.uuid);
-    const response = await eventApi.edit(route.params.uuid as string, fleventsEvent.value);
-    await router.push({ name: 'events.event', params: { uuid: route.params.uuid } });
+    const response = await eventApi.edit(eventUuid, fleventsEvent.value);
+    await router.push(backRoute);
   } catch (e) {
-    tooltip.value = "Das Event konnte nicht bearbeitet werden.";
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        tooltip.value = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        tooltip.value = 'Netzwerkfehler';
+      }
+    } else {
+      tooltip.value = `Unerwarteter Fehler: ${e}`;
+    }
   }
   formLoading.value = false;
   eventStore.hydrateSpecific(eventUuid);
@@ -133,7 +101,7 @@ async function submit() {
       />
       <v-form
         validate-on="submit"
-        @submit.prevent="submit()"
+        @submit.prevent="submit"
       >
         <v-container class="d-flex flex-column gap-3">
 
@@ -172,7 +140,7 @@ async function submit() {
               label="Startzeit"
               type="datetime-local"
               v-model="fleventsEvent.startTime"
-              :rules="[() => fleventsEvent.startTime !== '' || 'Events müssen ein Startdatum haben.']"
+              :rules="[() => fleventsEvent.startTime !== '' || 'Events müssen Startdatum und -zeit haben.']"
               hide-details="auto"
               required
             />
@@ -180,7 +148,7 @@ async function submit() {
               label="Endzeit"
               type="datetime-local"
               v-model="fleventsEvent.endTime"
-              :rules="[() => fleventsEvent.endTime !== '' || 'Events müssen ein Enddatum haben.']"
+              :rules="[() => fleventsEvent.endTime !== '' || 'Events müssen Enddatum und -zeit haben.']"
               hide-details="auto"
               required
             />
@@ -216,7 +184,7 @@ async function submit() {
         <v-container class="d-flex flex-column flex-sm-row justify-end gap">
           <v-btn
             variant="text"
-            :to="{ name: 'events.event', params: { uuid: route.params.uuid } }"
+            :to="backRoute"
           >
             Verwerfen
           </v-btn>

@@ -369,9 +369,8 @@ function reducelist(uuid: string){
 }
 onMounted(async () => {
   questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
-  console.log(event);
-  console.log(questionnaires);
-})
+});
+
 async function updateMailConfig(config: MailConfig) {
   const newEvent = { ...event.value, mailConfig: config } as FleventsEvent;
   try {

@@ -12,7 +12,7 @@
 import EventForm from "@/components/EventForm.vue";
 import Heading from "@/components/Heading.vue";
 import {useRoute} from "vue-router";
-import {computed} from "vue";
+import {ref, WritableComputedRef} from "vue";
 import {useEventStore} from "@/store/events";
 import {useOrganizationStore} from "@/store/organizations";
 import {storeToRefs} from "pinia";
@@ -23,7 +23,7 @@ const eventStore = useEventStore();
 const organizationStore = useOrganizationStore();
 const { managedOrganizations } = storeToRefs(organizationStore);
 
-let preset = undefined as any;
+let preset = ref(undefined) as WritableComputedRef<FleventsEvent|undefined>;
 const presetId = route.query.preset as string;
 if (presetId) preset = eventStore.getEventGetter(presetId);
 
