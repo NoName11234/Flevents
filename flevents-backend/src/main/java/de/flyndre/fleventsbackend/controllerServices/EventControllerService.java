@@ -28,15 +28,17 @@ public class EventControllerService {
     private  final FleventsAccountService accountService;
     private final EMailServiceImpl eMailService;
     private final InvitationTokenService invitationTokenService;
+    private final PostService postService;
     private final AuthService authService;
 
-    public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService, AuthService authService){
+    public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService, PostService postService, AuthService authService){
         this.eventService = eventService;
         this.fleventsAccountService = fleventsAccountService;
         this.organizationService = organizationService;
         this.accountService = accountService;
         this.eMailService = eMailService;
         this.invitationTokenService = invitationTokenService;
+        this.postService = postService;
         this.authService = authService;
     }
 
@@ -79,10 +81,12 @@ public class EventControllerService {
     }
 
     /**
-     * Delets the event with the given id.
+     * Deletes the event with the given id.
      * @param eventId the id of the event to delete
      */
     public void deleteEvent(String eventId){
+        Event event = getEventById(eventId);
+        event.getPosts().forEach(post -> postService.deletePost(post));
         eventService.deleteEvent(getEventById(eventId));
     }
 
