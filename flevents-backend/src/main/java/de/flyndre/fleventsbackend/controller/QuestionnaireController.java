@@ -31,6 +31,7 @@ public class QuestionnaireController {
     private final QuestionnaireControllerService questionnaireControllerService;
     private final ModelMapper mapper;
     private final Logger logger = LoggerFactory.getLogger(QuestionnaireController.class);
+    private static ResourceBundle strings = ResourceBundle.getBundle("strings.properties");
     public QuestionnaireController(QuestionnaireControllerService questionnaireControllerService, ModelMapper mapper) {
         this.questionnaireControllerService = questionnaireControllerService;
         this.mapper = mapper;
@@ -50,7 +51,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(questionnaireControllerService.getQuestionnaires(eventId), HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -63,7 +64,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.getQuestionnaire(questionnaireId), Questionnaire.class),HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -77,7 +78,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -90,7 +91,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.createQuestionnaire(eventId, bodyQuestionnaire), Questionnaire.class), HttpStatus.CREATED);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -102,7 +103,7 @@ public class QuestionnaireController {
         try {
             return new ResponseEntity<>(mapper.map(questionnaireControllerService.editQuestionnaire(questionnaireId, bodyQuestionnaire), Questionnaire.class), HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -115,9 +116,9 @@ public class QuestionnaireController {
         //}
         try {
             questionnaireControllerService.deleteQuestionnaire(questionnaireId);
-            return new ResponseEntity<>("Deleted.", HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(strings.getString("questionnaire.QuestionnaireDeleted"), HttpStatus.ACCEPTED);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -132,7 +133,7 @@ public class QuestionnaireController {
             questionnaireControllerService.addAnswer(questionnaireId, answeredQuestionnaire);
             return new ResponseEntity(HttpStatus.OK);
         }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -141,6 +142,11 @@ public class QuestionnaireController {
     public ResponseEntity getStatistics(@PathVariable String questionnaireId, Authentication auth){
         //TODO: Authentification if working again
         //Todo: Errorhandling and Logging
-        return new ResponseEntity(questionnaireControllerService.getStatistics(questionnaireId), HttpStatus.OK);
+        try{
+            return new ResponseEntity(questionnaireControllerService.getStatistics(questionnaireId), HttpStatus.OK);
+        }catch(Exception e){
+            logger.error(strings.getString("logger.InternalError"),e);
+            return  new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

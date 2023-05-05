@@ -32,6 +32,9 @@ public class EventController {
 private final EventControllerService eventControllerService;
 private final ModelMapper mapper;
 private final Logger logger = LoggerFactory.getLogger(EventController.class);
+
+private static ResourceBundle strings = ResourceBundle.getBundle("strings.properties");
+
    public EventController(EventControllerService eventControllerService, ModelMapper mapper){
       this.eventControllerService = eventControllerService;
       this.mapper = mapper;
@@ -47,7 +50,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
       try{
          return new ResponseEntity(eventControllerService.getEvents().stream().map(event -> mapper.map(event,EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -68,7 +71,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
       try {
          return new ResponseEntity(mapper.map(eventControllerService.getEventById(eventId),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -84,9 +87,9 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
       try{
          return new ResponseEntity(eventControllerService.getEventPreview(eventId, token), HttpStatus.OK);
       }catch (InvalidAttributesException e){
-         return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
+         return new ResponseEntity<>(strings.getString("event.TokenNotValid"),HttpStatus.BAD_REQUEST);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
@@ -108,7 +111,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.deleteEvent(eventId);
          return new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -129,7 +132,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          return new ResponseEntity<>(eventControllerService.getAttendees(eventId).stream()
                  .map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -150,7 +153,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          return new ResponseEntity<>(eventControllerService.getOrganizers(eventId).stream().
                  map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()), HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -171,7 +174,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
       try {
          return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -194,7 +197,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.inviteToEvent(eventId, email, role);
          return new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -214,7 +217,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.acceptInvitation(eventId, details.getId(), token);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -236,7 +239,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          return new ResponseEntity(HttpStatus.OK);
 
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -258,7 +261,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.addAccountToEvent(eventId,details.getId());
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -280,7 +283,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.addAccountToEvent(eventId,userId);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.OK);
       }
    }
@@ -304,7 +307,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.changeRole(eventId, accountId, fromRole,toRole);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -326,7 +329,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.addAnonymousAccountToEvent(eventId, account);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -349,7 +352,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          logger.error("Not Found",ex);
          return new ResponseEntity<>(ex.getMessage(),HttpStatus.NOT_FOUND);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -370,7 +373,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.attendeesCheckIn(eventId,accountId);
          return HttpStatus.OK;
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
@@ -391,7 +394,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          eventControllerService.attendeesCheckOut(eventId,accountId);
          return HttpStatus.OK;
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return HttpStatus.INTERNAL_SERVER_ERROR;
       }
    }
@@ -407,7 +410,7 @@ private final Logger logger = LoggerFactory.getLogger(EventController.class);
          List checkedIns = eventControllerService.getCheckedIn(eventId);
          return new ResponseEntity( checkedIns, HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
       }
    }

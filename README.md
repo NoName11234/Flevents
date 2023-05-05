@@ -7,11 +7,11 @@ The Developers of this Project consists of five Students at the DHBW Stuttgart C
 
 | Role | Name |
 | --- | --- |
-| Projektleiter | Lukas&nbsp;Burkhardt |
-| Technischer Assistent | Paul&nbsp;Lehmann |
-| Recherche- und Testbeauftrager | Pascal&nbsp;Fuchs |
-| Modellierungs- und Implementierungsbeauftrager | Ruben&nbsp;Kraft |
-| Qualitätssicherungs- und Dokumentationsbeauftrager | David&nbsp;Maier |
+| Project-Leader | Lukas&nbsp;Burkhardt |
+| Technical Assistent | Paul&nbsp;Lehmann |
+| Reserach- and Testcommissioner | Pascal&nbsp;Fuchs |
+| Modelling- und Implementationcommissioner | Ruben&nbsp;Kraft |
+| Quality Assurance- und Documentationcomissioner | David&nbsp;Maier |
 
 ## Techstack 
 
@@ -27,7 +27,7 @@ The Frontend ist written in Vue.js. TypeScript is beeing used as Scripting-Langu
 As Object-Relational Mapper Hibernate is beeing used, this enables many Databases wich can be configured in the applications.properties. 
 
 ## Structure of the software
-the Software consists off of 2 main folders. 
+the Software consists off of two main folders. 
 
 #### /flevents-backend
 Contains the Backend-Application 
