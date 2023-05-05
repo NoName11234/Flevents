@@ -23,6 +23,7 @@
     </v-tabs>
 
     <v-window v-model="tab">
+
       <v-window-item value="info">
         <template v-if="organization?.description">
           <v-container>
@@ -69,6 +70,7 @@
           </v-btn>
         </v-container>
       </v-window-item>
+
       <v-window-item value="members">
         <v-container
           v-if="currentAccountRole === OrganizationRole.admin"
@@ -83,7 +85,9 @@
             Mitglieder hinzufügen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
           fixed-header
         >
@@ -170,6 +174,7 @@
           </tbody>
         </v-table>
       </v-window-item>
+
     </v-window>
   </v-card>
 </template>
@@ -213,7 +218,6 @@ const loading = computed(() =>
   || organizationStore.specificLoading.get(route.params.uuid as string)
 );
 
-// TODO: replace authorization with token auth
 const currentAccountRole = computed(() => {
   return organization.value?.accountPreviews?.find(a => a.uuid === account.value!.uuid)?.role as OrganizationRole;
 });

@@ -31,7 +31,12 @@ const props = defineProps({
     required: false,
     type: Boolean,
     default: false,
-  }
+  },
+  showCommentForm: {
+    required: false,
+    type: Boolean,
+    default: true,
+  },
 });
 
 const canDeleteAndEdit = computed(() => {
@@ -182,6 +187,7 @@ async function downloadAttachment(url: string) {
           density="compact"
         >
           <CommentForm
+            v-if="showCommentForm"
             :event-uuid="eventUuid"
             :post-uuid="post.uuid"
           />
