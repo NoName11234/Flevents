@@ -126,7 +126,7 @@ jobs:
         #This uploads artifacts from your workflow allowing you to share data between jobs and store data once a workflow is complete.
         uses: actions/upload-artifact@v2
         with:
-          name: Artifact
+          name: Backend
           path: flevents-backend/target/flevents-backend-0.0.1-SNAPSHOT.jar
   build_frontend:
     name: Build Frontend
@@ -156,6 +156,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           #Set artifact name
-          name: Artifact
+          name: Frontend
           #From this path
           path: flevents-frontend/dist/
