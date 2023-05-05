@@ -21,8 +21,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.directory.InvalidAttributesException;
-import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +39,7 @@ public class OrganizationController {
    private final OrganizationControllerService organizationControllerService;
    private final ModelMapper mapper;
    private final Logger logger = LoggerFactory.getLogger(OrganizationController.class);
+   private static ResourceBundle strings = ResourceBundle.getBundle("strings.properties");
 
    public OrganizationController(OrganizationControllerService organizationControllerService, ModelMapper mapper){
       this.organizationControllerService = organizationControllerService;
@@ -63,7 +64,7 @@ public class OrganizationController {
          try {
             return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
          }catch (Exception e){
-            logger.error("Internal Error",e);
+            logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
          }
       }
@@ -78,12 +79,12 @@ public class OrganizationController {
    @GetMapping
    public ResponseEntity getOrganizations(Authentication auth){
       if(!auth.getAuthorities().contains(new SimpleGrantedAuthority(PlatformAdminRole.platformAdmin.toString()))){
-         return new ResponseEntity("The given user is not a platform admin",HttpStatus.UNAUTHORIZED);
+         return new ResponseEntity(strings.getString("organization.GivenUserNoAdmin"),HttpStatus.UNAUTHORIZED);
       }
       try {
          return new ResponseEntity(organizationControllerService.getOrganizations().stream().map(organization -> mapper.map(organization, OrganizationInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -105,7 +106,7 @@ public class OrganizationController {
          OrganizationInformation information = mapper.map(organization, OrganizationInformation.class);
          return new ResponseEntity(information,HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -125,7 +126,7 @@ public class OrganizationController {
       try {
          return new ResponseEntity<>(organizationControllerService.getEvents(organizationId).stream().map(event -> mapper.map(event, EventInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -142,9 +143,9 @@ public class OrganizationController {
       try{
          return new ResponseEntity<>(organizationControllerService.getOrganizationPreview(organizationId, token),HttpStatus.OK);
       }catch (InvalidAttributesException e){
-         return new ResponseEntity<>("The token is not valid",HttpStatus.BAD_REQUEST);
+         return new ResponseEntity<>(strings.getString("organization.TokenNotValid"),HttpStatus.BAD_REQUEST);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -164,7 +165,7 @@ public class OrganizationController {
       try {
          return new ResponseEntity(organizationControllerService.getAccounts(organizationId).stream().map(account -> mapper.map(account, AccountInformation.class)).collect(Collectors.toList()),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -185,7 +186,7 @@ public class OrganizationController {
       try {
          return new ResponseEntity<>(mapper.map(organizationControllerService.editOrganisation(organizationId, organisation), OrganizationInformation.class),HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -208,7 +209,7 @@ public class OrganizationController {
          organizationControllerService.sendInvitation(organizationId, email, role);
          return  new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -227,7 +228,7 @@ public class OrganizationController {
          organizationControllerService.acceptInvitation(organizationId, details.getId(), token);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
       }
    }
@@ -249,7 +250,7 @@ public class OrganizationController {
          organizationControllerService.removeAccount(organizationId, accountId);
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -273,7 +274,7 @@ public class OrganizationController {
          organizationControllerService.changeRole(organizationId, accountId, fromRole,toRole);
          return new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
@@ -290,7 +291,7 @@ public class OrganizationController {
          organizationControllerService.leaveOrganization(organizationId, accountId);
          return new ResponseEntity<>(HttpStatus.OK);
       }catch (Exception e){
-         logger.error("Internal Error",e);
+         logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
