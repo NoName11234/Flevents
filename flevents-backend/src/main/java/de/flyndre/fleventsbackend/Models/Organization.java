@@ -39,6 +39,9 @@ public class Organization {
     @Basic(fetch = FetchType.LAZY)
     private String icon;
 
+    @OneToOne
+    private MailConfig mailConfig=new MailConfig();
+
     @OneToMany(mappedBy ="organization",fetch = FetchType.LAZY)
     private List<OrganizationAccount> accounts = new ArrayList<>();
     @OneToMany(mappedBy = "organization",fetch = FetchType.EAGER)

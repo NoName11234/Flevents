@@ -225,7 +225,7 @@ private static ResourceBundle strings = ResourceBundle.getBundle("strings.proper
    /**
     * Adds an Anonymous account identified by the given Email. Invalidates the invitation token to the event.
     * Allows access for invited and above of the specified event.
-    * @implNote Does Method is for anonymous Accounts only
+    * @implNote Does Method be for anonymous Accounts only
     * @param eventId the id of the event to add the account to
     * @param token the token in the invitation link to verify the invitation
     * @param mailAddress the MailAddress of the anonymous Account.

@@ -66,7 +66,6 @@ const isAttending = computed(() => {
 });
 
 const validateRole = computed(() => {
-  //TODO: Ändern in JWT
 
   // If admin in event's organization then show everything
   if (organizationStore.managedOrganizations.find(o => o.uuid === event.value.organizationPreview.uuid)) {
@@ -554,6 +553,7 @@ onMounted(async () => {
             :event-uuid="eventUuid"
             :post="post"
             :admin-view="validateRole === EventRole.organizer"
+            :show-comment-form="isAttending"
             :key="pIndex"
           />
         </v-expansion-panels>
@@ -573,6 +573,7 @@ onMounted(async () => {
         </v-container>
 
         <v-divider />
+
         <v-expansion-panels
           v-if="questionnaires"
           variant="accordion"
@@ -609,7 +610,9 @@ onMounted(async () => {
             Teilnehmer einladen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
         fixed-header>
           <thead>
@@ -702,7 +705,9 @@ onMounted(async () => {
             Unangemeldeten Teilnehmer hinzufügen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
           fixed-header>
           <thead>
@@ -758,7 +763,9 @@ onMounted(async () => {
             Verwalter einladen
           </v-btn>
         </v-container>
+
         <v-divider />
+
         <v-table
           fixed-header>
           <thead>
@@ -794,6 +801,7 @@ onMounted(async () => {
 
     </v-window>
   </v-card>
+
   <v-dialog
     v-model="addAnon"
     persistent

@@ -10,3 +10,6 @@ flevents-backend/src/main/resources/application-local.properties
 /.idea/misc.xml
 /.idea/modules.xml
 /.idea/vcs.xml
+/package-lock.json
+/log.log
+/flevents-frontend/tsconfig.tsbuildinfo
