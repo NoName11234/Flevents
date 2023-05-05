@@ -23,6 +23,7 @@ import {FleventsEvent} from "@/models/fleventsEvent";
 import QuestionnaireApi from "@/api/questionnaireApi";
 import api from "@/api/api";
 import {OrganizationRole} from "@/models/organizationRole";
+import {useDisplay} from "vuetify";
 
 const openContext = ref(false);
 const address = ref("");
@@ -46,6 +47,7 @@ const posts = computed(() => event.value
 
 const surveyStore = useSurveyStore();
 const questionnaires : any = ref(null);
+
 const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
 const organizationStore = useOrganizationStore();
 const addAnon = ref(false);
@@ -55,6 +57,8 @@ const attendeesLoading = ref(false);
 const storesLoading = computed(() =>
   eventStore.specificLoading.get(eventUuid)
 );
+
+const { xs: tabTextBreakpoint } = useDisplay();
 
 const attendees = computed(() => {
   return event?.value?.accountPreviews.filter(a => [EventRole.attendee, EventRole.tutor, EventRole.guest].includes(a.role as EventRole)) as AccountPreview[];
@@ -420,13 +424,19 @@ async function updateMailConfig(config: MailConfig) {
         value="info"
         :disabled="storesLoading"
       >
-        Informationen
+        <v-icon icon="mdi-information-outline" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          Informationen
+        </span>
       </v-tab>
       <v-tab
         value="posts"
         :disabled="storesLoading"
       >
-        Posts
+        <v-icon icon="mdi-comment-multiple-outline" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          Posts
+        </span>
       </v-tab>
       <!-- TODO: hier eventuell anpassen, weil ja auch Orgaleute die Umfrage sehen dürfen -->
       <v-tab
@@ -434,34 +444,49 @@ async function updateMailConfig(config: MailConfig) {
       :disabled="storesLoading"
        v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer || validateRole === EventRole.attendee || validateRole === OrganizationRole.organizer || validateRole === OrganizationRole.admin"
         >
-       Umfragen
+        <v-icon icon="mdi-poll" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          Umfragen
+        </span>
       </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="mails"
       >
-        E-Mail-Vorlagen
+        <v-icon icon="mdi-email-edit-outline" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          E-Mails
+        </span>
       </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendees"
         :disabled="storesLoading"
       >
-        Teilnehmer
+        <v-icon icon="mdi-account-check" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          Teilnehmer
+        </span>
       </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
         value="attendance"
         :disabled="storesLoading"
       >
-        Anwesenheit
+        <v-icon icon="mdi-account-details" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          Anwesenheit
+        </span>
       </v-tab>
       <v-tab
         v-if="validateRole == EventRole.organizer"
         value="organizers"
         :disabled="storesLoading"
       >
-        Verwalter
+        <v-icon icon="mdi-account-cog" />
+        <span v-if="!tabTextBreakpoint" class="ms-1">
+          Verwalter
+        </span>
       </v-tab>
     </v-tabs>
 
