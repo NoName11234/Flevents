@@ -60,6 +60,14 @@ class QuestionnaireApi {
   delete(uuid: string) {
     return api.delete(`/questionnaires/${uuid}`);
   }
+
+  /**
+   * Retrieves statistics about the questionnaire.
+   * @param questionnaireUuid the uuid of the questionnaire
+   */
+  getStatistics(questionnaireUuid : string) {
+    return api.get(`/questionnaires/${questionnaireUuid}/statistics`);
+  }
 }
 
 export default new QuestionnaireApi();
