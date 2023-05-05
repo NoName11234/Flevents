@@ -29,9 +29,9 @@ As Object-Relational Mapper Hibernate is beeing used, this enables many Database
 ## Structure of the software
 the Software consists off of 2 main folders. 
 
-### /flevents-backend
+#### /flevents-backend
 Contains the Backend-Application 
-### /flevents-frontend
+#### /flevents-frontend
 Contains the Frontend-Application 
 
 ## Configuration 
