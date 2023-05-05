@@ -142,6 +142,11 @@ public class QuestionnaireController {
     public ResponseEntity getStatistics(@PathVariable String questionnaireId, Authentication auth){
         //TODO: Authentification if working again
         //Todo: Errorhandling and Logging
-        return new ResponseEntity(questionnaireControllerService.getStatistics(questionnaireId), HttpStatus.OK);
+        try{
+            return new ResponseEntity(questionnaireControllerService.getStatistics(questionnaireId), HttpStatus.OK);
+        }catch(Exception e){
+            logger.error(strings.getString("logger.InternalError"),e);
+            return  new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
