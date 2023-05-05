@@ -1,9 +1,6 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
-import de.flyndre.fleventsbackend.Models.Attachment;
-import de.flyndre.fleventsbackend.Models.Post;
-import de.flyndre.fleventsbackend.Models.PostComment;
-import de.flyndre.fleventsbackend.Models.Role;
+import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.services.*;
 import jdk.jshell.spi.ExecutionControl;
 import org.springframework.lang.Nullable;
@@ -131,12 +128,13 @@ public class PostControllerService {
     /**
      * Validate if the given Authentication matches to the given roles for the given event id.
      * @param auth the Authentication to validate.
-     * @param uuid the id of the event in which context the validation should be done.
+     * @param eventId the id of the event in which context the validation should be done.
      * @param roles the event roles that should match.
      * @return true if the given parameters match, false if not.
      */
-    public boolean getGranted(Authentication auth, String uuid, List<Role> roles){
-        return authService.validateRights(auth, roles, uuid);
+    public boolean getGranted(Authentication auth, String eventId, List<Role> roles){
+        return authService.validateRights(auth, roles, eventId)||
+                authService.validateRights(auth,Arrays.asList(OrganizationRole.admin),eventId);
     }
 
     /**
