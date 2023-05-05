@@ -1,7 +1,7 @@
 # Flevents 
 Flevents is a Event-Managment Software that is beeing developted as a student project at DHBW Stuttgart Campus Horb. 
 
-##The Developers 
+## The Developers 
 | Role in the Project | Name |
 | Projektleiter | Lukas&nbsp;Burkhardt |
 | Technischer Assistent | Paul&nbsp;Lehmann | 
@@ -9,7 +9,7 @@ Flevents is a Event-Managment Software that is beeing developted as a student pr
 | Modellierungs- und Implementierungsbeauftrager | Ruben&nbsp;Kraft | 
 | Qualitätssicherungs- und Dokumentationsbeauftrager | David&nbsp;Maier | 
 
-##Techstack 
+## Techstack 
 
 This application is beeing developted in Spring Boot. It also uses features of Spring MVC, Spring Data as well as Spring Security. 
 The Frontend ist written in Vue.js. TypeScript is beeing used as Scripting-Language in the Frontend. 
