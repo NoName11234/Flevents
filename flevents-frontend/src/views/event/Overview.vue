@@ -586,12 +586,14 @@ async function updateMailConfig(config: MailConfig) {
       </v-window-item>
 
       <v-window-item value="polls">
-        <v-container class="d-flex flex-column flex-sm-row justify-start gap">
+        <v-container
+          v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+          class="d-flex flex-column flex-sm-row justify-start gap"
+        >
           <v-btn
             prepend-icon="mdi-book-plus"
             color="primary"
             variant="tonal"
-            v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
             :to="{ name: 'events.questionnaires.create', params: { uuid: eventUuid } }"
           >
             Fragebogen erstellen
