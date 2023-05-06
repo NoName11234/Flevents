@@ -3,6 +3,7 @@ import {Questionnaire} from "@/models/questionnaire";
 import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {computed} from "vue";
+import {Post} from "@/models/post";
 
 export const useSurveyStore = defineStore('surveys', {
   state: () => ({
@@ -65,7 +66,7 @@ export const useSurveyStore = defineStore('surveys', {
      * @returns an array of questionnaires
      */
     getQuestionnairesOf(eventUuid: string) {
-      const requestedQuestionnaires = this.cachedSurveys.get(eventUuid);
+      const requestedQuestionnaires = this.cachedSurveysOfEvents.get(eventUuid);
       const lastUpdate = this.lastCaching.get(eventUuid);
       if (
         requestedQuestionnaires === undefined
@@ -73,7 +74,7 @@ export const useSurveyStore = defineStore('surveys', {
       ) {
         this.hydrateSpecificOf(eventUuid);
       }
-      return requestedQuestionnaires || [] as Questionnaire[];
+      return requestedQuestionnaires?.map(pUuid => this.cachedSurveys.get(pUuid) as Questionnaire) || [] as Questionnaire[];
     },
 
     /**
