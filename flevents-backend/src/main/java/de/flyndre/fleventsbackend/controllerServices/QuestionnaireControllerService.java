@@ -134,6 +134,8 @@ public class QuestionnaireControllerService {
         List<QuestionModel> questionModels = questionnaireModel.getQuestions();
         List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = questionnaireModel.getAnsweredQuestionnaireModels();
 
+        statistics.setUserCount(answeredQuestionnaireModels.size());
+
         for(int i=0;i<questionModels.size();i++){
             QuestionModel questionModel = questionModels.get(i);
 
@@ -141,7 +143,7 @@ public class QuestionnaireControllerService {
                 AnsweredQuestionnaireModel answeredQuestionnaireModel = answeredQuestionnaireModels.get(a);
                 AnsweredQuestionModel answeredQuestionModel = answeredQuestionnaireModel.getAnswers().get(i);
 
-                if(questionModel.getChoiceModels().equals(null)){//FreeTextQuestion
+                if(questionModel.getChoiceModels().size()==0){//FreeTextQuestion
                     if(i == statistics.getQuestionSummaries().size()){
                         List<QuestionSummary> summaries = statistics.getQuestionSummaries();
                         FreeTextQuestionSummary freeTextQuestionSummary = new FreeTextQuestionSummary();

@@ -10,4 +10,5 @@ import java.util.List;
 @Setter
 public class SingleChoiceQuestionSummary extends QuestionSummary{
     private List<Integer> votes = new ArrayList<Integer>();
+    QuestionType questionType = QuestionType.SingleTypeQuestion;
 }
