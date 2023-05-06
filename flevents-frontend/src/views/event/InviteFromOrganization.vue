@@ -23,8 +23,9 @@ const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
 const role = ref(EventRole.attendee) as Ref<EventRole.attendee|EventRole.tutor>;
-
+const loading = ref(true);
 const appStore = useAppStore();
+const items = ref([] as AccountPreview[]);
 const select  = ref([] as AccountPreview[])
 const eventStore = useEventStore();
 const orgaStore = useOrganizationStore();
@@ -38,6 +39,18 @@ const selectableRoles = [
   EventRole.attendee,
   EventRole.tutor,
 ];
+
+onBeforeMount(() => {
+  organization.value.accountPreviews.forEach(obj => {
+      for(const user of event.value.accountPreviews){
+        if(obj.uuid === user.uuid && user.role !== EventRole.organizer){
+          return;
+        }
+      }
+      items.value.push(obj);
+  })
+  loading.value = false;
+})
 
 function remove(item: any){
   chips.value.splice(chips.value.indexOf(item), 1)
@@ -75,12 +88,12 @@ async function submit() {
 
   <Heading :text="`Zu ${event.name} einladen`" />
 
-  <v-card>
+  <v-card v-if="!loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
       <v-container class="d-flex flex-column gap-3">
         <v-combobox
           v-model="select"
-          :items="organization.accountPreviews"
+          :items="items"
           :item-title="item => {return `${item.firstname} ${item.lastname}`}"
           return-object
           label="Mitglieder der Organisation"
