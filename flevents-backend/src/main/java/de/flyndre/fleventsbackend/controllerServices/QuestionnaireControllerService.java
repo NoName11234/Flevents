@@ -266,6 +266,7 @@ public class QuestionnaireControllerService {
         questionnaire.setTitle(questionnaireModel.getTitle());
         questionnaire.setCreationDate(questionnaireModel.getCreationDate());
         questionnaire.setClosingDate(questionnaireModel.getClosingDate());
+        questionnaire.setEventId(questionnaireModel.getEvent().getUuid());
 
         return questionnaire;
     }

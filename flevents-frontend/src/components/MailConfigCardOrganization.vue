@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {MailConfig} from "@/models/mailConfig";
 
 const props = defineProps({
   config: {
     required: true,
     type: Object as () => MailConfig,
-  },
-  eventStart: {
-    required: true,
-    type: Date,
-  },
-  eventEnd: {
-    required: true,
-    type: Date,
-  },
+  }
 });
 
 const emits = defineEmits<{
@@ -27,19 +19,24 @@ const infoOffset = ref(1);
 const feedbackOffset = ref(1);
 
 async function submit() {
-  let infoMessageTime = new Date(props.eventStart);
-  infoMessageTime.setHours((new Date(props.eventStart).getHours() - (infoOffset.value ?? 0)));
-  props.config!.infoMessageTime = infoMessageTime.toISOString();
-
-  let feedbackMessageTime = new Date(props.eventEnd);
-  feedbackMessageTime.setHours((new Date(props.eventEnd).getHours() - (feedbackOffset.value ?? 0)));
-  props.config!.feedbackMessageTime = feedbackMessageTime.toISOString();
   emits.call(emits, 'update', props.config);
 }
 
 </script>
 
-<template>
+  <template>
+    <v-container class="d-flex flex-column gap-3">
+      <v-textarea
+        label="Organisations-Einladungs-E-Mail-Text"
+        hide-details="auto"
+        no-resize
+        v-model="config.organizationInvitation"
+      >
+      </v-textarea>
+    </v-container>
+
+  <v-divider />
+
   <v-container class="d-flex flex-column gap-3">
     <v-textarea
       label="Registrierungs-E-Mail-Text"
@@ -60,15 +57,6 @@ async function submit() {
       v-model="config.infoMessage"
     >
     </v-textarea>
-<v-text-field
- label="Sendezeitpunkt vor dem Event in h"
-   prepend-inner-icon="mdi-clock"
-   min="0"
-      type="number"
-     v-model="infoOffset"
-     hide-details="auto"
-      :rules="[() => infoOffset >= 0 || 'Muss größer 1 sein.']"
-    />
   </v-container>
 
   <v-divider />
@@ -81,15 +69,6 @@ async function submit() {
       v-model="config.feedbackMessage"
     >
     </v-textarea>
-    <v-text-field
-      label="Sendezeitpunkt nach dem Event in h"
-      prepend-inner-icon="mdi-clock"
-      min="0"
-      type="number"
-      v-model="feedbackOffset"
-      hide-details="auto"
-      :rules="[() => feedbackOffset >= 0 || 'Muss größer 1 sein.']"
-   cd />
   </v-container>
 
   <v-divider />

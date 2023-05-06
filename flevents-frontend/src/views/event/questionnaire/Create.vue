@@ -91,7 +91,6 @@ async function submit(pendingValidation: Promise<any>){
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
-  return;
   loading.value = true;
   try {
     const response = questionnaireApi.create(questionnaire.value, eventUuid);

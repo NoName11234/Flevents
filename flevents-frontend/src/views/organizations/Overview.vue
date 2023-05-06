@@ -81,15 +81,9 @@
           variant="accordion"
           multiple
         >
-          <MailConfigCard
-            v-for="(c, i) in [
-              {
-                name: 'Einladungs-E-Mails',
-                text: 'Herzlich willkommen\nHeude dies das',
-              },
-            ]"
-            :key="i"
-            :config="c"
+          <MailConfigCardOrganization
+            :config="organization?.mailConfig"
+            @update="updateMailConfig"
           />
         </v-expansion-panels>
       </v-window-item>
@@ -203,7 +197,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useRoute} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {OrganizationRole} from "@/models/organizationRole";
@@ -217,6 +211,10 @@ import {useAppStore} from "@/store/app";
 import {EventRole} from "@/models/eventRole";
 import MailConfigCard from "@/components/MailConfigCard.vue";
 import router from "@/router";
+import MailConfigCardOrganization from "@/components/MailConfigCardOrganization.vue";
+import {MailConfig} from "@/models/mailConfig";
+import {FleventsEvent} from "@/models/fleventsEvent";
+import eventApi from "@/api/eventsApi";
 
 const route = useRoute();
 const tab = computed({
@@ -286,6 +284,23 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
   organizationStore.hydrate();
 }
 
+onMounted(() => {console.log(organization)});
+async function updateMailConfig(config: MailConfig) {
+  try {
+    const response = await organizationsApi.addMailConfig(organization.value.uuid, config);
+    appStore.addToast({
+      text: 'Mail-Konfiguration aktualisiert!',
+      color: 'success',
+    });
+  } catch (e) {
+    console.error('Failed to delete event.', e);
+    appStore.addToast({
+      text: 'Fehler beim Aktualisieren der Mail-Konfiguration.',
+      color: 'error',
+    });
+  }
+  organizationStore.hydrateSpecific(organization.value.uuid);
+}
 async function removeAccount(removeAccount: AccountPreview) {
   let ok = false;
   if (removeAccount.uuid === account.value!.uuid) {
