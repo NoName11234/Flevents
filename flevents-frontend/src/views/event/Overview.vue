@@ -646,6 +646,15 @@ async function updateMailConfig(config: MailConfig) {
           >
             Teilnehmer einladen
           </v-btn>
+          <v-btn
+            :to="{ name: 'events.inviteOrga', params: { uuid: eventUuid } }"
+            prepend-icon="mdi-account-plus"
+            color="primary"
+            variant="tonal"
+            v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+          >
+            Teilnehmer aus Organisation hinzufügen
+          </v-btn>
         </v-container>
 
         <v-divider />
