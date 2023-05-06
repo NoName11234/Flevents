@@ -84,7 +84,7 @@ async function submitAnswers(pendingValidation: Promise<any>) {
   try {
     console.log("------------------------")
     console.log(aq);
-    const response = QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
+    const response = await QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
     console.log(response);
     alreadyVoted.value = true;
     // TODO: replace with async store hydration
