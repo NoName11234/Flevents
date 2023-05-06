@@ -80,7 +80,7 @@ export const useSurveyStore = defineStore('surveys', {
      * Creates a computed ref that returns the questionnaires of the event.
      * @param eventUuid the uuid of the event
      */
-    getStatisticsGetterOf(eventUuid: string) {
+    getQuestionnairesGetterOf(eventUuid: string) {
       return computed(() => this.getQuestionnairesOf(eventUuid),);
     },
 
