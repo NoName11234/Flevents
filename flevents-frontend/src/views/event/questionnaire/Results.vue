@@ -4,7 +4,7 @@ import {useRoute, useRouter} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {useSurveyStore} from "@/store/surveys";
 import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
-import {computed, ref} from "vue";
+import {computed, onMounted, onUnmounted, ref} from "vue";
 import {useAppStore} from "@/store/app";
 import {Bar, Pie} from "vue-chartjs";
 import {
@@ -54,7 +54,8 @@ const liveUpdateHandlerFunction = () => {
 };
 let liveUpdateHandler: NodeJS.Timeout;
 
-updateLiveUpdates();
+onMounted(updateLiveUpdates);
+onUnmounted(() => clearInterval(liveUpdateHandler));
 
 function updateLiveUpdates() {
   if (liveUpdates.value !== true) {
