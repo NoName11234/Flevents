@@ -170,6 +170,22 @@ class EventsApi {
     });
   }
 
+
+  /**
+   * Books a User to an Event.
+   * @param uuid the uuid of the event
+   * @param accountUuid the account that should be booked
+   */
+  bookAccount(uuid: string, accountUuid: string) {
+    return api.post(`${base}/${uuid}/book`, {}, {
+      params: {
+        userId: accountUuid,
+      }
+    });
+  }
+
+
+
   /**
    * Accepts an invitation link as an anonymous User.
    * @param eventUuid the uuid of the event

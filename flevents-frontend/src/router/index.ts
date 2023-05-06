@@ -73,6 +73,11 @@ const routes = [
         name: 'events.invite',
         component: () => import(/* webpackChunkName: "events" */ '@/views/event/Invite.vue')
       },
+      {
+        path: ':uuid/add-organizationmember',
+        name: 'events.inviteOrga',
+        component: () => import(/* webpackChunkName: "events" */ '@/views/event/InviteFromOrganization.vue')
+      },
 
       // POSTS
       {
