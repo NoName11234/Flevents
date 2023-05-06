@@ -14,6 +14,7 @@ import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
 import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
 import SurveyStats from "@/components/SurveyStats.vue";
+import {Statistics} from "@/models/statistics";
 
 const props = defineProps({
   questionnaire: {
@@ -49,13 +50,9 @@ const alreadyVoted = ref(false);
 const loading = ref(true);
 
 const statisticsStore = useSurveyStatisticsStore();
-let statistics = ref({} as Object);
-let statisticsLoading = ref(false as Boolean|undefined);
-let statisticsError = ref(false as Boolean|undefined);
+let statistics = ref({} as Statistics);
 if (hasRights()) {
   statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
-  statisticsLoading = computed(() => statisticsStore.specificLoading.get(props.questionnaire.uuid));
-  statisticsError = computed(() => statisticsStore.specificError.get(props.questionnaire.uuid));
 }
 
 onMounted(setup);
@@ -184,7 +181,6 @@ function hasRights() {
       <div class="d-flex flex-column gap-3 my-3">
 
         <v-card
-          v-if="hasRights()"
           elevation="0"
           border
           class="border-dashed"
@@ -195,36 +191,22 @@ function hasRights() {
             :statistics="statistics"
           />
 
-          <v-divider class="border-dashed" />
+          <template v-if="hasRights">
+            <v-divider class="border-dashed" />
 
-          <v-container class="d-flex flex-column flex-sm-row justify-end gap">
-            <v-spacer/>
-            <v-btn
-              variant="tonal"
-              color="primary"
-              append-icon="mdi-chevron-right"
-              :to="{ name: 'events.questionnaires.results', params: { uuid: event.uuid, questionnaireUuid: questionnaire.uuid } }"
-            >
-              Ergebnisse ansehen
-            </v-btn>
-          </v-container>
+            <v-container class="d-flex flex-column flex-sm-row justify-end gap">
+              <v-spacer/>
+              <v-btn
+                variant="tonal"
+                color="primary"
+                append-icon="mdi-chevron-right"
+                :to="{ name: 'events.questionnaires.results', params: { uuid: event.uuid, questionnaireUuid: questionnaire.uuid } }"
+              >
+                Ergebnisse ansehen
+              </v-btn>
+            </v-container>
+          </template>
 
-        </v-card>
-
-        <v-card
-          v-if="!hasRights()"
-          elevation="0"
-          border
-          class="border-dashed"
-        >
-          <v-list>
-            <v-list-item
-              prepend-icon="mdi-timer-sand-complete"
-              subtitle="Einsendeschluss"
-            >
-              {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
-            </v-list-item>
-          </v-list>
         </v-card>
 
         <v-form
