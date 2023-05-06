@@ -221,6 +221,7 @@ function hasRights() {
               variant="tonal"
               color="primary"
               append-icon="mdi-chevron-right"
+              :to="{ name: 'events.questionnaires.results', params: { uuid: event.uuid, questionnaireUuid: questionnaire.uuid } }"
             >
               Ergebnisse ansehen
             </v-btn>

@@ -97,6 +97,11 @@ const routes = [
         name: 'events.questionnaires.edit',
         component: () => import(/* webpackChunkName: "questionnaires" */ '@/views/event/questionnaire/Edit.vue'),
       },
+      {
+        path: ':uuid/questionnaires/:questionnaireUuid/results',
+        name: 'events.questionnaires.results',
+        component: () => import(/* webpackChunkName: "questionnaires" */ '@/views/event/questionnaire/Results.vue'),
+      },
     ],
   },
   {
