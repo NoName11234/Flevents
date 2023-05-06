@@ -6,15 +6,7 @@ const props = defineProps({
   config: {
     required: true,
     type: Object as () => MailConfig,
-  },
-  eventStart: {
-    required: true,
-    type: Date,
-  },
-  eventEnd: {
-    required: true,
-    type: Date,
-  },
+  }
 });
 
 const emits = defineEmits<{
@@ -35,7 +27,7 @@ async function submit() {
   <template>
     <v-container class="d-flex flex-column gap-3">
       <v-textarea
-        label="Organisations-Einladungs-Email-Text"
+        label="Organisations-Einladungs-E-Mail-Text"
         hide-details="auto"
         no-resize
         v-model="config.organizationInvitation"
@@ -65,15 +57,6 @@ async function submit() {
       v-model="config.infoMessage"
     >
     </v-textarea>
-<!--    <v-text-field-->
-<!--      label="Sendezeitpunkt vor dem Event in h"-->
-<!--      prepend-inner-icon="mdi-clock"-->
-<!--      min="0"-->
-<!--      type="number"-->
-<!--      v-model="infoOffset"-->
-<!--      hide-details="auto"-->
-<!--      :rules="[() => infoOffset >= 0 || 'Muss größer 1 sein.']"-->
-<!--    />-->
   </v-container>
 
   <v-divider />
@@ -86,15 +69,6 @@ async function submit() {
       v-model="config.feedbackMessage"
     >
     </v-textarea>
-<!--    <v-text-field-->
-<!--      label="Sendezeitpunkt nach dem Event in h"-->
-<!--      prepend-inner-icon="mdi-clock"-->
-<!--      min="0"-->
-<!--      type="number"-->
-<!--      v-model="feedbackOffset"-->
-<!--      hide-details="auto"-->
-<!--      :rules="[() => feedbackOffset >= 0 || 'Muss größer 1 sein.']"-->
-<!--    />-->
   </v-container>
 
   <v-divider />
