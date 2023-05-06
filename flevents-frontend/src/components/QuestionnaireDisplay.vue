@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import {Questionnaire} from "@/models/questionnaire";
 import {computed, onMounted, ref} from "vue";
-import {QuestionType} from "@/models/questionType";
-import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {AnsweredQuestionnaire} from "@/models/answeredQuestionnaire";
-import security from "@/service/security";
-import {AnsweredSingleChoiceQuestion} from "@/models/answeredSingleChoiceQuestion";
-import {AnsweredFreeTextQuestion} from "@/models/answeredFreeTextQuestion";
-import axios from "axios";
 import {useRouter} from "vue-router";
 import {EventRole} from "@/models/eventRole";
 import {OrganizationRole} from "@/models/organizationRole";
 import {FleventsEvent} from "@/models/fleventsEvent";
-import {Question} from "@/models/question";
 import {AnsweredQuestion} from "@/models/answeredQuestion";
 import {useAccountStore} from "@/store/account";
 import QuestionnaireApi from "@/api/questionnaireApi";
-import AccountsApi from "@/api/accountsApi";
-import {Choices} from "@/models/choices";
+import DatetimeService from "@/service/datetimeService";
+import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
+import {AxiosError} from "axios";
+import {useAppStore} from "@/store/app";
 
 const props = defineProps({
   questionnaire: {
@@ -32,10 +27,11 @@ const props = defineProps({
 
 const emits = defineEmits(['update'])
 const accountStore = useAccountStore();
+const appStore = useAppStore();
 const router = useRouter();
 const isDelete = ref(false);
 const tooltip = ref('');
-const user = security.getAccount()!;
+const user = accountStore.currentAccount!;
 const aq = ref({
   uuid: '',
   questionnaireId: props.questionnaire.uuid,
@@ -50,6 +46,16 @@ const aq = ref({
 } as AnsweredQuestionnaire);
 const alreadyVoted = ref(false);
 const loading = ref(true);
+
+const statisticsStore = useSurveyStatisticsStore();
+let statistics = ref({} as Object);
+let statisticsLoading = ref(false as Boolean|undefined);
+let statisticsError = ref(false as Boolean|undefined);
+if (hasRights()) {
+  statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
+  statisticsLoading = computed(() => statisticsStore.specificLoading.get(props.questionnaire.uuid));
+  statisticsError = computed(() => statisticsStore.specificError.get(props.questionnaire.uuid));
+}
 
 onMounted(setup);
 async function setup() {
@@ -69,7 +75,13 @@ async function setup() {
   loading.value = false;
 }
 
-async function submit() {
+async function submitAnswers(pendingValidation: Promise<any>) {
+  tooltip.value = '';
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
+    tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
+    return;
+  }
   loading.value = true;
   try {
     console.log("------------------------")
@@ -77,25 +89,60 @@ async function submit() {
     const response = QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
     console.log(response);
     alreadyVoted.value = true;
+    // TODO: replace with async store hydration
+    appStore.addToast({
+      text: 'Abgestimmt.',
+      color: 'success',
+    });
   } catch (e) {
-    console.error('Failed to answer questionnaire.', e);
-    tooltip.value = 'Abstimmen fehlgeschlagen.';
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Abstimmen fehlgeschlagen: ${errorMessage}`,
+      color: 'error',
+    });
   }
   //await setup();
   loading.value = false;
 }
 
-async function remove(this: any) {
+async function deleteQuestionnaire() {
   loading.value = true;
   try {
     const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
-    console.log(response);
+    // TODO: replace with async store hydration
     isDelete.value = true;
+    emits("update", props.questionnaire?.uuid);
+    appStore.addToast({
+      text: 'Fragebogen gelöscht.',
+      color: 'success',
+    });
   } catch (e) {
-    console.error('Failed to delete questionnaire.', e);
-    tooltip.value = 'Löschen fehlgeschlagen.';
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    appStore.addToast({
+      text: `Fragebogen konnte nicht gelöscht werden: ${errorMessage}`,
+      color: 'error',
+    });
   }
-  emits("update", props.questionnaire?.uuid);
   loading.value = false;
 }
 
@@ -110,7 +157,7 @@ function hasRights() {
     OrganizationRole.admin,
     OrganizationRole.organizer,
   ];
-  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview.uuid && organizationRoles.includes(o.role as OrganizationRole));
+  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
   if (hasOrganizationRights) return true;
   return false;
 }
@@ -126,7 +173,7 @@ function hasRights() {
           {{ questionnaire.title }}
         </strong>
         <span class="text-grey">
-          {{ new Date(questionnaire.creationDate).toLocaleDateString("DE-de", {dateStyle: 'medium'}) }}
+          {{ DatetimeService.getDate(new Date(questionnaire.closingDate)) }}
         </span>
         <v-spacer />
       </div>
@@ -134,76 +181,146 @@ function hasRights() {
 
     <v-expansion-panel-text>
       <div class="d-flex flex-column gap-3 my-3">
-      <v-card
-        v-for="(question, index) in questionnaire.questions"
-        :key="index"
-        elevation="0"
-        border
-      >
-        <v-container>
-          <strong>
-            {{ `Frage ${index + 1}: ${question.question}` }}
-          </strong>
-        </v-container>
 
-        <v-divider />
-
-        <v-textarea
-          v-if="question.choices.length == 0"
-          hide-details="auto"
-          label="Eigene Antwort"
-          variant="solo"
-          :disabled="alreadyVoted || loading"
-          v-model="(aq.answers[index]).answer"
+        <v-card
+          :loading="statisticsLoading"
+          v-if="hasRights()"
+          elevation="0"
+          border
+          class="border-dashed"
         >
-        </v-textarea>
 
-        <v-radio-group
-          v-if="question.choices.length != 0"
-          hide-details="auto"
-          class="pa-2"
-          :disabled="alreadyVoted || loading"
-          v-model="(aq.answers[index]).choice"
+          <v-list>
+            <v-list-item
+              prepend-icon="mdi-star-four-points-outline"
+              subtitle="Erstelldatum"
+            >
+              {{ DatetimeService.getDateTime(new Date(questionnaire.creationDate)) }}
+            </v-list-item>
+            <v-list-item
+              prepend-icon="mdi-timer-sand-complete"
+              subtitle="Einsendeschluss"
+            >
+              {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
+            </v-list-item>
+            <template v-if="!statisticsError">
+              <v-list-item
+                prepend-icon="mdi-file-document-multiple-outline"
+                subtitle="Anzahl der Einsendungen"
+              >
+                {{ statistics.value }}
+              </v-list-item>
+            </template>
+          </v-list>
+
+          <v-divider class="border-dashed" />
+
+          <v-container class="d-flex flex-column flex-sm-row justify-end gap">
+            <v-spacer/>
+            <v-btn
+              variant="tonal"
+              color="primary"
+              append-icon="mdi-chevron-right"
+              :to="{ name: 'events.questionnaires.results', params: { uuid: event.uuid, questionnaireUuid: questionnaire.uuid } }"
+            >
+              Ergebnisse ansehen
+            </v-btn>
+          </v-container>
+
+        </v-card>
+
+        <v-card
+          v-if="!hasRights()"
+          elevation="0"
+          border
+          class="border-dashed"
         >
-          <v-radio
-            v-for="(option, oIndex) in question.choices"
-            :key="oIndex"
-            :value="option"
-            :label="option.choice"
-          />
-        </v-radio-group>
+          <v-list>
+            <v-list-item
+              prepend-icon="mdi-timer-sand-complete"
+              subtitle="Einsendeschluss"
+            >
+              {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
+            </v-list-item>
+          </v-list>
+        </v-card>
 
-      </v-card>
-
-        <div
-          v-if="tooltip !== ''"
-          class="text-error"
+        <v-form
+          style="display: contents;"
+          validate-on="submit"
+          @submit.prevent="submitAnswers"
         >
-          {{ tooltip }}
-        </div>
-
-        <div class="d-flex flex-column flex-sm-row justify-end gap">
-          <v-btn
-            v-if="hasRights()"
-            prepend-icon="mdi-delete"
-            color="error"
-            variant="text"
-            @click="remove()"
-            :loading="loading"
+          <v-card
+            v-for="(question, index) in questionnaire.questions"
+            :key="index"
+            elevation="0"
+            border
           >
-            Löschen
-          </v-btn>
-          <v-spacer />
-          <v-btn
-            prepend-icon="mdi-check"
-            color="primary"
-            @click="submit()"
-            :disabled="alreadyVoted || loading"
-            :loading="loading"
+            <v-container>
+              <strong>
+                {{ `Frage ${index + 1}: ${question.question}` }}
+              </strong>
+            </v-container>
+
+            <v-divider />
+
+            <v-textarea
+              v-if="question.choices.length == 0"
+              hide-details="auto"
+              label="Eigene Antwort"
+              variant="solo"
+              :disabled="alreadyVoted || loading"
+              v-model="(aq.answers[index]).answer"
+            >
+            </v-textarea>
+
+            <v-radio-group
+              v-if="question.choices.length != 0"
+              hide-details="auto"
+              class="pa-2"
+              :disabled="alreadyVoted || loading"
+              v-model="(aq.answers[index]).choice"
+            >
+              <v-radio
+                v-for="(option, oIndex) in question.choices"
+                :key="oIndex"
+                :value="option"
+                :label="option.choice"
+              />
+            </v-radio-group>
+
+          </v-card>
+
+          <div
+            v-if="tooltip !== ''"
+            class="text-error"
           >
-            Abstimmen
-          </v-btn>
-        </div>
+            {{ tooltip }}
+          </div>
+
+          <div class="d-flex flex-column flex-sm-row justify-end gap">
+            <v-btn
+              v-if="hasRights()"
+              prepend-icon="mdi-delete"
+              color="error"
+              variant="text"
+              @click="deleteQuestionnaire()"
+              :loading="loading"
+            >
+              Löschen
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              prepend-icon="mdi-check"
+              color="primary"
+              type="submit"
+              :disabled="loading || alreadyVoted"
+              :loading="loading"
+            >
+              {{ alreadyVoted ? 'Abgestimmt' : 'Abstimmen' }}
+            </v-btn>
+          </div>
+        </v-form>
 
       </div>
     </v-expansion-panel-text>

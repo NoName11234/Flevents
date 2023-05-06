@@ -132,7 +132,7 @@ public class QuestionnaireControllerService {
         Statistics statistics = new Statistics();
 
         List<QuestionModel> questionModels = questionnaireModel.getQuestions();
-        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = questionnaireService.getAnswersFromQuestionnaire(questionnaireModel);
+        List<AnsweredQuestionnaireModel> answeredQuestionnaireModels = questionnaireModel.getAnsweredQuestionnaireModels();
 
         for(int i=0;i<questionModels.size();i++){
             QuestionModel questionModel = questionModels.get(i);
@@ -264,6 +264,7 @@ public class QuestionnaireControllerService {
         questionnaire.setTitle(questionnaireModel.getTitle());
         questionnaire.setCreationDate(questionnaireModel.getCreationDate());
         questionnaire.setClosingDate(questionnaireModel.getClosingDate());
+        questionnaire.setEventId(questionnaireModel.getEvent().getUuid());
 
         return questionnaire;
     }

@@ -8,19 +8,24 @@ import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {QuestionType} from "@/models/questionType";
 import questionnaireApi from "@/api/questionnaireApi";
 import {Choices} from "@/models/choices";
+import {AxiosError} from "axios";
 
 const router = useRouter();
 const route = useRoute();
 const tooltip = ref("");
-const eventId = route.params.uuid;
+const eventUuid = route.params.uuid as string;
+const loading = ref(false);
 const questionnaire = ref({
-  eventId:  eventId as string,
-  creationDate: new Date().toISOString(),
+  eventId:  eventUuid as string,
+  title: '',
+  closingDate: '',
   questions: [{
     question: '',
     questionType: QuestionType.FreeText
   }] as Question[],
-} as unknown as Questionnaire);
+} as Questionnaire);
+
+const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'polls' } };
 
 const questionTypes = [
   QuestionType.SingleChoice,
@@ -79,17 +84,33 @@ async function removeChoice(question: any, index: number) {
   question.choices.splice(index, 1);
 }
 
-async function submit(){
-  console.log(questionnaire.value);
-
-  try {
-    const response = questionnaireApi.create( questionnaire.value, eventId as string)
-    console.log(response);
-  } catch (e) {
-    console.error('Failed to save questionnaire.', e);
-    tooltip.value = 'Speichern des Fragebogens fehlgeschlagen.';
+async function submit(pendingValidation: Promise<any>){
+  tooltip.value = '';
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
+    tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
+    return;
   }
-  await router.push({ name: 'events.event', params: { uuid: eventId }});
+  loading.value = true;
+  try {
+    const response = questionnaireApi.create(questionnaire.value, eventUuid);
+    // TODO: asynchron questionnaire-store aktualisieren
+    await router.push(backRoute);
+  } catch (e) {
+    let errorMessage = '';
+    if (e instanceof AxiosError) {
+      if (e.code === AxiosError.ERR_BAD_REQUEST) {
+        errorMessage = 'Ungültige Anfrage';
+      }
+      else if (e.code === AxiosError.ERR_NETWORK) {
+        errorMessage = 'Netzwerkfehler';
+      }
+    } else {
+      errorMessage = `Unerwarteter Fehler: ${e}`;
+    }
+    tooltip.value = `Speichern des Fragebogens fehlgeschlagen: ${errorMessage}`;
+  }
+  loading.value = false;
 }
 
 </script>
@@ -98,7 +119,7 @@ async function submit(){
   <Heading text="Fragebogen erstellen" />
 
   <v-card>
-    <v-form validate-on="submit" @submit.prevent="submit()">
+    <v-form validate-on="submit" @submit.prevent="submit">
       <v-container class="d-flex flex-column gap-3">
 
         <v-text-field
@@ -116,7 +137,7 @@ async function submit(){
           :rules="[() => questionnaire.closingDate !== '' || 'Fragebögen müssen einen Einsendeschluss haben.']"
           hide-details="auto"
           required
-          prepend-inner-icon="mdi-timer-sand"
+          prepend-inner-icon="mdi-timer-sand-complete"
         />
       </v-container>
       <v-divider/>
@@ -131,9 +152,10 @@ async function submit(){
           >
             <v-text-field
               :label=" questionNames.get(question.questionType) + '-Frage'"
-              :prepend-inner-icon="questionIcons.get(question.questionType)"
+              :prepend-inner-icon="questionIcons.get(question.questionType) ?? 'mdi-help'"
               hide-details="auto"
               v-model="question.question"
+              :rules="[() => question.question !== '' || 'Fragen brauchen einen Fragetext.']"
               bg-color="primary"
             />
 
@@ -153,6 +175,7 @@ async function submit(){
                   :label="`Option ${cIndex + 1}`"
                   variant="outlined"
                   density="compact"
+                  :rules="[() => question.choices[cIndex].choice !== '' || 'Antwortmöglichkeiten dürfen nicht leer sein.']"
                   hide-details="auto"
                 />
                 <v-btn
@@ -215,8 +238,8 @@ async function submit(){
                 <v-list-item
                   v-for="(entry, index) in questionTypes"
                   :key="index"
-                  :title="questionNames.get(entry)"
-                  :prepend-icon="questionIcons.get(entry)"
+                  :title="questionNames.get(entry) ?? ''"
+                  :prepend-icon="questionIcons.get(entry) ?? ''"
                   @click="addQuestion(entry)"
                 />
               </v-list>
@@ -235,7 +258,7 @@ async function submit(){
       <v-container class="d-flex flex-column flex-sm-row justify-end gap">
         <v-btn
           variant="text"
-          :to="{ name: 'events.event', params: { uuid: eventId } }"
+          :to="backRoute"
         >
           Verwerfen
         </v-btn>
