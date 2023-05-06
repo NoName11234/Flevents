@@ -26,6 +26,15 @@ class QuestionnaireApi {
       params: { "eventId": eventUuid}
     });
   }
+
+  /**
+   * Retrieves a specific questionnaire.
+   * @param uuid the uuid of the questionnaire
+   */
+  get(uuid: string) {
+    return api.get(`/questionnaires/${uuid}`);
+  }
+
   /**
    * Retrieves all questionnaires of the given event.
    * @param eventUuid the uuid of the event
