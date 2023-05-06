@@ -1,18 +1,15 @@
 <script setup lang="ts">
 
-import {computed, onMounted, Ref, ref} from "vue";
+import {onMounted, Ref, ref} from "vue";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {RouteLocationRaw, useRouter} from 'vue-router';
-import axios, {AxiosError} from "axios"
-import {Organization} from "@/models/organization";
-import security from "@/service/security";
-import {Account} from "@/models/account";
+import {AxiosError} from "axios"
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventsApi";
 import {useEventStore} from "@/store/events";
-import {load} from "webfontloader";
 import {useOrganizationStore} from "@/store/organizations";
+import FileService from "@/service/fileService";
 
 const props = defineProps({
   backRoute: {
@@ -32,19 +29,21 @@ const props = defineProps({
 
 const router = useRouter()
 const selectedOrga = ref();
-const files = ref(new Array<any>());
-const chips =  ref(new Array<any>());
 const imgUrl = ref('');
 const tooltip = ref('');
 const loading = ref(false);
-const fleventsEvent = ref( { ...props.presetEvent } as FleventsEvent ?? {
-  name: "",
-  description: "",
-  location: "",
-  image: "",
-  startTime: "",
-  endTime: "",
-} as FleventsEvent);
+const fleventsEvent = ref((props.presetEvent ?
+  { ...props.presetEvent } : {
+    name: '',
+    description: '',
+    location: '',
+    image: '',
+    startTime: '',
+    endTime: '',
+  }
+) as FleventsEvent);
+
+console.log(fleventsEvent.value);
 
 const eventStore = useEventStore();
 
@@ -66,52 +65,25 @@ function resetImage() {
   imgUrl.value = props.presetEvent?.image || '';
 }
 
-// email-input
-function remove(item: any){
-  chips.value.splice(chips.value.indexOf(item), 1)
-}
-
 onMounted(async () =>{
   if (props.presetEvent) {
     imgUrl.value = props.presetEvent.image;
     selectedOrga.value = managedOrganizations.value.find(o => o.uuid === props.presetEvent?.organizationPreview.uuid);
   }
 });
-function getBase64(file : any) {
-  return new Promise(function (resolve, reject) {
-    let reader = new FileReader();
-    reader.onload = function () { resolve(reader.result); };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-function convertTZ(date : any, tzString: any) {
-  return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
-}
 
-// submit
-// TODO: properly post to backend (including image file)
-async function submit() {
-  if (
-    fleventsEvent.value.name === ''
-    || fleventsEvent.value.location === ''
-    || selectedOrga.value == undefined
-  ) {
+async function submit(pendingValidation: Promise<any>) {
+  tooltip.value = '';
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
     tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
   loading.value = true;
-  if(imageFile.value.length != 0) {
-    const file = imageFile.value[0]
-    fleventsEvent.value.image = await getBase64(file) as string;
-    console.log(fleventsEvent.value);
+  if (imageFile.value.length > 0) {
+    const file = imageFile.value[0];
+    fleventsEvent.value.image = await FileService.encodeFile(file);
   }
-  let start = convertTZ(new Date(fleventsEvent.value.startTime as string), "Europe/Berlin");
-  let end = convertTZ(new Date(fleventsEvent.value.endTime as string), "Europe/Berlin");
-  fleventsEvent.value.startTime = start.toISOString();
-  fleventsEvent.value.endTime = end.toISOString();
-  console.log(fleventsEvent.value.startTime);
-  console.log(fleventsEvent.value.endTime);
   try {
     fleventsEvent.value.uuid = undefined;
     // TODO: Use real mailconfig
@@ -120,7 +92,6 @@ async function submit() {
     await router.push(props.submitRoute);
     eventStore.hydrate();
   } catch (e) {
-    console.log(e);
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_BAD_REQUEST) {
         tooltip.value = 'Ungültige Anfrage';
@@ -148,7 +119,7 @@ async function submit() {
     />
     <v-form
       validate-on="submit"
-      @submit.prevent="submit()"
+      @submit.prevent="submit"
     >
       <v-container class="d-flex flex-column gap-3">
 
@@ -186,7 +157,7 @@ async function submit() {
             label="Startzeit"
             type="datetime-local"
             v-model="fleventsEvent.startTime"
-            :rules="[() => fleventsEvent.startTime !== '' || 'Events müssen ein Startdatum haben.']"
+            :rules="[() => fleventsEvent.startTime !== '' || 'Events müssen Startdatum und -zeit haben.']"
             hide-details="auto"
             required
           />
@@ -194,7 +165,7 @@ async function submit() {
             label="Endzeit"
             type="datetime-local"
             v-model="fleventsEvent.endTime"
-            :rules="[() => fleventsEvent.endTime !== '' || 'Events müssen ein Enddatum haben.']"
+            :rules="[() => fleventsEvent.endTime !== '' || 'Events müssen Enddatum und -zeit haben.']"
             hide-details="auto"
             required
           />
