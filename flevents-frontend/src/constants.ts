@@ -88,3 +88,18 @@ export const VALIDATION = {
   MAX_ATTACHMENT_SIZE: Number.MAX_VALUE,
 
 }
+
+export const COLORS = {
+
+  /**
+   * Array of colors to use in charts.
+   */
+  CHART_COLORS: [
+    '#ffa8a8',
+    '#f2a4c7',
+    '#e4a2da',
+    '#ce9fe9',
+    '#b19dfa',
+  ],
+
+}

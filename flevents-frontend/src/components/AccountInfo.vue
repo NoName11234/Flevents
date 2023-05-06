@@ -3,7 +3,7 @@
     <div class="d-flex flex-row gap l-gap-huge">
         <v-avatar
           class="flex-grow-0"
-          :color="`rgb(${account.email.charCodeAt(0)*2},${account.firstname.charCodeAt(0)*2},${account.lastname.charCodeAt(0)*2})`"
+          :color="ColorService.getAvatarColor(account)"
           size="80"
         >
           <v-icon icon="mdi-account" size="50"></v-icon>
@@ -19,6 +19,8 @@
 <script setup lang="ts">
 import { Account } from '@/models/account'
 import {AccountPreview} from "@/models/accountPreview";
+import colorService from "@/service/colorService";
+import ColorService from "@/service/colorService";
 defineProps({
   account: {
     required: true,

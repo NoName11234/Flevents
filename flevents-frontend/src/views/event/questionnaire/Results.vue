@@ -3,10 +3,26 @@
 import {useRoute, useRouter} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {useSurveyStore} from "@/store/surveys";
-import DatetimeService from "@/service/datetimeService";
 import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
-import {computed, ref} from "vue";
+import {computed, onMounted, onUnmounted, ref} from "vue";
 import {useAppStore} from "@/store/app";
+import {Bar, Pie} from "vue-chartjs";
+import {
+  Chart,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  ArcElement,
+  ChartOptions, Legend, ScaleChartOptions,
+} from "chart.js";
+import StatisticsService from "@/service/statisticsService";
+import {SingleChoiceQuestionSummary} from "@/models/singleChoiceQuestionSummary";
+import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
+import {FreeTextQuestionSummary} from "@/models/freeTextQuestionSummary";
+import {Statistics} from "@/models/statistics";
+import SurveyStats from "@/components/SurveyStats.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -25,16 +41,21 @@ const statisticsStore = useSurveyStatisticsStore();
 const statistics = statisticsStore.getStatisticsGetterOf(questionnaireUuid);
 const statisticsLoading = computed(() => statisticsStore.specificLoading.get(questionnaireUuid));
 
+const diagramType = ref('bar');
+
 
 
 // Functionality for live-updating
 
 const liveUpdates = ref(false);
-const liveUpdateInterval = 10000;
-const liveUpdateHandlerFunction = async () => statisticsStore.hydrateSpecific(questionnaireUuid);
+const liveUpdateInterval = 2500;
+const liveUpdateHandlerFunction = () => {
+  statisticsStore.hydrateSpecific(questionnaireUuid);
+};
 let liveUpdateHandler: NodeJS.Timeout;
 
-updateLiveUpdates();
+onMounted(updateLiveUpdates);
+onUnmounted(() => clearInterval(liveUpdateHandler));
 
 function updateLiveUpdates() {
   if (liveUpdates.value !== true) {
@@ -45,34 +66,79 @@ function updateLiveUpdates() {
   liveUpdateHandler = setInterval(liveUpdateHandlerFunction, liveUpdateInterval);
 }
 
+const barChartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      display: false,
+    },
+  }
+} as ChartOptions;
+
+const pieChartOptions = {
+  responsive: true,
+  scales: {
+
+  } as ScaleChartOptions,
+  plugins: {
+    legend: {
+      display: true,
+      position: "right",
+    },
+  }
+} as ChartOptions;
+
+Chart.register(Title, Tooltip, BarElement, CategoryScale, LinearScale, ArcElement, Legend);
+
+function print() {
+  window.print();
+}
+
 </script>
 
 <template>
 
-  <Heading :text="questionnaire.title" />
+  <Heading :text="questionnaire.title ?? ''" />
 
   <v-card
     elevation="0"
     border
     class="border-dashed"
   >
-    <v-list>
-      <v-list-item
-        prepend-icon="mdi-timer-sand-complete"
-        subtitle="Einsendeschluss"
+    <SurveyStats
+      :questionnaire="questionnaire"
+      :statistics="statistics"
+    />
+    <v-divider class="border-dashed d-print-none"/>
+    <v-container class="d-flex flex-row justify-end align-center gap-3 d-print-none">
+      <v-spacer />
+      <v-btn
+        prepend-icon="mdi-printer"
+        variant="text"
+        @click="print"
       >
-        {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
-      </v-list-item>
-      <v-list-item
-        prepend-icon="mdi-file-document-multiple-outline"
-        subtitle="Anzahl der Einsendungen"
-      >
-        {{ statistics.value }}
-      </v-list-item>
-    </v-list>
+        Drucken
+      </v-btn>
+    </v-container>
   </v-card>
 
-  <v-container class="d-flex flex-row justify-end align-center gap">
+  <div class="d-flex flex-row justify-end align-center gap-3 d-print-none">
+    <v-btn-toggle
+      v-model="diagramType"
+      density="default"
+      variant="outlined"
+      color="primary"
+      mandatory
+    >
+      <v-btn
+        value="bar"
+        icon="mdi-chart-bar"
+      />
+      <v-btn
+        value="pie"
+        icon="mdi-chart-pie"
+      />
+    </v-btn-toggle>
     <v-switch
       label="Live"
       hide-details="auto"
@@ -89,15 +155,11 @@ function updateLiveUpdates() {
       color="primary"
       size="small"
     />
-  </v-container>
-
-  {{ statistics }}
-
-  <v-card>
-    Henlo
-  </v-card>
+  </div>
 
   <v-card
+    elevation="0"
+    border
     v-for="(question, index) in questionnaire.questions"
     :key="index"
   >
@@ -109,26 +171,48 @@ function updateLiveUpdates() {
 
     <v-divider />
 
-    <v-textarea
-      v-if="question.choices.length == 0"
-      hide-details="auto"
-      label="Eigene Antwort"
-      variant="solo"
-    >
-    </v-textarea>
+    <template v-if="(statistics as Statistics).questionSummaries?.length > 0">
+      <!-- Free Text Question -->
+      <v-list
+        v-if="question.choices.length == 0"
+        density="compact"
+      >
+        <v-list-item
+          v-for="[answer, count] of StatisticsService.unifyTextResults(statistics?.questionSummaries[index] as FreeTextQuestionSummary)"
+          :key="answer"
+        >
+          <v-badge
+            inline
+            color="secondary"
+            :content="count"
+          />
+          {{ answer }}
+        </v-list-item>
+      </v-list>
 
-    <v-radio-group
-      v-if="question.choices.length != 0"
-      hide-details="auto"
-      class="pa-2"
-    >
-      <v-radio
-        v-for="(option, oIndex) in question.choices"
-        :key="oIndex"
-        :value="option"
-        :label="option.choice"
-      />
-    </v-radio-group>
+      <!-- Single Choice Question -->
+      <v-container
+        v-if="question.choices.length != 0"
+      >
+        <v-window v-model="diagramType">
+          <v-window-item value="bar">
+            <Bar
+              class="w-100 h-100"
+              :options="barChartOptions"
+              :data="StatisticsService.toDiagramData(question as SingleChoiceQuestion, statistics.questionSummaries[index] as SingleChoiceQuestionSummary)"
+            />
+          </v-window-item>
+          <v-window-item value="pie">
+            <Pie
+              class="w-100 h-100 mx-auto"
+              style="max-width: 360px"
+              :options="pieChartOptions"
+              :data="StatisticsService.toDiagramData(question as SingleChoiceQuestion, statistics.questionSummaries[index] as SingleChoiceQuestionSummary)"
+            />
+          </v-window-item>
+        </v-window>
+      </v-container>
+    </template>
 
   </v-card>
 

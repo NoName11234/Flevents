@@ -1,28 +1,22 @@
 import { defineStore } from 'pinia'
-import AccountApi from "@/api/accountsApi";
-import {FleventsEvent} from "@/models/fleventsEvent";
-import {useAccountStore} from "@/store/account";
-import {Account} from "@/models/account";
-import eventApi from "@/api/eventsApi";
 import {computed} from "vue";
 import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
+import {Statistics} from "@/models/statistics";
 
 export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
   state: () => ({
-    cachedStatistics: new Map<string, Object>,
+    cachedStatistics: new Map<string, Statistics>,
     specificLoading: new Map<string, boolean>,
     specificError: new Map<string, boolean>,
     lastCaching: new Map<string, Date>,
-
-    loading: false,
   }),
   actions: {
     async hydrateSpecific(questionnaireUuid: string) {
       this.specificLoading.set(questionnaireUuid, true);
       try {
         const response = await questionnaireApi.getStatistics(questionnaireUuid);
-        this.cachedStatistics.set(questionnaireUuid, response.data as FleventsEvent);
+        this.cachedStatistics.set(questionnaireUuid, response.data as Statistics);
         this.lastCaching.set(questionnaireUuid, new Date());
         this.specificError.set(questionnaireUuid, false);
       } catch (e) {
@@ -48,7 +42,7 @@ export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
       ) {
         this.hydrateSpecific(questionnaireUuid);
       }
-      return requestedStatistics || {} as Object;
+      return requestedStatistics || {} as Statistics;
     },
 
     /**
@@ -60,7 +54,6 @@ export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
     },
 
     async dehydrate() {
-      this.loading = false;
       this.cachedStatistics = new Map();
       this.lastCaching = new Map();
       this.specificLoading = new Map();
