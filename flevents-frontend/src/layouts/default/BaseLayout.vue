@@ -1,13 +1,14 @@
 <template>
   <v-app class="bg-grey-lighten-4">
-    <default-bar />
-    <toast-display />
+    <default-bar class="d-print-none" />
+    <toast-display class="d-print-none" />
     <v-main class="c-main">
       <ContentFlexContainer>
         <router-view />
       </ContentFlexContainer>
     </v-main>
     <desktop-nav-bar
+      class="d-print-none"
       v-if="showDesktopBar"
       :show-personal="showPersonal"
       :show-managed="showManaged"
@@ -16,6 +17,7 @@
       :show-console="showConsole"
     />
     <mobile-nav-bar
+      class="d-print-none"
       v-if="showMobileBar"
       :show-personal="showPersonal"
       :show-managed="showManaged"
