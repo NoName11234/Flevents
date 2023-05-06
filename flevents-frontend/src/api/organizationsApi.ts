@@ -2,6 +2,7 @@ import api from "@/api/api";
 import {Organization} from "@/models/organization";
 import {OrganizationRole} from "@/models/organizationRole";
 import {ro} from "vuetify/locale";
+import {MailConfig} from "@/models/mailConfig";
 
 const base = `/organizations`
 
@@ -132,7 +133,9 @@ class OrganizationApi {
     });
   }
 
-
+  addMailConfig(organizationUuid : string, mailconfig : MailConfig){
+    return api.post(`${base}/${organizationUuid}/mailConfig`, mailconfig);
+  }
 
   // Collections
 

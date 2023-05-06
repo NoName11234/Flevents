@@ -10,4 +10,5 @@ import java.util.List;
 @Setter
 public class FreeTextQuestionSummary extends QuestionSummary{
     List<String> answers = new ArrayList<>();
+    QuestionType questionType = QuestionType.FreeTextQuestion;
 }

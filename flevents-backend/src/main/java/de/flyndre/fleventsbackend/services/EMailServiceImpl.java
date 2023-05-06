@@ -101,11 +101,12 @@ public class EMailServiceImpl implements EMailService{
         MailConfig mailConfig = organization.getMailConfig();
         if (
             mailConfig == null
-            || mailConfig.getOrganizationInvitation() == null
-            || mailConfig.getOrganizationInvitation().isEmpty()) {
+            || mailConfig.getOrganizationInvitation() == null || mailConfig.getOrganizationInvitation().equals("")
+            //|| mailConfig.getOrganizationInvitation().isEmpty()
+        ) {
             details.setMsgBody("You are invited to join the organization " + organization.getName() + " at the flevents event manage platform. To join click the following link: " + baseurl + ":" + frontendPort + "/organizations/join/" + organization.getUuid() + "?token=" + token);
         }else {
-            details.setMsgBody(organization.getMailConfig().getOrganizationInvitation().replace("<token>",token).replace("<organizationId>",organization.getUuid()));
+            details.setMsgBody(organization.getMailConfig().getOrganizationInvitation() + "\nUm beizutreten klicken sie auf folgenden Link: " + baseurl + ":" + frontendPort + "/organizations/join/" + organization.getUuid() + "?token=" + token);
         }
         sendSimpleEmail(details);
     }
@@ -127,7 +128,7 @@ public class EMailServiceImpl implements EMailService{
 
         if (
             mailConfig == null
-            || mailConfig.getRegisterMessage() == null
+            || mailConfig.getRegisterMessage() == null || mailConfig.getRegisterMessage().equals("")
             //|| mailConfig.getEventInvitation().isEmpty()
         ) {
             details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+":"+frontendPort+"/join/" +event.getUuid()+"?token="+token);
@@ -165,7 +166,7 @@ public class EMailServiceImpl implements EMailService{
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Reminder for event: "+event.getName());
 
-        if(event.getMailConfig().equals(null)){
+        if(event.getMailConfig() == null || event.getMailConfig().getInfoMessage().equals("")){
             details.setMsgBody("The event "+event.getName()+" starts tomorrow at "+event.getStartTime() + "! Dont miss it!");
         }else{
             details.setMsgBody(event.getMailConfig().getInfoMessage());
@@ -189,7 +190,7 @@ public class EMailServiceImpl implements EMailService{
         if(
             mailConfig == null
             || mailConfig.getFeedbackMessage() == null
-            || mailConfig.getFeedbackMessage().isEmpty()
+            || mailConfig.getFeedbackMessage().equals("")
         ){
             details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
         }else{

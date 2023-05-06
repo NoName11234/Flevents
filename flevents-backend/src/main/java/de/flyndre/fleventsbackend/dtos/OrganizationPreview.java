@@ -1,5 +1,6 @@
 package de.flyndre.fleventsbackend.dtos;
 
+import de.flyndre.fleventsbackend.Models.MailConfig;
 import de.flyndre.fleventsbackend.Models.Role;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class OrganizationPreview {
     private String icon;
     private Role role;
     private String address;
+    private MailConfig mailConfig;
     private String phoneContact;
     private String customerNumber;
 }
