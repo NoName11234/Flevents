@@ -149,7 +149,7 @@ public class EventService {
     public Event createEventInOrganization(Event event, FleventsAccount account, Organization organization){
         event.setUuid(null);
         event.setOrganization(organization);
-        mailConfigRepository.save(event.getMailConfig());
+        mailConfigRepository.save(organization.getMailConfig());
         event = eventRepository.save(event);
         addAccountToEvent(event,account,EventRole.organizer);
         return event;
