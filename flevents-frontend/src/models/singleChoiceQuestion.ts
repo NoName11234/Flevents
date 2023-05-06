@@ -1,7 +1,7 @@
-import {QuestionType} from "@/models/questionType";
+import {SingleChoiceQuestionChoice} from "@/models/singleChoiceQuestionChoice";
 
 export interface SingleChoiceQuestion {
   uuid: string;
   question: string;
-  choices: string[];
+  choices: SingleChoiceQuestionChoice[];
 }
