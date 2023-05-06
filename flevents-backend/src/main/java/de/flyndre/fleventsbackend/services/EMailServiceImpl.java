@@ -166,7 +166,7 @@ public class EMailServiceImpl implements EMailService{
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
         details.setSubject("Reminder for event: "+event.getName());
 
-        if(event.getMailConfig().equals(null)){
+        if(event.getMailConfig() == null || event.getMailConfig().getInfoMessage().equals("")){
             details.setMsgBody("The event "+event.getName()+" starts tomorrow at "+event.getStartTime() + "! Dont miss it!");
         }else{
             details.setMsgBody(event.getMailConfig().getInfoMessage());
@@ -190,7 +190,7 @@ public class EMailServiceImpl implements EMailService{
         if(
             mailConfig == null
             || mailConfig.getFeedbackMessage() == null
-            || mailConfig.getFeedbackMessage().isEmpty()
+            || mailConfig.getFeedbackMessage().equals("")
         ){
             details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
         }else{
