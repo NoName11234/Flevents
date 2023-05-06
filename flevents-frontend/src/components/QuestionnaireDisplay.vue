@@ -13,6 +13,7 @@ import DatetimeService from "@/service/datetimeService";
 import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
 import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
+import SurveyStats from "@/components/SurveyStats.vue";
 
 const props = defineProps({
   questionnaire: {
@@ -183,35 +184,16 @@ function hasRights() {
       <div class="d-flex flex-column gap-3 my-3">
 
         <v-card
-          :loading="statisticsLoading"
           v-if="hasRights()"
           elevation="0"
           border
           class="border-dashed"
         >
 
-          <v-list>
-            <v-list-item
-              prepend-icon="mdi-star-four-points-outline"
-              subtitle="Erstelldatum"
-            >
-              {{ DatetimeService.getDateTime(new Date(questionnaire.creationDate)) }}
-            </v-list-item>
-            <v-list-item
-              prepend-icon="mdi-timer-sand-complete"
-              subtitle="Einsendeschluss"
-            >
-              {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
-            </v-list-item>
-            <template v-if="!statisticsError">
-              <v-list-item
-                prepend-icon="mdi-file-document-multiple-outline"
-                subtitle="Anzahl der Einsendungen"
-              >
-                {{ statistics.value }}
-              </v-list-item>
-            </template>
-          </v-list>
+          <SurveyStats
+            :questionnaire="questionnaire"
+            :statistics="statistics"
+          />
 
           <v-divider class="border-dashed" />
 

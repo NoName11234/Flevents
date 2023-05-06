@@ -3,7 +3,6 @@
 import {useRoute, useRouter} from "vue-router";
 import Heading from "@/components/Heading.vue";
 import {useSurveyStore} from "@/store/surveys";
-import DatetimeService from "@/service/datetimeService";
 import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
 import {computed, ref} from "vue";
 import {useAppStore} from "@/store/app";
@@ -23,6 +22,7 @@ import {SingleChoiceQuestionSummary} from "@/models/singleChoiceQuestionSummary"
 import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {FreeTextQuestionSummary} from "@/models/freeTextQuestionSummary";
 import {Statistics} from "@/models/statistics";
+import SurveyStats from "@/components/SurveyStats.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -104,20 +104,10 @@ function print() {
     border
     class="border-dashed"
   >
-    <v-list>
-      <v-list-item
-        prepend-icon="mdi-timer-sand-complete"
-        subtitle="Einsendeschluss"
-      >
-        {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
-      </v-list-item>
-      <v-list-item
-        prepend-icon="mdi-file-document-multiple-outline"
-        subtitle="Anzahl der Einsendungen"
-      >
-        {{ (statistics as Statistics).userCount }}
-      </v-list-item>
-    </v-list>
+    <SurveyStats
+      :questionnaire="questionnaire"
+      :statistics="statistics"
+    />
     <v-divider class="border-dashed d-print-none"/>
     <v-container class="d-flex flex-row justify-end align-center gap-3 d-print-none">
       <v-spacer />
