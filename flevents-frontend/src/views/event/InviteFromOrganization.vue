@@ -94,7 +94,7 @@ async function submit() {
         <v-combobox
           v-model="select"
           :items="items"
-          :item-title="item => {return `${item.firstname} ${item.lastname}`}"
+          :item-title="item => {return `${item.firstname} ${item.lastname} (${item.email})`}"
           return-object
           label="Mitglieder der Organisation"
           multiple
