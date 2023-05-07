@@ -35,9 +35,11 @@
       >
         Passwort vergessen
       </v-btn>
+      <v-spacer />
       <v-btn
         :to="{ name: 'accounts.create', query: route.query }"
-        variant="text"
+        variant="tonal"
+        color="primary"
       >
         Registrieren
       </v-btn>
