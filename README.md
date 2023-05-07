@@ -80,7 +80,7 @@ flevents-frontend/
     ├───plugins/        (plugin-definitions)
     ├───router/         (routes of the veiws)
     ├───service/        (services used at various places in the application)
-    ├───store/          (frontend-stores state-management)
+    ├───store/          (frontend-stores for state-management and data-keeping)
     ├───styles/         (CSS)
     └───views/          (views for routes)
         ├───accounts/
