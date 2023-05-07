@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
  */
 
 @RestController
-@CrossOrigin   //TODO: Brauchts das wirklich?
 @RequestMapping("/api/organizations")
 public class OrganizationController {
    private final OrganizationControllerService organizationControllerService;
