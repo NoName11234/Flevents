@@ -47,8 +47,7 @@ const eventList = computed(() => {
       e.description?.toLowerCase().includes(queryText)
       || e.name?.toLowerCase().includes(queryText)
       || e.location?.toLowerCase().includes(queryText)
-      || e.organizationPreview?.name.toLowerCase().includes(queryText)
-      || e.organizationPreview?.description.toLowerCase().includes(queryText)
+      || e.organizationPreview?.name?.toLowerCase().includes(queryText)
     );
   }
 
