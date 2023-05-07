@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import Heading from "@/components/Heading.vue";
 import {computed, Ref, ref} from "vue";
-import {Account} from "@/models/account";
-import axios, {AxiosError, HttpStatusCode} from "axios";
+import axios, {AxiosError} from "axios";
 import {useRouter} from "vue-router";
-import security from "@/service/security";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import accountApi from "@/api/accountsApi";

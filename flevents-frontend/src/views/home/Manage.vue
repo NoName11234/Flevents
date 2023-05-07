@@ -49,13 +49,10 @@
 import EventList from "@/layouts/home/EventList.vue";
 import {computed} from "vue";
 import Heading from "@/components/Heading.vue";
-import security from "@/service/security";
-import {Account} from "@/models/account";
 import {OrganizationRole} from "@/models/organizationRole";
 import {useEventStore} from "@/store/events";
 import {storeToRefs} from "pinia";
 import {useOrganizationStore} from "@/store/organizations";
-import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 
 const eventStore = useEventStore();
