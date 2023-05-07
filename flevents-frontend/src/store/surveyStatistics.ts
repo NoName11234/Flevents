@@ -13,6 +13,10 @@ export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
   }),
   actions: {
     async hydrateSpecific(questionnaireUuid: string) {
+      if (this.specificLoading.get(questionnaireUuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.specificLoading.set(questionnaireUuid, true);
       try {
         const response = await questionnaireApi.getStatistics(questionnaireUuid);

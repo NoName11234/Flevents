@@ -30,6 +30,10 @@ export const usePlatformStore = defineStore('platform', {
      * Hydrates the store by requesting the data from the api.
      */
     async hydrate() {
+      if (this.loading === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.error = false;
       this.loading = true;
       try {
@@ -52,6 +56,10 @@ export const usePlatformStore = defineStore('platform', {
     },
 
     async hydrateSpecific(uuid: string) {
+      if (this.specificLoading.get(uuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.error = false;
       this.specificLoading.set(uuid, true);
       try {

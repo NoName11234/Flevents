@@ -109,13 +109,6 @@ async function leaveOrganization() {
       elevation="5"
       @click="showDeleteDialog = true"
     />
-<!--    <v-btn-->
-<!--      class="mt-n8 mr-5"-->
-<!--      color="primary"-->
-<!--      icon="mdi-logout-variant"-->
-<!--      elevation="5"-->
-<!--      @click="/* resetCookie(); */ security.resetAccount(); router.push({ name: 'home' });"-->
-<!--    />-->
   </div>
   <v-card>
     <v-card-title>

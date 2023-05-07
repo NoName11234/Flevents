@@ -51,9 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from "vue";
 import router from "@/router";
-import security from "@/service/security";
 import {useAppStore} from "@/store/app";
 import {storeToRefs} from "pinia";
 import {logout as authLogout} from "@/service/authService";
@@ -71,7 +69,6 @@ const props = defineProps({
   }
 });
 
-const account : any = ref(security.getAccount());
 const appStore = useAppStore();
 const { globallyLoading, loggedIn } = storeToRefs(appStore);
 
