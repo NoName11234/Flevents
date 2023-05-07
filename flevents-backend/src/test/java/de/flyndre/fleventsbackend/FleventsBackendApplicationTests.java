@@ -33,7 +33,8 @@ class FleventsBackendApplicationTests {
 	@Autowired
 	private MockMvc mockMvc;
 
-	String accesstoken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI0MDI4MzJkMjg3Y2NkZWNhMDE4N2NjZjllNGZkMDAwMyIsImlhdCI6MTY4Mjg2NzA3NywiZXhwIjoxNjgyOTUzNDc3fQ.EGGjwa2-V6tdPeagcdBL6bhpZAwZsY_ZURhIsLMIS2na7b5xJRpz5CnPg-QcWyYMczJHuFNZ8iE11PvfBomlsA";
+	String uuid="";
+	String accesstoken = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI0MDI4MzJkMjg3Y2NkZWNhMDE4N2NjZTFiYzQ2MDAwMCIsImlhdCI6MTY4MzQ3NTk0MSwiZXhwIjoxNjgzNTYyMzQxfQ.Ic6CAIGhHVgjvWW0H3ZlxhArQEhcU3nqhpgKBxp50Mu0WPVyCcqbJ08LB9bkwqBZFyJ5_guvwKciSDeiA1MOSw";
 	@Mock
 	ApiService apiService;
 
@@ -126,17 +127,18 @@ class FleventsBackendApplicationTests {
 
 	/*
 	* Kann so nicht funktionieren, falsche API-Adresse
+	* sollte gefixt sein
 	* */
 	@Test
 	@WithMockUser
 	void getCheckedInTest() throws  Exception {
-		mockMvc.perform(get("/{eventId}/checkedIns", "2c9180848752d53801875315d979000b")).andExpect(status().isOk());
+		mockMvc.perform(get("/api/{eventId}/check-ins", "2c9180848752d53801875315d979000b")).andExpect(status().isOk());
 	}
 
 	@Test
 	void postEvent() throws  Exception {
 		login();
-		mockMvc.perform(post("/api/organizations/{orgaUuid}/create-event", "402882e487ae5aa40187ae5f243c0001").header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Testevent\",\"description\":\"Testbeschreibung\",\"startTime\":\"2023-04-23T12:30\",\"endeTime\":\"2023-04-23T13:30\",\"location\":\"Horb a.N.\"}")).andExpect(status().isOk());
+		mockMvc.perform(post("/api/organizations/{orgaUuid}/create-event", "402832d287f731910187f7319d180001").header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Testevent\",\"description\":\"Testbeschreibung\",\"startTime\":\"2023-04-23T12:30\",\"endeTime\":\"2023-04-23T13:30\",\"location\":\"Horb a.N.\"}")).andExpect(status().isOk());
 	}
 
 	@Test
@@ -144,7 +146,7 @@ class FleventsBackendApplicationTests {
 		mockMvc.perform(post("/api/accounts").contentType(MediaType.APPLICATION_JSON).content("{\n" +
 				"    \"firstname\":\"tete\",\n" +
 				"    \"lastname\":\"tester\",\n" +
-				"    \"email\":\"test@test.de\",\n" +
+				"    \"email\":\"test@flevents.de\",\n" +
 				"    \"secret\":\"123\"\n" +
 				"\n" +
 				"}")).andExpect(status().isOk());
@@ -153,8 +155,14 @@ class FleventsBackendApplicationTests {
 	@Test
 	@WithMockUser
 	void createOrganization() throws  Exception {
-		//TODO: Implement
-		//mockMvc.perform(get("/{eventId}/checkedIns", "2c9180848752d53801875315d979000b")).andExpect(status().isOk());
+		MvcResult mvcResult =  mockMvc.perform(post("/api/platform/organizations?email=test@flyndre.de").header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken).contentType(MediaType.APPLICATION_JSON).content(
+				"{"+
+						"\"name\": \"TestOrga\","+
+						"\"customerNumber\": \"99999\","+
+						"\"phoneContact\":\"012345678910\""+
+						"}"
+		)).andExpect(status().isCreated()).andReturn();
+		uuid = mvcResult.getResponse().getContentAsString().split("\"")[3];
 	}
 
 	@Test
@@ -164,6 +172,38 @@ class FleventsBackendApplicationTests {
 				"    \"token\":\""+ accesstoken +"\"" +
 				"}")).andExpect(status().isOk());
 	}
+	/*
+	@Test
+	void setMailConfig() throws Exception {
+		String mainConfig =
+				"{" +
+				"\"registerMessage\": \"TestReg\","+
+				"\"infoMessage\": \"TestInfo\",\n"+
+				"\"infoMessageTime\": \"2023-05-20T10:40:00\","+
+				"\"feedbackMessage\": \"TestFeedback\","+
+				"\"feedbackMessageTime\": \"2023-05-20T10:40:00\","+
+				"\"organizationInvitation\": \"TestOrgaInvite\","+
+				"\"eventInvitation\": \"TestEventInvite\""+
+				"}";
+		String url = "/api/organization/"+uuid+"/mailConfig";
+		mockMvc.perform(post(url).header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken).contentType(MediaType.APPLICATION_JSON).content(
+			mainConfig)).andExpect(status().isCreated());
+	}
 
+	@Test
+	void getMailConfig() throws Exception {
+		String mainConfig =
+				"{" +
+						"\"registerMessage\": \"TestReg\","+
+						"\"infoMessage\": \"TestInfo\",\n"+
+						"\"infoMessageTime\": \"2023-05-20T10:40:00\","+
+						"\"feedbackMessage\": \"TestFeedback\","+
+						"\"feedbackMessageTime\": \"2023-05-20T10:40:00\","+
+						"\"organizationInvitation\": \"TestOrgaInvite\","+
+						"\"eventInvitation\": \"TestEventInvite\""+
+						"}";
+		mockMvc.perform(get("/api/organization/"+uuid+"/mailConfig").header(HttpHeaders.AUTHORIZATION, "Bearer " + accesstoken)).andExpect(status().isOk());
+	}
+	*/
 
 }
