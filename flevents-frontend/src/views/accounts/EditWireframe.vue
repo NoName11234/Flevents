@@ -17,15 +17,6 @@ const account : Ref<Partial<Account>> = ref({
   secret: ""
 })
 
-
-// onBeforeMount(async () => {
-//   adress.value = route.params.uuid as string;
-//   console.log(adress.value);
-//   const response = await axios.get(`http://h3005487.stratoserver.net:8082/api/accounts/${adress.value}`);
-//   console.log(response);
-//   response.status == 200? account.value = response.data : -1;
-// })
-
 </script>
 <template>
   <h1>Nutzer bearbeiten</h1>

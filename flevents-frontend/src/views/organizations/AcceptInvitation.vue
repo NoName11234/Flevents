@@ -216,7 +216,6 @@ async function performLogin() {
   showDialog.value = true;
 }
 async function enroll(){
-  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
     await OrganizationsApi.acceptInvitation(organizationUuid,  invitationToken);
     appStore.addToast({

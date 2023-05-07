@@ -43,8 +43,6 @@ const fleventsEvent = ref((props.presetEvent ?
   }
 ) as FleventsEvent);
 
-console.log(fleventsEvent.value);
-
 const eventStore = useEventStore();
 
 const organizationStore = useOrganizationStore();
@@ -57,7 +55,6 @@ const imageFile: Ref<Array<File>> = ref([]);
 
 // image
 function previewImage(e: any) {
-  console.log(imageFile.value.length);
   const file = e.target.files[0];
   imgUrl.value = URL.createObjectURL(file);
 }

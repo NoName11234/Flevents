@@ -45,7 +45,6 @@ async function submit() {
   }
   formLoading.value = true;
   try {
-    console.log(api.defaults.headers.common['Authorization']);
     const response = await accountApi.editMe(account.value);
     if (Math.floor(response.status/100) !== 2) {
       throw new Error(`Request failed ${response}`);

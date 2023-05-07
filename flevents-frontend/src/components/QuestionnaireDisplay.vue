@@ -58,12 +58,8 @@ if (hasRights()) {
 onMounted(setup);
 async function setup() {
   loading.value = true;
-  console.log(props.questionnaire);
-  console.log(aq.value.answers);
   try {
     const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
-    console.log("11111111111111")
-    console.log(response);
     aq.value = response.data as AnsweredQuestionnaire;
     alreadyVoted.value = true;
   } catch (e) {
@@ -82,10 +78,7 @@ async function submitAnswers(pendingValidation: Promise<any>) {
   }
   loading.value = true;
   try {
-    console.log("------------------------")
-    console.log(aq);
     const response = await QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
-    console.log(response);
     alreadyVoted.value = true;
     // TODO: replace with async store hydration
     appStore.addToast({
