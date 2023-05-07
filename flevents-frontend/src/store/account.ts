@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import api from "@/api/api";
 import {Account} from "@/models/account";
 import {useAppStore} from "@/store/app";
 import {STORES} from "@/constants";
@@ -19,6 +18,10 @@ export const useAccountStore = defineStore({
   }),
   actions: {
     async hydrate() {
+      if (this.loading === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.loading = true;
       this.error = false;
       const appStore = useAppStore();

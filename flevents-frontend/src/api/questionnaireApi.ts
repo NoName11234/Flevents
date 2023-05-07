@@ -58,7 +58,6 @@ class QuestionnaireApi {
    * @param questionnaireId the Uuid of the questionnaire
    */
   saveAnswer(answeredQuestionnaire : AnsweredQuestionnaire, questionnaireId : string){
-    console.log(answeredQuestionnaire);
     return api.post(`/questionnaires/${questionnaireId}/answers`, answeredQuestionnaire)
   }
 

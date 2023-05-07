@@ -43,6 +43,10 @@ export const useEventStore = defineStore('events', {
      * Hydrates the store by requesting the data from the api.
      */
     async hydrate() {
+      if (this.loading === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.error = false;
       this.loading = true;
       const accountStore = useAccountStore();
@@ -81,6 +85,10 @@ export const useEventStore = defineStore('events', {
     },
 
     async hydrateSpecific(uuid: string) {
+      if (this.specificLoading.get(uuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.error = false;
       this.specificLoading.set(uuid, true);
       try {

@@ -235,8 +235,6 @@ let firstLoad = true;
  * Navigation guard to check for logged-in status and redirect to /login.
  */
 router.beforeEach(async (to, from) => {
-  // console.log(document.cookie);
-  // console.log(router.currentRoute.value);
   const loginRoute = {
     name: 'accounts.login',
     query: { location: encodeURIComponent(to.fullPath) }

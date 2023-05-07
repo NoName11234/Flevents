@@ -284,7 +284,6 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
   organizationStore.hydrate();
 }
 
-onMounted(() => {console.log(organization)});
 async function updateMailConfig(config: MailConfig) {
   try {
     const response = await organizationsApi.addMailConfig(organization.value.uuid, config);
