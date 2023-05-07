@@ -1,5 +1,8 @@
 <script setup lang="ts">
 
+import {useAppStore} from "@/store/app";
+import {storeToRefs} from "pinia";
+
 const props = defineProps({
   showPersonal: {
     required: false,
@@ -28,12 +31,16 @@ const props = defineProps({
   }
 });
 
+const appStore = useAppStore();
+const { globallyLoading, loggedIn } = storeToRefs(appStore);
+
 </script>
 
 <template>
   <v-card
     class="c-navigation-menu"
     elevation="0"
+    :disabled="!loggedIn || globallyLoading"
     border
   >
     <v-list

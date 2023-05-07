@@ -1,6 +1,8 @@
 <script setup lang="ts">
 
 import {useDisplay} from "vuetify";
+import {useAppStore} from "@/store/app";
+import {storeToRefs} from "pinia";
 
 const props = defineProps({
   showPersonal: {
@@ -30,6 +32,9 @@ const props = defineProps({
   }
 });
 
+const appStore = useAppStore();
+const { globallyLoading, loggedIn } = storeToRefs(appStore);
+
 const { xs: chevronBreakpoint } = useDisplay();
 
 const minWidth = '130px';
@@ -41,6 +46,7 @@ const minWidth = '130px';
     :elevation="5"
     color="primary"
     style="height: auto"
+    :disabled="!loggedIn || globallyLoading"
   >
     <div
       class="d-flex flex-row overflow-x-auto"
