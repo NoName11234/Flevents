@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +27,7 @@ public class EventService {
     private EventRegistrationRepository eventRegistrationRepository;
     private EventRepository eventRepository;
     private final MailConfigRepository mailConfigRepository;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
     public EventService(EventRegistrationRepository eventRegistrationRepository, EventRepository eventRepository, MailConfigRepository mailConfigRepository){
         this.eventRegistrationRepository = eventRegistrationRepository;
@@ -161,9 +163,19 @@ public class EventService {
      * @param eventId the id of the event to be set
      * @param event the event to be set to the given id
      * @return the overwritten event
+     * @throws IllegalArgumentException if the times aren't in the right order.
      */
     public Event setEventById(String eventId, Event event){
         Event srcEvent = eventRepository.findById(eventId).get();
+        if(event.getStartTime()!=null&&event.getEndTime()==null&&event.getStartTime().isAfter(srcEvent.getEndTime())) {
+            throw new IllegalArgumentException(strings.getString("event.NoValidTime"));
+        }
+        if(event.getEndTime()!=null&&event.getEndTime()==null&&event.getEndTime().isBefore(srcEvent.getStartTime())){
+            throw new IllegalArgumentException(strings.getString("event.NoValidTime"));
+        }
+        if(event.getEndTime()!=null&&event.getEndTime()!=null&&event.getEndTime().isBefore(event.getStartTime())){
+            throw new IllegalArgumentException(strings.getString("event.NoValidTime"));
+        }
         srcEvent.merge(event);
         srcEvent = eventRepository.save(srcEvent);
         return srcEvent;

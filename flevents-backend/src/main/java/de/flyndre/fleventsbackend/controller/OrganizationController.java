@@ -60,15 +60,22 @@ public class OrganizationController {
 
       boolean grantedAccess = organizationControllerService.getGranted(auth, organizationId, Arrays.asList(OrganizationRole.admin,OrganizationRole.organizer));
       UserDetailsImpl authUser = (UserDetailsImpl) auth.getPrincipal();
-      if(grantedAccess){
-         try {
-            return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
-         }catch (Exception e){
-            logger.error(strings.getString("logger.InternalError"),e);
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
-         }
+      if(!grantedAccess) {
+         return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
       }
-      return new ResponseEntity(null, HttpStatus.UNAUTHORIZED);
+      if(event.getName()==null||event.getName().isBlank()){
+         return new ResponseEntity(strings.getString("organizationController.NoEventName"),HttpStatus.BAD_REQUEST);
+      }
+      if(event.getStartTime()==null||event.getEndTime()==null||event.getStartTime().isAfter(event.getEndTime())){
+         return new ResponseEntity(strings.getString("organizationController.NoValidTimes"),HttpStatus.BAD_REQUEST);
+      }
+      try {
+         return new ResponseEntity(mapper.map(organizationControllerService.createEvent(organizationId, event, authUser.getId()),EventInformation.class), HttpStatus.CREATED);
+      }catch (Exception e){
+         logger.error(strings.getString("logger.InternalError"),e);
+         return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
    }
 
    /**

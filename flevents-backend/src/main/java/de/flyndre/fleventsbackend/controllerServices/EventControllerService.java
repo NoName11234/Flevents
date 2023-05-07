@@ -12,6 +12,7 @@ import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.ResourceBundle;
 
 /**
  * This Class is the service for the EventController class.
@@ -30,6 +31,7 @@ public class EventControllerService {
     private final InvitationTokenService invitationTokenService;
     private final PostService postService;
     private final AuthService authService;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
     public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService, PostService postService, AuthService authService){
         this.eventService = eventService;
@@ -123,6 +125,7 @@ public class EventControllerService {
      * @param eventId the id of the event to be set
      * @param event the event to be set to the given id
      * @return updated event
+     * @throws IllegalArgumentException if the times aren't in the right order.
      */
     public Event setEventById(String eventId, Event event){
         return eventService.setEventById(eventId,event);
@@ -155,6 +158,9 @@ public class EventControllerService {
      */
     public void acceptInvitation(String eventId, String accountId, String token) throws InvalidAttributesException {
         Event event = getEventById(eventId);
+        if(LocalDateTime.now().isAfter(event.getEndTime())){
+            throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
+        }
         FleventsAccount account = accountService.getAccountById(accountId);
         InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
         eventService.acceptInvitation(event,account,EventRole.valueOf(invitationToken.getRole()));
@@ -203,8 +209,12 @@ public class EventControllerService {
      * @param mailAddress the mail adr ess to be added
      */
     public void registerAnonymousAccountToEvent(String eventId, String mailAddress){
+        Event event = getEventById(eventId);
+        if(LocalDateTime.now().isAfter(event.getEndTime())){
+            throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
+        }
         FleventsAccount account = accountService.createAnonymousAccount(mailAddress);
-        eventService.addAccountToEvent(getEventById(eventId),account,EventRole.attendee);
+        eventService.addAccountToEvent(event,account,EventRole.attendee);
     }
 
     /**
@@ -304,6 +314,10 @@ public class EventControllerService {
      * @param accountId the account to be added.
      */
     public void addAccountToEvent(String eventId, String accountId) {
-        eventService.addAccountToEvent(getEventById(eventId),accountService.getAccountById(accountId),EventRole.attendee);
+        Event event = getEventById(eventId);
+        if(LocalDateTime.now().isAfter(event.getEndTime())){
+            throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
+        }
+        eventService.addAccountToEvent(event,accountService.getAccountById(accountId),EventRole.attendee);
     }
 }
