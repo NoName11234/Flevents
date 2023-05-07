@@ -73,7 +73,7 @@ const barChartOptions = {
       display: false,
     },
   }
-} as ChartOptions;
+} as any;
 
 const pieChartOptions = {
   responsive: true,
@@ -86,7 +86,7 @@ const pieChartOptions = {
       position: "right",
     },
   }
-} as ChartOptions;
+} as any;
 
 Chart.register(Title, Tooltip, BarElement, CategoryScale, LinearScale, ArcElement, Legend);
 

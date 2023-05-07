@@ -19,7 +19,6 @@
 <script setup lang="ts">
 import { Account } from '@/models/account'
 import {AccountPreview} from "@/models/accountPreview";
-import colorService from "@/service/colorService";
 import ColorService from "@/service/colorService";
 defineProps({
   account: {

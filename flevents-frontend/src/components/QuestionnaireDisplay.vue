@@ -49,9 +49,25 @@ const aq = ref({
 const alreadyVoted = ref(false);
 const loading = ref(true);
 
+const hasRights = computed(() => {
+  let eventRoles = [
+    EventRole.tutor,
+    EventRole.organizer,
+  ];
+  let hasEventRights = props.event?.accountPreviews.find(a => a.uuid === accountStore.currentAccount!.uuid && eventRoles.includes(a.role as EventRole))
+  if (hasEventRights) return true;
+  let organizationRoles = [
+    OrganizationRole.admin,
+    OrganizationRole.organizer,
+  ];
+  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
+  if (hasOrganizationRights) return true;
+  return false;
+});
+
 const statisticsStore = useSurveyStatisticsStore();
 let statistics = ref({} as Statistics);
-if (hasRights()) {
+if (hasRights.value) {
   statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
 }
 
@@ -135,22 +151,6 @@ async function deleteQuestionnaire() {
     });
   }
   loading.value = false;
-}
-
-function hasRights() {
-  let eventRoles = [
-    EventRole.tutor,
-    EventRole.organizer,
-  ];
-  let hasEventRights = props.event?.accountPreviews.find(a => a.uuid === accountStore.currentAccount!.uuid && eventRoles.includes(a.role as EventRole))
-  if (hasEventRights) return true;
-  let organizationRoles = [
-    OrganizationRole.admin,
-    OrganizationRole.organizer,
-  ];
-  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
-  if (hasOrganizationRights) return true;
-  return false;
 }
 
 </script>
@@ -257,7 +257,7 @@ function hasRights() {
 
           <div class="d-flex flex-column flex-sm-row justify-end gap">
             <v-btn
-              v-if="hasRights()"
+              v-if="hasRights"
               prepend-icon="mdi-delete"
               color="error"
               variant="text"
