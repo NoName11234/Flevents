@@ -3,7 +3,6 @@ import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {STORES} from "@/constants";
 import {computed} from "vue";
-import {FleventsEvent} from "@/models/fleventsEvent";
 
 export const usePostStore = defineStore('posts', {
   state: () => ({
@@ -13,6 +12,7 @@ export const usePostStore = defineStore('posts', {
     cachedPosts: new Map<string, Post>(),
     specificLoading: new Map<string, boolean>,
     lastCaching: new Map<string, Date>,
+    specificError: new Map<string, boolean>,
 
     loading: false,
     error: false,
@@ -24,8 +24,11 @@ export const usePostStore = defineStore('posts', {
      * @param eventUuid the uuid of the event associated with requested posts
      */
     async hydrateSpecific(eventUuid: string) {
-      this.loading = true;
-      this.error = false;
+      if (this.specificLoading.get(eventUuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
+      this.specificLoading.set(eventUuid, true);
       try {
         const { data } = await postApi.getOf(eventUuid);
         let postsOfEvent = data as Post[];
@@ -38,11 +41,13 @@ export const usePostStore = defineStore('posts', {
           postsOfEvent.map(p => p.uuid)
         );
         this.lastSuccessfulHydration.set(eventUuid, new Date());
+        this.specificError.set(eventUuid, false);
       } catch (e) {
         console.warn(`Failed to fetch posts for event with id ${eventUuid}.`, e);
+        this.specificError.set(eventUuid, true);
         this.error = true;
       }
-      this.loading = false;
+      this.specificLoading.set(eventUuid, false);
     },
 
     /**
@@ -98,5 +103,16 @@ export const usePostStore = defineStore('posts', {
         set: (e) => this.setEvent(e),
       });
     },
+
+    async dehydrate() {
+      this.postsOfEvents = new Map();
+      this.cachedPosts = new Map();
+      this.lastCaching = new Map();
+      this.specificLoading = new Map();
+      this.specificError = new Map();
+      this.lastSuccessfulHydration = new Map();
+      this.loading = false;
+      this.error = false;
+    }
   },
 })

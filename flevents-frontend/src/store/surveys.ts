@@ -3,7 +3,6 @@ import {Questionnaire} from "@/models/questionnaire";
 import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {computed} from "vue";
-import {Post} from "@/models/post";
 
 export const useSurveyStore = defineStore('surveys', {
   state: () => ({
@@ -20,6 +19,10 @@ export const useSurveyStore = defineStore('surveys', {
      * @param uuid the uuid of the questionnaire
      */
     async hydrateSpecific(uuid: string) {
+      if (this.specificLoading.get(uuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.specificLoading.set(uuid, true);
       try {
         const { data } = await questionnaireApi.get(uuid);
@@ -38,6 +41,10 @@ export const useSurveyStore = defineStore('surveys', {
      * @param eventUuid the uuid of the event associated with requested posts
      */
     async hydrateSpecificOf(eventUuid: string) {
+      if (this.specificLoading.get(eventUuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.specificLoading.set(eventUuid, true);
       try {
         const { data } = await questionnaireApi.getOf(eventUuid);
