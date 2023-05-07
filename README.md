@@ -49,13 +49,13 @@ Contains the Backend-Application.
             │   AppConfiguration.java               (configuration for mappings etc.)
             │   FleventsBackendApplication.java     (the entry-point for the server-application)
             │   WebConfiguration.java
-            ├───controller                          (controllers for ahndling incoming requests)
-            ├───controllerServices                  (services for controller-logic)
-            ├───dtos                                (data-to-object models)
-            ├───Models                              (model-classes for data structure)
-            ├───repositories                        (definition of repositories for data base access)
-            ├───security                            (configuration and logic for handling authentication and authorization)
-            └───services                            (services for business logic)
+            ├───controller/                         (controllers for ahndling incoming requests)
+            ├───controllerServices/                 (services for controller-logic)
+            ├───dtos/                               (data-to-object models)
+            ├───Models/                             (model-classes for data structure)
+            ├───repositories/                       (definition of repositories for data base access)
+            ├───security/                           (configuration and logic for handling authentication and authorization)
+            └───services/                           (services for business logic)
 ```
 
 ### /flevents-frontend
