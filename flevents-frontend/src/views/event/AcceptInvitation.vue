@@ -351,7 +351,7 @@ async function enroll(){
 }
 async function performAnonLogin(){
   try {
-    const response = await eventApi.registerAnonymously(eventUuid, account.value.email as string, invitationToken);
+    const response = await eventApi.acceptInvitationAnonymously(eventUuid, account.value.email as string, invitationToken);
     appStore.addToast({
       text: `Sie sind dem Event anonym mit ihrer E-Mail-Adresse beigetreten.`,
       color: "success",

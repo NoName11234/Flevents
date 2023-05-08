@@ -20,9 +20,7 @@ const router = useRouter();
 
 const eventUuid = route.params.uuid as string;
 const address = ref("");
-const chips =  ref(new Array<any>());
 const tooltip = ref('');
-const role = ref(EventRole.attendee) as Ref<EventRole.attendee|EventRole.tutor>;
 const loading = ref(true);
 const appStore = useAppStore();
 const items = ref([] as AccountPreview[]);
@@ -34,11 +32,6 @@ const accountStore = useAccountStore();
 const event = eventStore.getEventGetter(eventUuid);
 const organization = orgaStore.getOrganizationGetter(event.value.organizationPreview.uuid);
 const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'attendees' } };
-
-const selectableRoles = [
-  EventRole.attendee,
-  EventRole.tutor,
-];
 
 onBeforeMount(() => {
   organization.value.accountPreviews.forEach(obj => {
@@ -52,9 +45,6 @@ onBeforeMount(() => {
   loading.value = false;
 })
 
-function remove(item: any){
-  chips.value.splice(chips.value.indexOf(item), 1)
-}
 // submit
 async function submit() {
   let failedInvitations = [];
@@ -62,7 +52,7 @@ async function submit() {
   for (const obj of select.value) {
     try {
       const response = await eventApi.bookAccount(eventUuid, obj.uuid);
-      successfulInvitations.push(`${obj.firstname} ${obj.lastname}`);
+      successfulInvitations.push(obj.email);
     } catch (e) {
       failedInvitations.push(obj.email);
     }
@@ -94,12 +84,13 @@ async function submit() {
         <v-combobox
           v-model="select"
           :items="items"
-          :item-title="item => {return `${item.firstname} ${item.lastname} (${item.email})`}"
-          return-object
+          :item-title="item => `${item.firstname} ${item.lastname} (${item.email})`"
           label="Mitglieder der Organisation"
+          messages="Rollen können nach dem Hinzufügen in der Teilnehmerübersicht zugewiesen werden."
           menu-icon="mdi-chevron-down"
-          multiple
           hide-details="auto"
+          return-object
+          multiple
         >
           <template v-slot:selection="data">
             <v-chip
@@ -114,13 +105,6 @@ async function submit() {
             </v-chip>
           </template>
         </v-combobox>
-        <v-select
-          label="Zugewiesene Rolle"
-          hide-details="auto"
-          :items="selectableRoles"
-          v-model="role"
-          menu-icon="mdi-chevron-down"
-        />
       </v-container>
 
       <v-divider />
