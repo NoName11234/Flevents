@@ -219,7 +219,7 @@ import eventApi from "@/api/eventsApi";
 const route = useRoute();
 const tab = computed({
   get: () => route.query.tab ?? 'info',
-  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
+  set: (tabValue) => router.replace({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
 const appStore = useAppStore();
