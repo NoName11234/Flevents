@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
  */
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/events/{eventId}/posts")
 public class PostController {
     private  final PostControllerService postControllerService;

@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import AccountApi from "@/api/accountsApi";
 import {Organization} from "@/models/organization";
 import {useAccountStore} from "@/store/account";
-import {FleventsEvent} from "@/models/fleventsEvent";
-import eventApi from "@/api/eventsApi";
 import organizationsApi from "@/api/organizationsApi";
 import {computed} from "vue";
 import {STORES} from "@/constants";
@@ -33,6 +31,10 @@ export const useOrganizationStore = defineStore('organizations', {
      * Hydrates the store by requesting the data from the api.
      */
     async hydrate() {
+      if (this.loading === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.error = false;
       this.loading = true;
       const accountStore = useAccountStore();
@@ -64,6 +66,10 @@ export const useOrganizationStore = defineStore('organizations', {
     },
 
     async hydrateSpecific(uuid: string) {
+      if (this.specificLoading.get(uuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.error = false;
       this.specificLoading.set(uuid, true);
       try {

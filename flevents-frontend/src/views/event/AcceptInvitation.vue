@@ -67,10 +67,11 @@
       />
       <div>
         <v-btn
-          :to="{ name: 'accounts.forget', query: route.query }"
+          :to="{ name: 'accounts.forget' }"
           variant="plain"
+          target="_blank"
         >
-          Passwort zurücksetzen
+          Passwort vergessen
         </v-btn>
       </div>
       <div
@@ -84,7 +85,6 @@
 
       <v-btn
         @click="anon = true"
-        target="_blank"
         variant="text"
         prepend-icon="mdi-incognito"
       >
@@ -326,7 +326,6 @@ async function performLogin(){
   showDialog.value = true;
 }
 async function enroll(){
-  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
     const response = await eventApi.acceptInvitation(eventUuid, invitationToken);
     appStore.addToast({
@@ -351,9 +350,7 @@ async function enroll(){
   }
 }
 async function performAnonLogin(){
-  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
-    console.log(account.value.email);
     const response = await eventApi.registerAnonymously(eventUuid, account.value.email as string, invitationToken);
     appStore.addToast({
       text: `Sie sind dem Event anonym mit ihrer E-Mail-Adresse beigetreten.`,

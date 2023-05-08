@@ -21,7 +21,6 @@ import java.util.*;
  * @version $I$
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/api/questionnaires")
 public class QuestionnaireController {
 

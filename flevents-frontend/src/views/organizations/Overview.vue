@@ -95,11 +95,11 @@
         >
           <v-btn
             :to="{ name: 'organizations.invite', params: { uuid: organization?.uuid } }"
-            prepend-icon="mdi-account-plus"
+            prepend-icon="mdi-email-fast"
             color="primary"
             variant="tonal"
           >
-            Mitglieder hinzufügen
+            Mitglieder einladen
           </v-btn>
         </v-container>
 
@@ -208,18 +208,15 @@ import organizationsApi from "@/api/organizationsApi";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import {useAppStore} from "@/store/app";
-import {EventRole} from "@/models/eventRole";
-import MailConfigCard from "@/components/MailConfigCard.vue";
 import router from "@/router";
 import MailConfigCardOrganization from "@/components/MailConfigCardOrganization.vue";
 import {MailConfig} from "@/models/mailConfig";
-import {FleventsEvent} from "@/models/fleventsEvent";
-import eventApi from "@/api/eventsApi";
 
 const route = useRoute();
+const organizationUuid = route.params.uuid as string;
 const tab = computed({
   get: () => route.query.tab ?? 'info',
-  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
+  set: (tabValue) => router.replace({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
 const appStore = useAppStore();
@@ -228,7 +225,7 @@ const accountStore = useAccountStore();
 const { currentAccount: account } = storeToRefs(accountStore);
 
 const organizationStore = useOrganizationStore();
-const organization = organizationStore.getOrganizationGetter(route.params.uuid as string);
+const organization = organizationStore.getOrganizationGetter(organizationUuid);
 
 const members = computed(() => {
   return organization?.value?.accountPreviews as AccountPreview[];
@@ -257,8 +254,8 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
   }
   customLoading.value = true;
   try {
-    await organizationsApi.changeRole(route.params.uuid as string, updatedAccount.uuid, updatedAccount.role as OrganizationRole, newRole)
-    await organizationStore.hydrateSpecific(route.params.uuid as string);
+    await organizationsApi.changeRole(organizationUuid, updatedAccount.uuid, updatedAccount.role as OrganizationRole, newRole)
+    await organizationStore.hydrateSpecific(organizationUuid);
     appStore.addToast({
       text: 'Rolle aktualisiert.',
       color: 'success',
@@ -284,7 +281,6 @@ async function updateRole(updatedAccount: AccountPreview, newRole: OrganizationR
   organizationStore.hydrate();
 }
 
-onMounted(() => {console.log(organization)});
 async function updateMailConfig(config: MailConfig) {
   try {
     const response = await organizationsApi.addMailConfig(organization.value.uuid, config);
@@ -325,8 +321,8 @@ async function removeAccount(removeAccount: AccountPreview) {
   }
   customLoading.value = true;
   try {
-    await organizationsApi.removeMember(route.params.uuid as string, removeAccount.uuid);
-    await organizationStore.hydrateSpecific(route.params.uuid as string);
+    await organizationsApi.removeMember(organizationUuid, removeAccount.uuid);
+    await organizationStore.hydrateSpecific(organizationUuid);
     appStore.addToast({
       text: 'Mitglied entfernt.',
       color: 'success',

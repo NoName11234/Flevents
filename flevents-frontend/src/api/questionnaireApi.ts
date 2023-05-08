@@ -22,7 +22,6 @@ class QuestionnaireApi {
    */
   create(questionnaire: Questionnaire, eventUuid: string) {
     return api.post(`/questionnaires`, questionnaire, {
-      headers: { "Content-Type": undefined },
       params: { "eventId": eventUuid}
     });
   }
@@ -58,7 +57,6 @@ class QuestionnaireApi {
    * @param questionnaireId the Uuid of the questionnaire
    */
   saveAnswer(answeredQuestionnaire : AnsweredQuestionnaire, questionnaireId : string){
-    console.log(answeredQuestionnaire);
     return api.post(`/questionnaires/${questionnaireId}/answers`, answeredQuestionnaire)
   }
 

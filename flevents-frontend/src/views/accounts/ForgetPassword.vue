@@ -1,6 +1,6 @@
 <template>
 
-  <Heading text="Passwort zurücksetzen" />
+  <Heading text="Passwort vergessen" />
 
   <v-alert
     v-show="alert == 1"
@@ -10,15 +10,13 @@
   ></v-alert>
   <v-alert
     v-show="alert == -1"
-    type="success"
+    type="error"
     title="Fehler"
     text="Es ist etwas schief gelaufen! Versuchen sie es nochmal."
   ></v-alert>
 
-
-
   <v-card :loading="loading" :disabled="loading">
-    <v-container class="d-flex flex-column gap-3" @keydown.enter="performLogin()">
+    <v-container class="d-flex flex-column gap-3">
       <v-text-field
         label="Mailadresse"
         prepend-inner-icon="mdi-email"
@@ -34,11 +32,17 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
+        variant="text"
+        :to="{ name: 'accounts.login', query: route.query }"
+      >
+        Abbrechen
+      </v-btn>
+      <v-btn
         @click="performReset()"
         color="primary"
-        prepend-icon="mdi-login-variant"
+        prepend-icon="mdi-email-fast"
       >
-        neues Einmalpasswort versenden
+        Einmalpasswort anfordern
       </v-btn>
     </v-container>
   </v-card>
@@ -54,7 +58,6 @@ import {login} from "@/service/authService";
 import {load} from "webfontloader";
 import accountsApi from "@/api/accountsApi";
 const route = useRoute();
-const showPass = ref(false);
 const loading = ref(false);
 const tooltip = ref("");
 const router = useRouter();

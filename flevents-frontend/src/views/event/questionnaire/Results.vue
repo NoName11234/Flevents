@@ -43,6 +43,10 @@ const statisticsLoading = computed(() => statisticsStore.specificLoading.get(que
 
 const diagramType = ref('bar');
 
+const isClosed = computed(() =>
+  new Date(questionnaire.value.closingDate).getTime() - new Date().getTime() <= 0
+);
+
 
 
 // Functionality for live-updating
@@ -73,7 +77,7 @@ const barChartOptions = {
       display: false,
     },
   }
-} as ChartOptions;
+} as any;
 
 const pieChartOptions = {
   responsive: true,
@@ -86,7 +90,7 @@ const pieChartOptions = {
       position: "right",
     },
   }
-} as ChartOptions;
+} as any;
 
 Chart.register(Title, Tooltip, BarElement, CategoryScale, LinearScale, ArcElement, Legend);
 
@@ -140,6 +144,7 @@ function print() {
       />
     </v-btn-toggle>
     <v-switch
+      v-if="!isClosed"
       label="Live"
       hide-details="auto"
       density="compact"
@@ -211,6 +216,12 @@ function print() {
             />
           </v-window-item>
         </v-window>
+      </v-container>
+    </template>
+
+    <template v-else>
+      <v-container class="text-grey">
+        Keine Antworten
       </v-container>
     </template>
 

@@ -16,7 +16,6 @@ import java.io.IOException;
  * @version $I$
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/api")
 public class ApiController {
 

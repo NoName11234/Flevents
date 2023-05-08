@@ -3,7 +3,6 @@ import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {STORES} from "@/constants";
 import {computed} from "vue";
-import {FleventsEvent} from "@/models/fleventsEvent";
 
 export const usePostStore = defineStore('posts', {
   state: () => ({
@@ -13,6 +12,7 @@ export const usePostStore = defineStore('posts', {
     cachedPosts: new Map<string, Post>(),
     specificLoading: new Map<string, boolean>,
     lastCaching: new Map<string, Date>,
+    specificError: new Map<string, boolean>,
 
     loading: false,
     error: false,
@@ -24,8 +24,11 @@ export const usePostStore = defineStore('posts', {
      * @param eventUuid the uuid of the event associated with requested posts
      */
     async hydrateSpecific(eventUuid: string) {
-      this.loading = true;
-      this.error = false;
+      if (this.specificLoading.get(eventUuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
+      this.specificLoading.set(eventUuid, true);
       try {
         const { data } = await postApi.getOf(eventUuid);
         let postsOfEvent = data as Post[];
@@ -38,11 +41,13 @@ export const usePostStore = defineStore('posts', {
           postsOfEvent.map(p => p.uuid)
         );
         this.lastSuccessfulHydration.set(eventUuid, new Date());
+        this.specificError.set(eventUuid, false);
       } catch (e) {
         console.warn(`Failed to fetch posts for event with id ${eventUuid}.`, e);
+        this.specificError.set(eventUuid, true);
         this.error = true;
       }
-      this.loading = false;
+      this.specificLoading.set(eventUuid, false);
     },
 
     /**
@@ -61,6 +66,14 @@ export const usePostStore = defineStore('posts', {
         this.hydrateSpecific(eventUuid);
       }
       return requestedPosts?.map(pUuid => this.cachedPosts.get(pUuid) as Post) || [] as Post[];
+    },
+
+    /**
+     * Creates a computed ref that returns the posts of the event.
+     * @param eventUuid the uuid of the event
+     */
+    getPostsGetterOf(eventUuid: string) {
+      return computed(() => this.getPostsOf(eventUuid),);
     },
 
     /**
@@ -87,16 +100,27 @@ export const usePostStore = defineStore('posts', {
      * If one of `post` or `post.uuid` is `undefined` no action is taken.
      * @param post the event
      */
-    setEvent(post: Post|undefined) {
+    setPost(post: Post|undefined) {
       if (post === undefined || post.uuid === undefined) return;
       this.cachedPosts.set(post.uuid, post);
     },
 
-    getEventGetter(uuid: string, eventUuid: string) {
+    getPostGetter(uuid: string, eventUuid: string) {
       return computed({
         get: () => this.getPost(uuid, eventUuid),
-        set: (e) => this.setEvent(e),
+        set: (e) => this.setPost(e),
       });
     },
+
+    async dehydrate() {
+      this.postsOfEvents = new Map();
+      this.cachedPosts = new Map();
+      this.lastCaching = new Map();
+      this.specificLoading = new Map();
+      this.specificError = new Map();
+      this.lastSuccessfulHydration = new Map();
+      this.loading = false;
+      this.error = false;
+    }
   },
 })

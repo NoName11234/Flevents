@@ -19,6 +19,10 @@ export const useSurveyStore = defineStore('surveys', {
      * @param uuid the uuid of the questionnaire
      */
     async hydrateSpecific(uuid: string) {
+      if (this.specificLoading.get(uuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.specificLoading.set(uuid, true);
       try {
         const { data } = await questionnaireApi.get(uuid);
@@ -37,6 +41,10 @@ export const useSurveyStore = defineStore('surveys', {
      * @param eventUuid the uuid of the event associated with requested posts
      */
     async hydrateSpecificOf(eventUuid: string) {
+      if (this.specificLoading.get(eventUuid) === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
       this.specificLoading.set(eventUuid, true);
       try {
         const { data } = await questionnaireApi.getOf(eventUuid);
@@ -65,7 +73,7 @@ export const useSurveyStore = defineStore('surveys', {
      * @returns an array of questionnaires
      */
     getQuestionnairesOf(eventUuid: string) {
-      const requestedQuestionnaires = this.cachedSurveys.get(eventUuid);
+      const requestedQuestionnaires = this.cachedSurveysOfEvents.get(eventUuid);
       const lastUpdate = this.lastCaching.get(eventUuid);
       if (
         requestedQuestionnaires === undefined
@@ -73,7 +81,7 @@ export const useSurveyStore = defineStore('surveys', {
       ) {
         this.hydrateSpecificOf(eventUuid);
       }
-      return requestedQuestionnaires || [] as Questionnaire[];
+      return requestedQuestionnaires?.map(pUuid => this.cachedSurveys.get(pUuid) as Questionnaire) || [] as Questionnaire[];
     },
 
     /**

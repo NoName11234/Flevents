@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import {onMounted, Ref, ref} from "vue";
-import {Organization} from "@/models/organization";
+import {Ref, ref} from "vue";
 import {RouteLocationRaw, useRoute, useRouter} from "vue-router";
-import axios, {AxiosError} from "axios";
+import {AxiosError} from "axios";
 import {useOrganizationStore} from "@/store/organizations";
 import organizationsApi from "@/api/organizationsApi";
 import {VALIDATION} from "@/constants";
@@ -58,7 +57,7 @@ async function submit(pendingValidation: Promise<any>) {
       const file = imageFile.value[0]
       organization.value.icon = await getBase64(file) as string;
     }
-    const response = organizationsApi.edit(organizationUuid, organization.value);
+    const response = await organizationsApi.edit(organizationUuid, organization.value);
     await router.push(props.submitRoute);
   } catch (e) {
     if (e instanceof AxiosError) {

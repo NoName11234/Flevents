@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
  */
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/accounts")
 public class FleventsAccountController {
     private FleventsAccountControllerService fleventsAccountControllerService;

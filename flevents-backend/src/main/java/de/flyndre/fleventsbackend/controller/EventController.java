@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  */
 
 @RestController
-@CrossOrigin
 @RequestMapping("/api/events")
 public class EventController {
 
@@ -171,7 +170,11 @@ private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings"
       }
       try {
          return new ResponseEntity<>(mapper.map(eventControllerService.setEventById(eventId,event),EventInformation.class),HttpStatus.OK);
-      }catch (Exception e){
+      }catch (IllegalArgumentException e){
+         logger.error(strings.getString("logger.InternalError"),e);
+         return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+      }
+      catch (Exception e){
          logger.error(strings.getString("logger.InternalError"),e);
          return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
@@ -282,7 +285,7 @@ private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings"
          return new ResponseEntity(HttpStatus.OK);
       }catch (Exception e){
          logger.error(strings.getString("logger.InternalError"),e);
-         return new ResponseEntity(e.getMessage(),HttpStatus.OK);
+         return new ResponseEntity(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
       }
    }
 

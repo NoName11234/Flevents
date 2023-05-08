@@ -25,7 +25,6 @@ import java.util.ResourceBundle;
  * @version $I$
  */
 @RestController
-@CrossOrigin
 @RequestMapping("/api/platform")
 public class PlatformController {
 

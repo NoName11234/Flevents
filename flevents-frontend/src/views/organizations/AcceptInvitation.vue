@@ -65,11 +65,13 @@
     <v-divider />
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
-        :to="{ name: 'accounts.forget', query: route.query }"
+        :to="{ name: 'accounts.forget' }"
         variant="text"
+        target="_blank"
       >
         Passwort vergessen
       </v-btn>
+      <v-spacer />
       <v-btn
         :to="{ name: 'accounts.create' }"
         variant="text"
@@ -216,7 +218,6 @@ async function performLogin() {
   showDialog.value = true;
 }
 async function enroll(){
-  // console.log(JSON.parse(document.cookie.split(";")[0].split("=")[1]).uuid);
   try {
     await OrganizationsApi.acceptInvitation(organizationUuid,  invitationToken);
     appStore.addToast({

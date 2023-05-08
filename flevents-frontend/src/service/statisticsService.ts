@@ -1,13 +1,11 @@
-import {ChartData} from "chart.js";
 import {SingleChoiceQuestionSummary} from "@/models/singleChoiceQuestionSummary";
 import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {COLORS} from "@/constants";
-import {FreeTextQuestion} from "@/models/freeTextQuestion";
 import {FreeTextQuestionSummary} from "@/models/freeTextQuestionSummary";
 
 class StatisticsService {
 
-  toDiagramData(question: SingleChoiceQuestion, summary: SingleChoiceQuestionSummary): ChartData {
+  toDiagramData(question: SingleChoiceQuestion, summary: SingleChoiceQuestionSummary) {
     return {
       labels: question.choices.map(c => c.choice),
       datasets: [
@@ -17,7 +15,7 @@ class StatisticsService {
           backgroundColor: COLORS.CHART_COLORS,
         }
       ]
-    } as ChartData;
+    } as any;
   }
 
   unifyTextResults(summary: FreeTextQuestionSummary) {

@@ -15,6 +15,7 @@ import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
 import SurveyStats from "@/components/SurveyStats.vue";
 import {Statistics} from "@/models/statistics";
+import {useSurveyStore} from "@/store/surveys";
 
 const props = defineProps({
   questionnaire: {
@@ -27,9 +28,9 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(['update'])
 const accountStore = useAccountStore();
 const appStore = useAppStore();
+const surveyStore = useSurveyStore();
 const router = useRouter();
 const isDelete = ref(false);
 const tooltip = ref('');
@@ -39,31 +40,47 @@ const aq = ref({
   questionnaireId: props.questionnaire.uuid,
   userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
-    if(question.choices.length != 0) {
-      return {choice: question.choices[0]}as AnsweredQuestion
-    }else{
-        return {answer: ''} as AnsweredQuestion;
+    if (question?.choices?.length != 0) {
+      return { choice: question?.choices[0] } as AnsweredQuestion
+    } else {
+        return { answer: '' } as AnsweredQuestion;
     }
   }),
 } as AnsweredQuestionnaire);
 const alreadyVoted = ref(false);
 const loading = ref(true);
 
+const isClosed = computed(() =>
+  new Date(props.questionnaire.closingDate).getTime() - new Date().getTime() <= 0
+);
+
+const hasRights = computed(() => {
+  let eventRoles = [
+    EventRole.tutor,
+    EventRole.organizer,
+  ];
+  let hasEventRights = props.event?.accountPreviews.find(a => a.uuid === accountStore.currentAccount!.uuid && eventRoles.includes(a.role as EventRole))
+  if (hasEventRights) return true;
+  let organizationRoles = [
+    OrganizationRole.admin,
+    OrganizationRole.organizer,
+  ];
+  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
+  if (hasOrganizationRights) return true;
+  return false;
+});
+
 const statisticsStore = useSurveyStatisticsStore();
 let statistics = ref({} as Statistics);
-if (hasRights()) {
+if (hasRights.value) {
   statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
 }
 
 onMounted(setup);
 async function setup() {
   loading.value = true;
-  console.log(props.questionnaire);
-  console.log(aq.value.answers);
   try {
     const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
-    console.log("11111111111111")
-    console.log(response);
     aq.value = response.data as AnsweredQuestionnaire;
     alreadyVoted.value = true;
   } catch (e) {
@@ -82,10 +99,7 @@ async function submitAnswers(pendingValidation: Promise<any>) {
   }
   loading.value = true;
   try {
-    console.log("------------------------")
-    console.log(aq);
-    const response = QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
-    console.log(response);
+    const response = await QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
     alreadyVoted.value = true;
     // TODO: replace with async store hydration
     appStore.addToast({
@@ -117,9 +131,6 @@ async function deleteQuestionnaire() {
   loading.value = true;
   try {
     const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
-    // TODO: replace with async store hydration
-    isDelete.value = true;
-    emits("update", props.questionnaire?.uuid);
     appStore.addToast({
       text: 'Fragebogen gelöscht.',
       color: 'success',
@@ -142,22 +153,7 @@ async function deleteQuestionnaire() {
     });
   }
   loading.value = false;
-}
-
-function hasRights() {
-  let eventRoles = [
-    EventRole.tutor,
-    EventRole.organizer,
-  ];
-  let hasEventRights = props.event?.accountPreviews.find(a => a.uuid === accountStore.currentAccount!.uuid && eventRoles.includes(a.role as EventRole))
-  if (hasEventRights) return true;
-  let organizationRoles = [
-    OrganizationRole.admin,
-    OrganizationRole.organizer,
-  ];
-  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
-  if (hasOrganizationRights) return true;
-  return false;
+  surveyStore.hydrateSpecificOf(props.event.uuid!);
 }
 
 </script>
@@ -166,14 +162,17 @@ function hasRights() {
   <v-expansion-panel v-if="!isDelete">
 
     <v-expansion-panel-title>
-      <div class="d-flex flex-row justify-start align-center gap-3 w-100">
+      <div class="d-flex flex-row justify-start align-center w-100">
         <strong>
           {{ questionnaire.title }}
         </strong>
-        <span class="text-grey">
-          {{ DatetimeService.getDate(new Date(questionnaire.closingDate)) }}
-        </span>
         <v-spacer />
+        <v-badge
+          :content="isClosed ? 'geschlossen' : 'offen'"
+          :color="isClosed ? 'grey' : 'success'"
+          class="text-capitalize"
+          inline
+        />
       </div>
     </v-expansion-panel-title>
 
@@ -213,6 +212,7 @@ function hasRights() {
           style="display: contents;"
           validate-on="submit"
           @submit.prevent="submitAnswers"
+          :disabled="isClosed"
         >
           <v-card
             v-for="(question, index) in questionnaire.questions"
@@ -264,7 +264,7 @@ function hasRights() {
 
           <div class="d-flex flex-column flex-sm-row justify-end gap">
             <v-btn
-              v-if="hasRights()"
+              v-if="hasRights"
               prepend-icon="mdi-delete"
               color="error"
               variant="text"
@@ -278,7 +278,7 @@ function hasRights() {
               prepend-icon="mdi-check"
               color="primary"
               type="submit"
-              :disabled="loading || alreadyVoted"
+              :disabled="loading || alreadyVoted || isClosed"
               :loading="loading"
             >
               {{ alreadyVoted ? 'Abgestimmt' : 'Abstimmen' }}
