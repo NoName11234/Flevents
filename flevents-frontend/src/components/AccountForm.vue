@@ -33,27 +33,15 @@ const account = ref({
   secret: ""
 } as Account);
 
-async function submit() {
+async function submit(pendingValidation: Promise<any>) {
   // Structured Logging
   console.log("ich bin echt jetzt in der post methode drin, wie krass");
 
   // Validation
   tooltip.value = '';
-  if (
-    account.value.firstname === ""
-    || account.value.lastname === ""
-    || account.value.email === ""
-    || account.value.secret === ""
-  ) {
-    tooltip.value = "Nicht alle Felder wurden angegeben.";
-    return;
-  }
-  if (account.value.secret !== correctPassword.value) {
-    tooltip.value = "Die Passwörter stimmen nicht überein.";
-    return;
-  }
-  if (!account.value.email.match(VALIDATION.EMAIL)) {
-    tooltip.value = "Die angegebene E-Mail-Adresse ist ungültig.";
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
+    tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
 
@@ -89,7 +77,7 @@ async function submit() {
 
 <template>
   <v-card :loading="loading" :disabled="loading">
-    <v-form validate-on="submit" @submit.prevent="submit()">
+    <v-form validate-on="submit" @submit.prevent="submit">
       <v-container class="d-flex flex-column gap-3">
         <div class="d-flex flex-column flex-sm-row gap-3">
           <v-text-field
@@ -113,7 +101,10 @@ async function submit() {
           label="Mailadresse"
           v-model="account.email"
           prepend-inner-icon="mdi-email"
-          :rules="[() => account.email !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[
+            () => account.email !== '' || 'Dieses Feld wird benötigt.',
+            () => account.email.match(VALIDATION.EMAIL) !== null || 'Die angegebene E-Mail-Adresse ist ungültig.'
+            ]"
           hide-details="auto"
           required
         />
@@ -135,7 +126,10 @@ async function submit() {
           :type="showCorr ? 'text' : 'password'"
           @click:append-inner="showCorr = !showCorr"
           prepend-inner-icon="mdi-lock"
-          :rules="[() => correctPassword !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[
+            () => correctPassword !== '' || 'Dieses Feld wird benötigt.',
+            () => correctPassword === account.secret || 'Die Passwörter stimmen nicht überein.'
+            ]"
           hide-details="auto"
           required
         />
