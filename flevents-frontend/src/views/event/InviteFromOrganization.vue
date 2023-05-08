@@ -69,13 +69,13 @@ async function submit() {
   }
   if (failedInvitations.length > 0) {
     appStore.addToast({
-      text: `Das Einladen folgender Nutzer war nicht erfolgreich: ${failedInvitations.join(', ')}`,
+      text: `Das Hinzufügen folgender Nutzer war nicht erfolgreich: ${failedInvitations.join(', ')}`,
       color: 'error',
     });
   }
   if (successfulInvitations.length > 0) {
     appStore.addToast({
-      text: `Das Einladen folgender E-Mail-Adressen war erfolgreich: ${successfulInvitations.join(', ')}`,
+      text: `Das Hinzufügen folgender Nutzer war erfolgreich: ${successfulInvitations.join(', ')}`,
       color: 'success',
     });
   }
@@ -97,6 +97,7 @@ async function submit() {
           :item-title="item => {return `${item.firstname} ${item.lastname} (${item.email})`}"
           return-object
           label="Mitglieder der Organisation"
+          menu-icon="mdi-chevron-down"
           multiple
           hide-details="auto"
         >

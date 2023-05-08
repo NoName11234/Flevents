@@ -144,7 +144,7 @@ function print() {
       />
     </v-btn-toggle>
     <v-switch
-      :disabled="isClosed"
+      v-if="!isClosed"
       label="Live"
       hide-details="auto"
       density="compact"
@@ -216,6 +216,12 @@ function print() {
             />
           </v-window-item>
         </v-window>
+      </v-container>
+    </template>
+
+    <template v-else>
+      <v-container class="text-grey">
+        Keine Antworten
       </v-container>
     </template>
 

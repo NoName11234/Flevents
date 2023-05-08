@@ -163,14 +163,17 @@ async function deleteQuestionnaire() {
   <v-expansion-panel v-if="!isDelete">
 
     <v-expansion-panel-title>
-      <div class="d-flex flex-row justify-start align-center gap-3 w-100">
+      <div class="d-flex flex-row justify-start align-center w-100">
         <strong>
           {{ questionnaire.title }}
         </strong>
-        <span class="text-grey">
-          {{ DatetimeService.getDate(new Date(questionnaire.closingDate)) }}
-        </span>
         <v-spacer />
+        <v-badge
+          :content="isClosed ? 'geschlossen' : 'offen'"
+          :color="isClosed ? 'grey' : 'success'"
+          class="text-capitalize"
+          inline
+        />
       </div>
     </v-expansion-panel-title>
 

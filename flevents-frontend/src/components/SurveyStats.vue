@@ -33,7 +33,7 @@ const isClosed = computed(() =>
       prepend-icon="mdi-timer-sand-complete"
       subtitle="Einsendeschluss"
     >
-      {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }} ({{ isClosed ? 'geschlossen' : 'offen' }})
+      {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }} - {{ isClosed ? 'Geschlossen' : 'Offen' }}
     </v-list-item>
     <v-list-item
       v-if="statistics"
