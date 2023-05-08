@@ -43,6 +43,10 @@ const statisticsLoading = computed(() => statisticsStore.specificLoading.get(que
 
 const diagramType = ref('bar');
 
+const isClosed = computed(() =>
+  new Date(questionnaire.value.closingDate).getTime() - new Date().getTime() <= 0
+);
+
 
 
 // Functionality for live-updating
@@ -140,6 +144,7 @@ function print() {
       />
     </v-btn-toggle>
     <v-switch
+      :disabled="isClosed"
       label="Live"
       hide-details="auto"
       density="compact"

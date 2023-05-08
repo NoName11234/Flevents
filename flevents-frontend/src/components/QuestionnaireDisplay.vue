@@ -49,6 +49,10 @@ const aq = ref({
 const alreadyVoted = ref(false);
 const loading = ref(true);
 
+const isClosed = computed(() =>
+  new Date(props.questionnaire.closingDate).getTime() - new Date().getTime() <= 0
+);
+
 const hasRights = computed(() => {
   let eventRoles = [
     EventRole.tutor,
@@ -206,6 +210,7 @@ async function deleteQuestionnaire() {
           style="display: contents;"
           validate-on="submit"
           @submit.prevent="submitAnswers"
+          :disabled="isClosed"
         >
           <v-card
             v-for="(question, index) in questionnaire.questions"
@@ -271,7 +276,7 @@ async function deleteQuestionnaire() {
               prepend-icon="mdi-check"
               color="primary"
               type="submit"
-              :disabled="loading || alreadyVoted"
+              :disabled="loading || alreadyVoted || isClosed"
               :loading="loading"
             >
               {{ alreadyVoted ? 'Abgestimmt' : 'Abstimmen' }}

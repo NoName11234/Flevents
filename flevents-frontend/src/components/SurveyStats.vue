@@ -2,6 +2,7 @@
 import DatetimeService from "@/service/datetimeService";
 import {Questionnaire} from "@/models/questionnaire";
 import {Statistics} from "@/models/statistics";
+import {computed} from "vue";
 
 const props = defineProps({
   questionnaire: {
@@ -13,6 +14,10 @@ const props = defineProps({
     type: Object as () => Statistics,
   }
 });
+
+const isClosed = computed(() =>
+  new Date(props.questionnaire.closingDate).getTime() - new Date().getTime() <= 0
+);
 
 </script>
 
@@ -28,7 +33,7 @@ const props = defineProps({
       prepend-icon="mdi-timer-sand-complete"
       subtitle="Einsendeschluss"
     >
-      {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }}
+      {{ DatetimeService.getDateTime(new Date(questionnaire.closingDate)) }} ({{ isClosed ? 'geschlossen' : 'offen' }})
     </v-list-item>
     <v-list-item
       v-if="statistics"

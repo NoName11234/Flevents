@@ -10,6 +10,7 @@ import questionnaireApi from "@/api/questionnaireApi";
 import {Choices} from "@/models/choices";
 import {AxiosError} from "axios";
 import {useSurveyStore} from "@/store/surveys";
+import {useEventStore} from "@/store/events";
 
 const router = useRouter();
 const route = useRoute();
@@ -26,7 +27,7 @@ const questionnaire = ref({
   }] as Question[],
 } as Questionnaire);
 
-const surveyStore = useSurveyStore();
+const eventStore = useEventStore();
 
 const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'polls' } };
 
@@ -97,9 +98,7 @@ async function submit(pendingValidation: Promise<any>){
   loading.value = true;
   try {
     const response = questionnaireApi.create(questionnaire.value, eventUuid);
-    // TODO: asynchron questionnaire-store aktualisieren
     await router.push(backRoute);
-    surveyStore.hydrateSpecificOf(eventUuid);
   } catch (e) {
     let errorMessage = '';
     if (e instanceof AxiosError) {
@@ -115,6 +114,7 @@ async function submit(pendingValidation: Promise<any>){
     tooltip.value = `Speichern des Fragebogens fehlgeschlagen: ${errorMessage}`;
   }
   loading.value = false;
+  eventStore.hydrateSpecific(eventUuid);
 }
 
 </script>
