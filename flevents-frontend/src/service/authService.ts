@@ -61,10 +61,7 @@ async function processResponse(accessToken: string) {
  */
 export async function login(email: string, plainSecret: string) {
 
-  // TODO: encode secret!
-  const encodedSecret = plainSecret;
-
-  const response = await accountApi.login(email, encodedSecret);
+  const response = await accountApi.login(email, plainSecret);
 
   await processResponse(response.data.accessToken);
 }
