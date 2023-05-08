@@ -37,8 +37,8 @@ public class QuestionnaireController {
     /**
      * Returns all questionnaires from the specified event.
      * @param eventId the id of the event to get the questionnaires from
-     * @param auth the authorization object
-     * @return
+     * @param auth the authentication object
+     * @return ResponseEntity with a list of questionnaires or an error message
      */
     @GetMapping
     public ResponseEntity getQuestionnaires(@RequestParam String eventId, Authentication auth){
@@ -53,6 +53,12 @@ public class QuestionnaireController {
         }
     }
 
+    /**
+     * Returns the specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to be returned
+     * @param auth the authentication object
+     * @return ResponseEntity with the questionnaire or an error message
+     */
     @GetMapping("/{questionnaireId}")
     public ResponseEntity getQuestionnaire(@PathVariable String questionnaireId, Authentication auth){
         if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(),Arrays.asList(EventRole.organizer,EventRole.tutor,EventRole.attendee,EventRole.guest))){
@@ -66,6 +72,13 @@ public class QuestionnaireController {
         }
     }
 
+    /**
+     * Returns a AnsweredQuestionnaire from a specified questionnaire and a specified user.
+     * @param questionnaireId the id of the questionnaire
+     * @param userId the id of the user
+     * @param auth the authentication object
+     * @return ResponseEntity with the answered questionnaire or an error message
+     */
     @GetMapping("/{questionnaireId}/answers/{userId}")
     public ResponseEntity getAnswers(@PathVariable String questionnaireId,@PathVariable String userId, Authentication auth){
         //TODO: not Working
@@ -80,6 +93,13 @@ public class QuestionnaireController {
         }
     }
 
+    /**
+     * Creates a questionnaire in the specified event.
+     * @param eventId the event to create the questionnaire in
+     * @param bodyQuestionnaire the questionnaire to be created in the event
+     * @param auth the authentication object
+     * @return ResponseEntity with the created questionnaire or an error message
+     */
     @PostMapping
     public ResponseEntity createQuestionnaire(@RequestParam String eventId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
         if(!questionnaireControllerService.getGranted(auth, eventId, Arrays.asList(EventRole.organizer,EventRole.tutor))){
@@ -92,6 +112,14 @@ public class QuestionnaireController {
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * Overwrites the specified questionnaire with the given questionnaire.
+     * @param questionnaireId the id of the questionnaire to be overwritten
+     * @param bodyQuestionnaire the new questionnaire
+     * @param auth the authentication object
+     * @return ResponseEntity with the overwritten questionnaire or an error message
+     */
     @PostMapping("/{questionnaireId}")
     public ResponseEntity editQuestionnaire(@PathVariable String questionnaireId,@RequestBody Questionnaire bodyQuestionnaire, Authentication auth){
         if(!questionnaireControllerService.getGranted(auth, questionnaireControllerService.getQuestionnaire(questionnaireId).getEventId(), Arrays.asList(EventRole.organizer,EventRole.tutor))){
@@ -105,6 +133,12 @@ public class QuestionnaireController {
         }
     }
 
+    /**
+     * Deletes the specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to be deleted
+     * @param auth the authentication object
+     * @return ResponseEntity with ACCEPTED or INTERNAL_SERVER_ERROR message
+     */
     @DeleteMapping("/{questionnaireId}")
     public ResponseEntity deleteQuestionnaire(@PathVariable String questionnaireId, Authentication auth) {
         //TODO: not working
@@ -120,6 +154,13 @@ public class QuestionnaireController {
         }
     }
 
+    /**
+     * Adds an AnsweredQuestionnaire to the specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to add the answer to
+     * @param answeredQuestionnaire the new answer
+     * @param auth the authentication object
+     * @return ResponseEntity with OK message or an error message
+     */
     @PostMapping("/{questionnaireId}/answers")
     public ResponseEntity addAnswer(@PathVariable String questionnaireId,@RequestBody AnsweredQuestionnaire answeredQuestionnaire, Authentication auth){
         //TODO: not working
@@ -135,6 +176,12 @@ public class QuestionnaireController {
         }
     }
 
+    /**
+     * Returns a summary of all answers of a specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to get the summary from
+     * @param auth the authentication object
+     * @return ResponseEntity with the statistics object or an error message
+     */
     @GetMapping("/{questionnaireId}/statistics")
     public ResponseEntity getStatistics(@PathVariable String questionnaireId, Authentication auth){
         //TODO: Authentification if working again
