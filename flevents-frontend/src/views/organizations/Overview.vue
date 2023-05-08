@@ -95,11 +95,11 @@
         >
           <v-btn
             :to="{ name: 'organizations.invite', params: { uuid: organization?.uuid } }"
-            prepend-icon="mdi-account-plus"
+            prepend-icon="mdi-email-fast"
             color="primary"
             variant="tonal"
           >
-            Mitglieder hinzufügen
+            Mitglieder einladen
           </v-btn>
         </v-container>
 

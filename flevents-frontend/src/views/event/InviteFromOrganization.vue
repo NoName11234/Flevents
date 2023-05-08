@@ -98,6 +98,7 @@ async function submit() {
           return-object
           label="Mitglieder der Organisation"
           multiple
+          hide-details="auto"
         >
           <template v-slot:selection="data">
             <v-chip
@@ -133,9 +134,9 @@ async function submit() {
         <v-btn
           type="submit"
           color="primary"
-          prepend-icon="mdi-email-fast"
+          prepend-icon="mdi-account-plus"
         >
-          Einladen
+          Hinzufügen
         </v-btn>
       </v-container>
 
