@@ -110,7 +110,7 @@ const eventStatus = computed(() => {
     case end < now:
       return { code: -1, text: 'VERGANGEN', color: "grey", icon: "mdi-archive" };
     default:
-      return { code: null, text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick" };
+      return { code: NaN, text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick" };
   }
 });
 async function addAnonAcc(){
