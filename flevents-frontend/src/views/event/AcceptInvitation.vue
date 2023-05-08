@@ -67,10 +67,11 @@
       />
       <div>
         <v-btn
-          :to="{ name: 'accounts.forget', query: route.query }"
+          :to="{ name: 'accounts.forget' }"
           variant="plain"
+          target="_blank"
         >
-          Passwort zurücksetzen
+          Passwort vergessen
         </v-btn>
       </div>
       <div
@@ -84,7 +85,6 @@
 
       <v-btn
         @click="anon = true"
-        target="_blank"
         variant="text"
         prepend-icon="mdi-incognito"
       >
