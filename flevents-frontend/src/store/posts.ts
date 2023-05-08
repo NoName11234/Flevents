@@ -69,6 +69,14 @@ export const usePostStore = defineStore('posts', {
     },
 
     /**
+     * Creates a computed ref that returns the posts of the event.
+     * @param eventUuid the uuid of the event
+     */
+    getPostsGetterOf(eventUuid: string) {
+      return computed(() => this.getPostsOf(eventUuid),);
+    },
+
+    /**
      * Retrieves a post.
      * If the requested post is not yet loaded, it initialized its loading.
      * @param uuid the uuid of the post
@@ -92,15 +100,15 @@ export const usePostStore = defineStore('posts', {
      * If one of `post` or `post.uuid` is `undefined` no action is taken.
      * @param post the event
      */
-    setEvent(post: Post|undefined) {
+    setPost(post: Post|undefined) {
       if (post === undefined || post.uuid === undefined) return;
       this.cachedPosts.set(post.uuid, post);
     },
 
-    getEventGetter(uuid: string, eventUuid: string) {
+    getPostGetter(uuid: string, eventUuid: string) {
       return computed({
         get: () => this.getPost(uuid, eventUuid),
-        set: (e) => this.setEvent(e),
+        set: (e) => this.setPost(e),
       });
     },
 

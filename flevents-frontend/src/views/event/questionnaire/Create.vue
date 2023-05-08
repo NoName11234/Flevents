@@ -27,7 +27,7 @@ const questionnaire = ref({
   }] as Question[],
 } as Questionnaire);
 
-const eventStore = useEventStore();
+const surveyStore = useSurveyStore();
 
 const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'polls' } };
 
@@ -114,7 +114,7 @@ async function submit(pendingValidation: Promise<any>){
     tooltip.value = `Speichern des Fragebogens fehlgeschlagen: ${errorMessage}`;
   }
   loading.value = false;
-  eventStore.hydrateSpecific(eventUuid);
+  surveyStore.hydrateSpecificOf(eventUuid);
 }
 
 </script>

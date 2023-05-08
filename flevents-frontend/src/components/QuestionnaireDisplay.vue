@@ -15,6 +15,7 @@ import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
 import SurveyStats from "@/components/SurveyStats.vue";
 import {Statistics} from "@/models/statistics";
+import {useSurveyStore} from "@/store/surveys";
 
 const props = defineProps({
   questionnaire: {
@@ -27,9 +28,9 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(['update'])
 const accountStore = useAccountStore();
 const appStore = useAppStore();
+const surveyStore = useSurveyStore();
 const router = useRouter();
 const isDelete = ref(false);
 const tooltip = ref('');
@@ -39,10 +40,10 @@ const aq = ref({
   questionnaireId: props.questionnaire.uuid,
   userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
-    if(question.choices.length != 0) {
-      return {choice: question.choices[0]}as AnsweredQuestion
-    }else{
-        return {answer: ''} as AnsweredQuestion;
+    if (question?.choices?.length != 0) {
+      return { choice: question?.choices[0] } as AnsweredQuestion
+    } else {
+        return { answer: '' } as AnsweredQuestion;
     }
   }),
 } as AnsweredQuestionnaire);
@@ -130,9 +131,6 @@ async function deleteQuestionnaire() {
   loading.value = true;
   try {
     const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
-    // TODO: replace with async store hydration
-    isDelete.value = true;
-    emits("update", props.questionnaire?.uuid);
     appStore.addToast({
       text: 'Fragebogen gelöscht.',
       color: 'success',
@@ -155,6 +153,7 @@ async function deleteQuestionnaire() {
     });
   }
   loading.value = false;
+  surveyStore.hydrateSpecificOf(props.event.uuid!);
 }
 
 </script>
