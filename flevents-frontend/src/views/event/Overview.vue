@@ -23,6 +23,7 @@ import {FleventsEvent} from "@/models/fleventsEvent";
 import QuestionnaireApi from "@/api/questionnaireApi";
 import api from "@/api/api";
 import {OrganizationRole} from "@/models/organizationRole";
+import {usePostStore} from "@/store/posts";
 
 const openContext = ref(false);
 const address = ref("");
@@ -31,7 +32,7 @@ const eventUuid = route.params.uuid as string;
 
 const tab = computed({
   get: () => route.query.tab ?? 'info',
-  set: (tabValue) => router.push({ ...route, query: { ...route.query, tab: tabValue }}),
+  set: (tabValue) => router.replace({ ...route, query: { ...route.query, tab: tabValue }}),
 });
 
 const accountStore = useAccountStore();
@@ -43,11 +44,23 @@ const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
 const posts = computed(() => event.value
   .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
+// TODO: Re-hydrate post store in all necessary places to stay up-to-date
+// const postStore = usePostStore();
+// const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
+//   ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
-const questionnaires : any = ref(null);
-const anonAcc = ref({email: '', firstname: '', lastname: ''} as AccountPreview);
+const questionnaires = computed(() => surveyStore.getQuestionnairesGetterOf(eventUuid).value
+  ?.sort((a, b) => new Date(b.closingDate).getTime() - new Date(a.closingDate).getTime()));
+
+const anonAcc = ref({
+  email: '',
+  firstname: '',
+  lastname: ''
+} as AccountPreview);
+
 const organizationStore = useOrganizationStore();
+
 const addAnon = ref(false);
 const enrollLoading = ref(false);
 const organizersLoading = ref(false);
@@ -91,13 +104,13 @@ const eventStatus = computed(() => {
   let now = new Date();
   switch (true) {
     case start > now:
-      return {text: 'ANSTEHEND', color: "blue", icon: "mdi-clock-outline"};
+      return { code: 1, text: 'ANSTEHEND', color: "blue", icon: "mdi-clock-outline" };
     case start <= now && end >= now:
-      return {text: 'IM GANGE', color: "green", icon: "mdi-play"};
+      return { code: 0, text: 'IM GANGE', color: "green", icon: "mdi-play" };
     case end < now:
-      return {text: 'VERGANGEN', color: "grey", icon: "mdi-archive"};
+      return { code: -1, text: 'VERGANGEN', color: "grey", icon: "mdi-archive" };
     default:
-      return {text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick"};
+      return { code: null, text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick" };
   }
 });
 async function addAnonAcc(){
@@ -362,15 +375,6 @@ async function deleteEvent() {
   eventStore.hydrate();
 }
 
-function reducelist(uuid: string){
-  questionnaires.value.filter((qeuestionair : Questionnaire) => {
-      return qeuestionair.uuid != uuid
-  })
-}
-onMounted(async () => {
-  questionnaires.value = (await QuestionnaireApi.getOf(eventUuid)).data as Questionnaire[];
-});
-
 async function updateMailConfig(config: MailConfig) {
   const newEvent = { ...event.value, mailConfig: config } as FleventsEvent;
   try {
@@ -501,6 +505,7 @@ async function updateMailConfig(config: MailConfig) {
         <v-container class="d-flex flex-column flex-sm-row justify-end gap">
           <v-btn
             v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+            :disabled="eventStatus.code < 0"
             variant="text"
             prepend-icon="mdi-pencil"
             :to="{ name: 'events.edit', params: { uuid: eventUuid }}"
@@ -530,7 +535,7 @@ async function updateMailConfig(config: MailConfig) {
           <v-spacer/>
           <v-btn
             :loading="enrollLoading"
-            :disabled="enrollLoading"
+            :disabled="enrollLoading || eventStatus.code < 0"
             v-if="!isAttending"
             color="primary"
             variant="elevated"
@@ -541,7 +546,7 @@ async function updateMailConfig(config: MailConfig) {
           </v-btn>
           <v-btn
             :loading="enrollLoading"
-            :disabled="enrollLoading"
+            :disabled="enrollLoading || eventStatus.code < 0"
             v-if="isAttending"
             color="primary"
             variant="tonal"
@@ -603,17 +608,14 @@ async function updateMailConfig(config: MailConfig) {
         <v-divider />
 
         <v-expansion-panels
-          v-if="questionnaires"
           variant="accordion"
           multiple
         >
           <QuestionnaireDisplay
-            v-if="questionnaires != null"
             v-for="(questionnaire, index) in questionnaires"
             :key="index"
             :questionnaire="questionnaire"
             :event="event"
-            @update="reducelist"
           />
         </v-expansion-panels>
       </v-window-item>
