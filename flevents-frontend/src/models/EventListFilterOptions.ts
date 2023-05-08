@@ -6,5 +6,5 @@ export interface EventListFilterOptions {
   fromDate?: string,
   toDate?: string,
   eventRoles?: EventRole[],
-  attending?: boolean,
+  dateAscending?: boolean,
 }
