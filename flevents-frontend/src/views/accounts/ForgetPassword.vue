@@ -33,7 +33,7 @@
     <v-container class="d-flex flex-column flex-sm-row justify-end gap">
       <v-btn
         variant="text"
-        :to="{ name: 'accounts.login' }"
+        :to="{ name: 'accounts.login', query: route.query }"
       >
         Abbrechen
       </v-btn>

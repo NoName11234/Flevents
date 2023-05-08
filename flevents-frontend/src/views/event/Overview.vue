@@ -639,7 +639,7 @@ async function updateMailConfig(config: MailConfig) {
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
             :to="{ name: 'events.invite', params: { uuid: eventUuid } }"
-            prepend-icon="mdi-account-plus"
+            prepend-icon="mdi-email-fast"
             color="primary"
             variant="tonal"
             v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
@@ -653,7 +653,7 @@ async function updateMailConfig(config: MailConfig) {
             variant="tonal"
             v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
           >
-            Teilnehmer aus Organisation hinzufügen
+            Teilnehmer hinzufügen
           </v-btn>
         </v-container>
 
@@ -748,7 +748,7 @@ async function updateMailConfig(config: MailConfig) {
             variant="tonal"
             @click="addAnon = true"
           >
-            Unangemeldeten Teilnehmer hinzufügen
+            Unangemeldeter Teilnehmer
           </v-btn>
         </v-container>
 
@@ -802,7 +802,7 @@ async function updateMailConfig(config: MailConfig) {
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
             :to="{ name: 'events.organizer', params: { uuid: eventUuid } }"
-            prepend-icon="mdi-account-plus"
+            prepend-icon="mdi-email-fast"
             color="primary"
             variant="tonal"
           >
