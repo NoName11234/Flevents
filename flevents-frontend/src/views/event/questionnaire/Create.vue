@@ -138,7 +138,10 @@ async function submit(pendingValidation: Promise<any>){
           label="Einsendeschluss"
           type="datetime-local"
           v-model="questionnaire.closingDate"
-          :rules="[() => questionnaire.closingDate !== '' || 'Fragebögen müssen einen Einsendeschluss haben.']"
+          :rules="[
+            () => questionnaire.closingDate !== '' || 'Fragebögen müssen einen Einsendeschluss haben.',
+            () => new Date(questionnaire.closingDate).getTime() - new Date().getTime() > 0 || 'Einsendeschluss muss in der Zukunft liegen.'
+            ]"
           hide-details="auto"
           required
           prepend-inner-icon="mdi-timer-sand-complete"
