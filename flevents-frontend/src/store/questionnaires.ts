@@ -1,18 +1,66 @@
-import { defineStore } from 'pinia'
+import {defineStore, storeToRefs} from 'pinia'
 import {Questionnaire} from "@/models/questionnaire";
 import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {computed} from "vue";
+import {useEventStore} from "@/store/events";
 
+/**
+ * Store for state management of Questionnaires.
+ * @author David Maier
+ * @since Weekly Build 3
+ */
 export const useQuestionnaireStore = defineStore('questionnaires', {
   state: () => ({
-    cachedQuestionnaires: new Map<string, Questionnaire>(),
     cachedQuestionnairesOfEvents: new Map<string, string[]>(),
+
+    cachedQuestionnaires: new Map<string, Questionnaire>(),
+    lastCaching: new Map<string, Date>,
     specificLoading: new Map<string, boolean>,
     specificError: new Map<string, boolean>,
-    lastCaching: new Map<string, Date>,
+
+    lastSuccessfulHydration: undefined as Date|undefined,
+    loading: false,
+    error: false,
   }),
   actions: {
+
+    /**
+     * Hydrates the store by requesting data from the event store.
+     * This way, advantage is taken of already cached data.
+     */
+    async hydrate() {
+      if (this.loading === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
+      this.error = false;
+      this.loading = true;
+      const eventStore = useEventStore();
+      const { cachedEvents } = storeToRefs(eventStore);
+      cachedEvents.value.forEach(e => {
+        this.cachedQuestionnairesOfEvents.set(e.uuid!, e.questionnaires.map(q => q.uuid));
+        e.questionnaires.forEach(q =>{
+          this.cachedQuestionnaires.set(q.uuid, q);
+        });
+      });
+      this.lastSuccessfulHydration = new Date();
+      this.error = false;
+      this.loading = true;
+    },
+
+    /**
+     * Signals the store that recent contents of it's state are being used.
+     * The store then decides whether the last successful hydration is long enough ago to update the state.
+     */
+    async requestHydration() {
+      if (
+        this.lastSuccessfulHydration === undefined
+        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > STORES.CACHE_MAX_AGE
+      ) {
+        await this.hydrate();
+      }
+    },
 
     /**
      * Hydrates the store by requesting a specific questionnaire from the api.
@@ -48,15 +96,18 @@ export const useQuestionnaireStore = defineStore('questionnaires', {
       this.specificLoading.set(eventUuid, true);
       try {
         const { data } = await questionnaireApi.getOf(eventUuid);
-        const questionnaires = data as Questionnaire[];
-        questionnaires.forEach(q => {
+        const questionnairesOfEvent = data as Questionnaire[];
+        questionnairesOfEvent.forEach(q => {
           if (q.uuid) {
             this.cachedQuestionnaires.set(q.uuid, q);
             this.lastCaching.set(q.uuid, new Date());
             this.specificError.set(q.uuid, false);
           }
         });
-        this.cachedQuestionnairesOfEvents.set(eventUuid, questionnaires.map(q => q.uuid));
+        this.cachedQuestionnairesOfEvents.set(
+          eventUuid,
+          questionnairesOfEvent.map(q => q.uuid)
+        );
         this.lastCaching.set(eventUuid, new Date());
         this.specificError.set(eventUuid, false);
       } catch (e) {
@@ -132,11 +183,14 @@ export const useQuestionnaireStore = defineStore('questionnaires', {
     },
 
     async dehydrate() {
+      this.cachedQuestionnairesOfEvents = new Map();
       this.cachedQuestionnaires = new Map();
-      this.cachedQuestionnairesOfEvents = new Map<string, string[]>();
       this.lastCaching = new Map();
       this.specificLoading = new Map();
       this.specificError = new Map();
+      this.lastSuccessfulHydration = undefined;
+      this.loading = false;
+      this.error = false;
     }
   },
 })

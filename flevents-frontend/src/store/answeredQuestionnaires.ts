@@ -5,6 +5,11 @@ import {computed} from "vue";
 import {AnsweredQuestionnaire} from "@/models/answeredQuestionnaire";
 import {AxiosError, HttpStatusCode} from "axios";
 
+/**
+ * Store for state management of answers to questionnaires.
+ * @author David Maier
+ * @since Weekly Build 4
+ */
 export const useAnsweredQuestionnaireStore = defineStore('answeredQuestionnaires', {
   state: () => ({
     cachedAnsweredQuestionnaires: new Map<string, AnsweredQuestionnaire>(),

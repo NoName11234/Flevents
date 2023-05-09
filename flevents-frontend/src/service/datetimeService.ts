@@ -43,6 +43,11 @@ class DatetimeService {
       + end.toLocaleString("DE-de", long);
   }
 
+  /**
+   * Determines whether two dates are on the same day.
+   * @param a a date
+   * @param b another date
+   */
   isSameDay(a: Date, b: Date) {
     let sameYear = a.getFullYear() === b.getFullYear();
     let sameMonth = a.getMonth() === b.getMonth();
@@ -51,4 +56,9 @@ class DatetimeService {
   }
 }
 
+/**
+ * Util-class for managing date and time.
+ * @author David Maier
+ * @since Weekly Build 3
+ */
 export default new DatetimeService(VLocaleProvider.locale);

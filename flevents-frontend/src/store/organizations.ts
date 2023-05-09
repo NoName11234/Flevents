@@ -6,6 +6,11 @@ import organizationsApi from "@/api/organizationsApi";
 import {computed} from "vue";
 import {STORES} from "@/constants";
 
+/**
+ * Store for state management of Organizations.
+ * @author David Maier
+ * @since Weekly Build 1
+ */
 export const useOrganizationStore = defineStore('organizations', {
   state: () => ({
     managedOrganizationsIds: [] as string[],

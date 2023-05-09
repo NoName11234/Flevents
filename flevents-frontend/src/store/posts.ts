@@ -1,23 +1,66 @@
-import { defineStore } from 'pinia'
+import {defineStore, storeToRefs} from 'pinia'
 import {Post} from "@/models/post";
-import postApi from "@/api/postsApi";
 import {STORES} from "@/constants";
+import postApi from "@/api/postsApi";
 import {computed} from "vue";
+import {useEventStore} from "@/store/events";
 
+/**
+ * Store for state management of Posts.
+ * @author David Maier
+ * @since Weekly Build 3
+ */
 export const usePostStore = defineStore('posts', {
   state: () => ({
-    postsOfEvents: new Map<string, string[]>(),
-    lastSuccessfulHydration: new Map<string, Date>(),
+    cachedPostsOfEvents: new Map<string, string[]>(),
 
     cachedPosts: new Map<string, Post>(),
-    specificLoading: new Map<string, boolean>,
     lastCaching: new Map<string, Date>,
+    specificLoading: new Map<string, boolean>,
     specificError: new Map<string, boolean>,
 
+    lastSuccessfulHydration: undefined as Date|undefined,
     loading: false,
     error: false,
   }),
   actions: {
+
+    /**
+     * Hydrates the store by requesting data from the event store.
+     * This way, advantage is taken of already cached data.
+     */
+    async hydrate() {
+      if (this.loading === true) {
+        // Do not hydrate if already hydrating
+        return;
+      }
+      this.error = false;
+      this.loading = true;
+      const eventStore = useEventStore();
+      const { cachedEvents } = storeToRefs(eventStore);
+      cachedEvents.value.forEach(e => {
+        this.cachedPostsOfEvents.set(e.uuid!, e.posts.map(p => p.uuid));
+        e.posts.forEach(p =>{
+          this.cachedPosts.set(p.uuid, p);
+        });
+      });
+      this.lastSuccessfulHydration = new Date();
+      this.error = false;
+      this.loading = true;
+    },
+
+    /**
+     * Signals the store that recent contents of it's state are being used.
+     * The store then decides whether the last successful hydration is long enough ago to update the state.
+     */
+    async requestHydration() {
+      if (
+        this.lastSuccessfulHydration === undefined
+        || new Date().getTime() - this.lastSuccessfulHydration.getTime() > STORES.CACHE_MAX_AGE
+      ) {
+        await this.hydrate();
+      }
+    },
 
     /**
      * Hydrates the store by requesting the posts of the given event uuid from the API.
@@ -35,12 +78,13 @@ export const usePostStore = defineStore('posts', {
         postsOfEvent.forEach(p => {
           this.cachedPosts.set(p.uuid, p);
           this.lastCaching.set(p.uuid, new Date());
+          this.specificError.set(p.uuid, false);
         });
-        this.postsOfEvents.set(
+        this.cachedPostsOfEvents.set(
           eventUuid,
           postsOfEvent.map(p => p.uuid)
         );
-        this.lastSuccessfulHydration.set(eventUuid, new Date());
+        this.lastCaching.set(eventUuid, new Date());
         this.specificError.set(eventUuid, false);
       } catch (e) {
         console.warn(`Failed to fetch posts for event with id ${eventUuid}.`, e);
@@ -57,8 +101,8 @@ export const usePostStore = defineStore('posts', {
      * @returns an array of posts
      */
     getPostsOf(eventUuid: string) {
-      const requestedPosts = this.postsOfEvents.get(eventUuid);
-      const lastUpdate = this.lastSuccessfulHydration.get(eventUuid);
+      const requestedPosts = this.cachedPostsOfEvents.get(eventUuid);
+      const lastUpdate = this.lastCaching.get(eventUuid);
       if (
         requestedPosts === undefined
         || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
@@ -105,6 +149,11 @@ export const usePostStore = defineStore('posts', {
       this.cachedPosts.set(post.uuid, post);
     },
 
+    /**
+     * Creates a writable computed ref that enables read/write access to a cached post.
+     * @param uuid the uuid of the questionnaire
+     * @param eventUuid the uuid of the post's event
+     */
     getPostGetter(uuid: string, eventUuid: string) {
       return computed({
         get: () => this.getPost(uuid, eventUuid),
@@ -113,12 +162,12 @@ export const usePostStore = defineStore('posts', {
     },
 
     async dehydrate() {
-      this.postsOfEvents = new Map();
+      this.cachedPostsOfEvents = new Map();
       this.cachedPosts = new Map();
       this.lastCaching = new Map();
       this.specificLoading = new Map();
       this.specificError = new Map();
-      this.lastSuccessfulHydration = new Map();
+      this.lastSuccessfulHydration = undefined;
       this.loading = false;
       this.error = false;
     }
