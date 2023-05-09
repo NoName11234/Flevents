@@ -63,6 +63,7 @@ public class JwtUtils {
     try {
       Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
       if(invalidTokens.containsKey(authToken)){
+        logger.error("The token was invalidated");
         return false;
       }
       return true;

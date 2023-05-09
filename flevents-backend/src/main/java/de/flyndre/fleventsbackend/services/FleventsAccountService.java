@@ -116,8 +116,14 @@ public class FleventsAccountService {
         if(account.getSecret()==null){
             throw new IllegalArgumentException("No secret provided");
         }
-        if(!fleventsAccountRepository.findByEmail(account.getEmail()).isEmpty()){
+        Optional<FleventsAccount> optional;
+        if(!(optional= fleventsAccountRepository.findByEmail(account.getEmail())).isEmpty()&&optional.get().getIsActive()){
             throw new IllegalArgumentException("The provided email is already in use");
+        }
+        if(optional.isPresent()){
+            FleventsAccount oldAcc = optional.get();
+            oldAcc.setEmail(null);
+            fleventsAccountRepository.save(oldAcc);
         }
         account.setUuid(null);
         account.setIsActive(true);
@@ -191,6 +197,7 @@ public class FleventsAccountService {
      */
     public void deleteAccount(FleventsAccount account){
         account.setIsActive(false);
+        account.setSecret(null);
         fleventsAccountRepository.save(account);
     }
 
