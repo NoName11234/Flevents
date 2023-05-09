@@ -1,7 +1,9 @@
 package de.flyndre.fleventsbackend;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.Models.questionnaire.QuestionModel;
 import de.flyndre.fleventsbackend.dtos.*;
+import de.flyndre.fleventsbackend.dtos.questionnaire.Question;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -115,6 +117,7 @@ public class AppConfiguration {
         };
         modelMapper.typeMap(Post.class,PostInformation.class).addMappings(mapper -> mapper.using(convertPostCommentToPostCommentInformation).map(Post::getComments,PostInformation::setComments));
 
+        modelMapper.typeMap(QuestionModel.class, Question.class).addMapping(QuestionModel::getChoiceModels,Question::setChoices);
         return modelMapper;
     }
     public static String[] getNullPropertyNames (Object source) {
