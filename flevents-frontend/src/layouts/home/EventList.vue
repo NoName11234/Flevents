@@ -7,7 +7,7 @@ import ContentLoadingIndicator from "@/components/ContentLoadingIndicator.vue";
 import CardBanner from "@/components/CardBanner.vue";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import {EventListFilterOptions} from "@/models/EventListFilterOptions";
+import {EventListFilterOptions} from "@/models/eventListFilterOptions";
 import {EventRole} from "@/models/eventRole";
 
 const props = defineProps({

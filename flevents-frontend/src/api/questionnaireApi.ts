@@ -22,7 +22,7 @@ class QuestionnaireApi {
    */
   create(questionnaire: Questionnaire, eventUuid: string) {
     return api.post(`/questionnaires`, questionnaire, {
-      params: { "eventId": eventUuid}
+      params: { "eventId": eventUuid }
     });
   }
 

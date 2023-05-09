@@ -20,7 +20,6 @@ const loading = ref(false);
 const questionnaire = ref({
   eventId:  eventUuid as string,
   title: '',
-  closingDate: '',
   questions: [{
     question: '',
     questionType: QuestionType.FreeText

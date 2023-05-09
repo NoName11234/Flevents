@@ -89,7 +89,7 @@ async function deleteComment() {
         <div class="d-flex flex-row align-center gap">
           <div class="d-flex flex-column flex-sm-row gap">
             <strong>{{ comment.author.firstname }} {{ comment.author.lastname }}</strong>
-            <span class="text-grey mt-n2 mt-sm-0">{{ DatetimeService.getDateTime(new Date(comment.creationDate)) }}</span>
+            <span class="text-grey mt-n2 mt-sm-0">{{ DatetimeService.getDateTime(comment.creationDate) }}</span>
           </div>
           <v-spacer />
           <v-btn

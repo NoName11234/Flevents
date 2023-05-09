@@ -92,7 +92,7 @@ async function deletePost() {
         </strong>
 
         <span class="text-grey">
-          {{ DatetimeService.getDateTime(new Date(post.creationDate)) }}
+          {{ DatetimeService.getDateTime(post.creationDate) }}
         </span>
 
       </div>

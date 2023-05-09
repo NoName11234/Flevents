@@ -10,30 +10,30 @@ class DatetimeService {
 
   /**
    * Gets the date part of a date as formatted string.
-   * @param date the date
+   * @param date the date string
    */
-  getDate(date: Date) {
-    return date.toLocaleDateString(this.locale, {
+  getDate(date: string) {
+    return new Date(date).toLocaleDateString(this.locale, {
       dateStyle: 'medium'
     });
   }
 
   /**
    * Gets the time part of a date as formatted string.
-   * @param date the date
+   * @param date the date string
    */
-  getTime(date: Date) {
-    return date.toLocaleTimeString(this.locale, {
+  getTime(date: string) {
+    return new Date(date).toLocaleTimeString(this.locale, {
       timeStyle: 'short'
     });
   }
 
   /**
    * Gets both, date and time part, of a date as formatted string.
-   * @param date the date
+   * @param date the date string
    */
-  getDateTime(date: Date) {
-    return date.toLocaleString(this.locale, {
+  getDateTime(date: string) {
+    return new Date(date).toLocaleString(this.locale, {
       dateStyle: 'medium',
       timeStyle: 'short',
     });

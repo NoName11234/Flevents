@@ -22,6 +22,7 @@ import Heading from "@/components/Heading.vue";
 import PostDisplay from "@/components/PostDisplay.vue";
 import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
 import MailConfigCard from "@/components/MailConfigCard.vue";
+import DatetimeService from "../../service/datetimeService";
 
 const openContext = ref(false);
 const address = ref("");
@@ -184,26 +185,6 @@ async function disEnroll(){
   }
   enrollLoading.value = false;
   eventStore.hydrate();
-}
-
-function parseDate(from: any, to: any) {
-  let short = {
-    timeStyle: "short",
-  } as Intl.DateTimeFormatOptions;
-  let long = {
-    dateStyle: "long",
-    timeStyle: "short",
-  } as Intl.DateTimeFormatOptions;
-  let start = new Date(from);
-  let end = new Date(to);
-  if (isSameDay(start, end)) {
-    return start.toLocaleString("DE-de", long)
-      + " - "
-      + end.toLocaleString("DE-de", short);
-  }
-  return start.toLocaleString("DE-de", long)
-    + " - "
-    + end.toLocaleString("DE-de", long);
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -474,7 +455,7 @@ async function updateMailConfig(config: MailConfig) {
       <v-window-item value="info">
         <template v-if="event?.description">
           <v-container>
-            {{event?.description}}
+            {{ event?.description }}
           </v-container>
           <v-divider />
         </template>
@@ -484,21 +465,21 @@ async function updateMailConfig(config: MailConfig) {
             prepend-icon="mdi-clock"
             subtitle="Zeitraum"
           >
-            {{parseDate(event?.startTime, event?.endTime)}}
+            {{ DatetimeService.formatDateRange(event?.startTime, event?.endTime) }}
           </v-list-item>
           <v-list-item
             v-if="event?.location"
             prepend-icon="mdi-map-marker"
             subtitle="Ort"
           >
-            {{event?.location}}
+            {{ event?.location }}
           </v-list-item>
           <v-list-item
             v-if="event?.organizationPreview?.name"
             prepend-icon="mdi-account-group"
             subtitle="Organisation"
           >
-            {{event?.organizationPreview?.name}}
+            {{ event?.organizationPreview?.name }}
           </v-list-item>
         </v-list>
         <v-divider/>
