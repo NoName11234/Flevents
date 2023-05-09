@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {ref} from "vue";
 import {MailConfig} from "@/models/mailConfig";
-import {Duration} from "@/models/duration";
 import DurationService from "@/service/durationService";
-import * as events from "events";
 import {VALIDATION} from "@/constants";
 
 const props = defineProps({
