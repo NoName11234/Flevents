@@ -55,6 +55,20 @@ public class AuthService {
                 roles);
     }
 
+    public JwtResponse refresh(Authentication auth){
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        String jwt = jwtUtils.generateJwtToken(auth);
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+        return new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles);
+    }
+
     /**
      * @param auth the current logged-in User
      * @param roles the roles that are allowed
