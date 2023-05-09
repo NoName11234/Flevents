@@ -29,6 +29,7 @@ public class PostControllerService {
     private final AuthService authService;
     private final AttachmentService attachmentService;
 
+
     public PostControllerService(EventService eventService, PostService postService, FleventsAccountService accountService, AuthService authService, AttachmentService attachmentService) {
         this.eventService = eventService;
         this.postService = postService;

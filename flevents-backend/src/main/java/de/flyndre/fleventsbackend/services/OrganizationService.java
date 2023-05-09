@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +25,7 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationAccountRepository organizationAccountRepository;
     private final MailConfigRepository mailConfigRepository;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
     public OrganizationService(OrganizationRepository organizationRepository, OrganizationAccountRepository organizationAccountRepository, MailConfigRepository mailConfigRepository){
         this.organizationRepository = organizationRepository;
         this.organizationAccountRepository = organizationAccountRepository;

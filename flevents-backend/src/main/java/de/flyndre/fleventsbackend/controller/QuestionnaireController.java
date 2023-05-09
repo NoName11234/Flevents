@@ -85,7 +85,10 @@ public class QuestionnaireController {
         //    return new ResponseEntity(HttpStatus.UNAUTHORIZED);
        //}
         try {
-            return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class),HttpStatus.OK);
+            return new ResponseEntity<>(mapper.map(questionnaireControllerService.getAnswerFromUser(questionnaireId, userId), AnsweredQuestionnaire.class), HttpStatus.OK);
+        }catch(NoSuchElementException e){
+            logger.error(strings.getString("logger.InternalError"),e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }catch (Exception e){
             logger.error(strings.getString("logger.InternalError"),e);
             return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
