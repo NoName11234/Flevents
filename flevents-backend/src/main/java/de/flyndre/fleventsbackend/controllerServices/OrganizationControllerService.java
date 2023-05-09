@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -203,7 +204,7 @@ public class OrganizationControllerService {
      * @param mailText the text for the MailConfiguration to set
      * @param localDateTime the time to set
      */
-    public void setMailConfigEventInfo(String organizationId, String mailText, LocalDateTime localDateTime) {
+    public void setMailConfigEventInfo(String organizationId, String mailText, Duration localDateTime) {
         organizationService.setMailConfigEventInfo(getOrganizationById(organizationId) , mailText, localDateTime);
     }
 
@@ -213,7 +214,7 @@ public class OrganizationControllerService {
      * @param mailText the text for the MailConfiguration to set
      * @param localDateTime the time to set
      */
-    public void setMailConfigEventFeedback(String organizationId, String mailText, LocalDateTime localDateTime) {
+    public void setMailConfigEventFeedback(String organizationId, String mailText, Duration localDateTime) {
         organizationService.setMailConfigEventFeedback(getOrganizationById(organizationId) , mailText, localDateTime);
     }
 

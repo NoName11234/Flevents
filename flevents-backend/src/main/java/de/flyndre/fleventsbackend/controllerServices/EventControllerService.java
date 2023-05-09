@@ -239,14 +239,14 @@ public class EventControllerService {
         LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         //now.plusHours(2);
         for(Event event:events) {
-            if (now.equals(event.getMailConfig().getInfoMessageTime().withMinute(0).withSecond(0).withNano(0))) {
+            if (now.equals(event.getStartTime().minus(event.getMailConfig().getInfoMessageOffset()).withMinute(0).withSecond(0).withNano(0))) {
                 try {
                     eMailService.sendAlertMessage(event);
                 } catch (MessagingException e) {
                     throw new RuntimeException(e);
                 }
             }
-            if (now.equals(event.getMailConfig().getFeedbackMessageTime().withMinute(0).withSecond(0).withNano(0))) {
+            if (now.equals(event.getEndTime().plus(event.getMailConfig().getInfoMessageOffset()).withMinute(0).withSecond(0).withNano(0))) {
                 try {
                     eMailService.sendThankMessage(event);
                 } catch (MessagingException e) {
