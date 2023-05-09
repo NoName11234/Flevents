@@ -9,7 +9,7 @@ import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 import {useOrganizationStore} from "@/store/organizations";
 import {usePostStore} from "@/store/posts";
-import {useSurveyStore} from "@/store/surveys";
+import {useQuestionnaireStore} from "@/store/questionnaires";
 import {useEventStore} from "@/store/events";
 import {StoreDefinition} from "pinia";
 
@@ -18,7 +18,7 @@ const stores = [
   useAccountStore,
   useOrganizationStore,
   usePostStore,
-  useSurveyStore,
+  useQuestionnaireStore,
   useEventStore,
 ] as StoreDefinition[];
 

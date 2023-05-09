@@ -2,7 +2,7 @@
 import {useAppStore} from "@/store/app";
 import {storeToRefs} from "pinia";
 import {Toast as ToastType} from "@/models/toast";
-import Toast from "@/components/toast.vue";
+import Toast from "@/components/Toast.vue";
 
 const appStore = useAppStore();
 const { toasts } = storeToRefs(appStore);

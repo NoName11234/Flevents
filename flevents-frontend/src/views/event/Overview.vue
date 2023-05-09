@@ -1,30 +1,27 @@
 <script setup lang="ts">
-import {computed, onMounted, Ref, ref} from "vue";
-import {useRoute} from "vue-router";
-import Heading from "@/components/Heading.vue";
-import {AxiosError} from "axios";
 import router from "@/router";
-import EventPost from "@/components/EventPost.vue";
+import eventApi from "@/api/eventsApi";
+import {computed, ref} from "vue";
+import {VALIDATION} from "@/constants";
+import {AxiosError} from "axios";
 import {Account} from "@/models/account";
 import {EventRole} from "@/models/eventRole";
-import {Questionnaire} from "@/models/questionnaire";
-import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
-import {useEventStore} from "@/store/events";
-import {useSurveyStore} from "@/store/surveys";
 import {AccountPreview} from "@/models/accountPreview";
-import {useAccountStore} from "@/store/account";
-import {storeToRefs} from "pinia";
-import eventApi from "@/api/eventsApi";
-import {useAppStore} from "@/store/app";
-import {useOrganizationStore} from "@/store/organizations";
-import MailConfigCard from "@/components/MailConfigCard.vue";
 import {MailConfig} from "@/models/mailConfig";
 import {FleventsEvent} from "@/models/fleventsEvent";
-import QuestionnaireApi from "@/api/questionnaireApi";
-import api from "@/api/api";
 import {OrganizationRole} from "@/models/organizationRole";
+import {useRoute} from "vue-router";
+import {useEventStore} from "@/store/events";
+import {useQuestionnaireStore} from "@/store/questionnaires";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import {useAppStore} from "@/store/app";
+import {useOrganizationStore} from "@/store/organizations";
 import {usePostStore} from "@/store/posts";
-import {VALIDATION} from "@/constants";
+import Heading from "@/components/Heading.vue";
+import PostDisplay from "@/components/PostDisplay.vue";
+import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
+import MailConfigCard from "@/components/MailConfigCard.vue";
 
 const openContext = ref(false);
 const address = ref("");
@@ -48,7 +45,7 @@ const postStore = usePostStore();
 const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
   ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
-const surveyStore = useSurveyStore();
+const surveyStore = useQuestionnaireStore();
 const questionnaires = computed(() => surveyStore.getQuestionnairesGetterOf(eventUuid).value
   ?.sort((a, b) => new Date(b.closingDate).getTime() - new Date(a.closingDate).getTime()));
 
@@ -582,7 +579,7 @@ async function updateMailConfig(config: MailConfig) {
           variant="accordion"
           multiple
         >
-          <EventPost
+          <PostDisplay
             v-for="(post, pIndex) in posts"
             :event-uuid="eventUuid"
             :post="post"

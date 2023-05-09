@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {Post} from "@/models/post";
-import Comment from "@/components/Comment.vue";
+import Comment from "@/components/PostComment.vue";
 import AccountAvatar from "@/components/AccountAvatar.vue";
-import CommentForm from "@/components/CommentForm.vue";
+import CommentForm from "@/components/PostCommentForm.vue";
 import {computed, ref} from "vue";
 import postApi from "@/api/postsApi";
 import {useAppStore} from "@/store/app";

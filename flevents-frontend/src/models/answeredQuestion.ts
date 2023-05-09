@@ -1,11 +1,9 @@
-import {AnsweredSingleChoiceQuestion} from "@/models/answeredSingleChoiceQuestion";
-import {AnsweredFreeTextQuestion} from "@/models/answeredFreeTextQuestion";
 import {QuestionType} from "@/models/questionType";
-import {Choices} from "@/models/choices";
+import {Choice} from "@/models/choice";
 
 export type AnsweredQuestion = {
-  uuid : string;
-  questionType : QuestionType
-  choice: Choices;
+  uuid: string;
+  questionType: QuestionType;
+  choice: Choice;
   answer: string;
 }

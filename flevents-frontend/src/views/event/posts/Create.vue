@@ -5,7 +5,6 @@ import {useRoute, useRouter} from "vue-router";
 import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
-import {useEventStore} from "@/store/events";
 import IconService from "@/service/iconService";
 import {usePostStore} from "@/store/posts";
 
@@ -208,9 +207,5 @@ async function submit() {
 </template>
 
 <style scoped>
-
-.w-custom {
-  min-width: 250px;
-}
 
 </style>

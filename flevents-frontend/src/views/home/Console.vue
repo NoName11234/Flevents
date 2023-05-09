@@ -8,13 +8,6 @@ import {Organization} from "@/models/organization";
 import {AxiosError} from "axios";
 import {VALIDATION} from "@/constants";
 import ConsoleApi from "@/api/consoleApi";
-import {el} from "vuetify/locale";
-import IconService from "@/service/iconService";
-import DatetimeService from "@/service/datetimeService";
-import Comment from "@/components/Comment.vue";
-import CommentForm from "@/components/CommentForm.vue";
-import AccountAvatar from "@/components/AccountAvatar.vue";
-import {OrganizationRole} from "@/models/organizationRole";
 
 const appStore = useAppStore();
 

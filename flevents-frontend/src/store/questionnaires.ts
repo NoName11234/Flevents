@@ -4,10 +4,10 @@ import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {computed} from "vue";
 
-export const useSurveyStore = defineStore('surveys', {
+export const useQuestionnaireStore = defineStore('questionnaires', {
   state: () => ({
-    cachedSurveys: new Map<string, Questionnaire>(),
-    cachedSurveysOfEvents: new Map<string, string[]>(),
+    cachedQuestionnaires: new Map<string, Questionnaire>(),
+    cachedQuestionnairesOfEvents: new Map<string, string[]>(),
     specificLoading: new Map<string, boolean>,
     specificError: new Map<string, boolean>,
     lastCaching: new Map<string, Date>,
@@ -26,12 +26,12 @@ export const useSurveyStore = defineStore('surveys', {
       this.specificLoading.set(uuid, true);
       try {
         const { data } = await questionnaireApi.get(uuid);
-        this.cachedSurveys.set(uuid, data as Questionnaire);
+        this.cachedQuestionnaires.set(uuid, data as Questionnaire);
         this.lastCaching.set(uuid, new Date());
         this.specificError.set(uuid, false);
       } catch (e) {
         console.warn(`Failed to fetch questionnaires for event with id ${uuid}.`, e);
-        this.specificError.set(uuid, false);
+        this.specificError.set(uuid, true);
       }
       this.specificLoading.set(uuid, false);
     },
@@ -51,12 +51,12 @@ export const useSurveyStore = defineStore('surveys', {
         const questionnaires = data as Questionnaire[];
         questionnaires.forEach(q => {
           if (q.uuid) {
-            this.cachedSurveys.set(q.uuid, q);
+            this.cachedQuestionnaires.set(q.uuid, q);
             this.lastCaching.set(q.uuid, new Date());
             this.specificError.set(q.uuid, false);
           }
         });
-        this.cachedSurveysOfEvents.set(eventUuid, questionnaires.map(q => q.uuid));
+        this.cachedQuestionnairesOfEvents.set(eventUuid, questionnaires.map(q => q.uuid));
         this.lastCaching.set(eventUuid, new Date());
         this.specificError.set(eventUuid, false);
       } catch (e) {
@@ -73,7 +73,7 @@ export const useSurveyStore = defineStore('surveys', {
      * @returns an array of questionnaires
      */
     getQuestionnairesOf(eventUuid: string) {
-      const requestedQuestionnaires = this.cachedSurveysOfEvents.get(eventUuid);
+      const requestedQuestionnaires = this.cachedQuestionnairesOfEvents.get(eventUuid);
       const lastUpdate = this.lastCaching.get(eventUuid);
       if (
         requestedQuestionnaires === undefined
@@ -81,7 +81,7 @@ export const useSurveyStore = defineStore('surveys', {
       ) {
         this.hydrateSpecificOf(eventUuid);
       }
-      return requestedQuestionnaires?.map(pUuid => this.cachedSurveys.get(pUuid) as Questionnaire) || [] as Questionnaire[];
+      return requestedQuestionnaires?.map(pUuid => this.cachedQuestionnaires.get(pUuid) as Questionnaire) || [] as Questionnaire[];
     },
 
     /**
@@ -99,7 +99,7 @@ export const useSurveyStore = defineStore('surveys', {
      * @returns The event if cached, `undefined` otherwise.
      */
     getQuestionnaire(uuid: string) {
-      const requestedQuestionnaire = this.cachedSurveys.get(uuid);
+      const requestedQuestionnaire = this.cachedQuestionnaires.get(uuid);
       const lastUpdate = this.lastCaching.get(uuid);
       if (
         requestedQuestionnaire === undefined
@@ -117,7 +117,7 @@ export const useSurveyStore = defineStore('surveys', {
      */
     setQuestionnaire(questionnaire: Questionnaire) {
       if (questionnaire === undefined || questionnaire.uuid === undefined) return;
-      this.cachedSurveys.set(questionnaire.uuid, questionnaire);
+      this.cachedQuestionnaires.set(questionnaire.uuid, questionnaire);
     },
 
     /**
@@ -132,8 +132,8 @@ export const useSurveyStore = defineStore('surveys', {
     },
 
     async dehydrate() {
-      this.cachedSurveys = new Map();
-      this.cachedSurveysOfEvents = new Map<string, string[]>();
+      this.cachedQuestionnaires = new Map();
+      this.cachedQuestionnairesOfEvents = new Map<string, string[]>();
       this.lastCaching = new Map();
       this.specificLoading = new Map();
       this.specificError = new Map();

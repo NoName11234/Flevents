@@ -10,12 +10,15 @@ import {AnsweredQuestion} from "@/models/answeredQuestion";
 import {useAccountStore} from "@/store/account";
 import QuestionnaireApi from "@/api/questionnaireApi";
 import DatetimeService from "@/service/datetimeService";
-import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
+import {useQuestionnaireStatisticsStore} from "@/store/questionnaireStatistics";
 import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
-import SurveyStats from "@/components/SurveyStats.vue";
+import SurveyStats from "@/components/QuestionnaireStats.vue";
 import {Statistics} from "@/models/statistics";
-import {useSurveyStore} from "@/store/surveys";
+import {useQuestionnaireStore} from "@/store/questionnaires";
+import {useAnsweredQuestionnaireStore} from "@/store/answeredQuestionnaires";
+import {storeToRefs} from "pinia";
+import {Choice} from "@/models/choice";
 
 const props = defineProps({
   questionnaire: {
@@ -30,25 +33,29 @@ const props = defineProps({
 
 const accountStore = useAccountStore();
 const appStore = useAppStore();
-const surveyStore = useSurveyStore();
-const router = useRouter();
-const isDelete = ref(false);
+const questionnaireStore = useQuestionnaireStore();
+
 const tooltip = ref('');
-const user = accountStore.currentAccount!;
+const { currentAccount: account } = storeToRefs(accountStore);
+
+const answerStore = useAnsweredQuestionnaireStore();
+const savedAq = answerStore.getQuestionnaireGetter(props.questionnaire?.uuid, account.value!.uuid);
+const answerError = computed(() => answerStore.specificError.get(props.questionnaire?.uuid));
 const aq = ref({
-  uuid: '',
-  questionnaireId: props.questionnaire.uuid,
-  userId: accountStore.currentAccount!.uuid,
-  answers: props.questionnaire.questions.map(question => {
-    if (question?.choices?.length != 0) {
-      return { choice: question?.choices[0] } as AnsweredQuestion
-    } else {
+    uuid: '',
+    questionnaireId: props.questionnaire.uuid,
+    userId: accountStore.currentAccount!.uuid,
+    answers: props.questionnaire.questions.map(question => {
+      if (question?.choices?.length != 0) {
+        return { choice: question?.choices[0] } as AnsweredQuestion
+      } else {
         return { answer: '' } as AnsweredQuestion;
-    }
-  }),
-} as AnsweredQuestionnaire);
-const alreadyVoted = ref(false);
-const loading = ref(true);
+      }
+    }),
+  } as AnsweredQuestionnaire);
+
+const alreadyVoted = computed(() => answerError.value === false );
+const loading = ref(false);
 
 const isClosed = computed(() =>
   new Date(props.questionnaire.closingDate).getTime() - new Date().getTime() <= 0
@@ -65,29 +72,15 @@ const hasRights = computed(() => {
     OrganizationRole.admin,
     OrganizationRole.organizer,
   ];
-  let hasOrganizationRights = user.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
+  let hasOrganizationRights = account.value!.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
   if (hasOrganizationRights) return true;
   return false;
 });
 
-const statisticsStore = useSurveyStatisticsStore();
+const statisticsStore = useQuestionnaireStatisticsStore();
 let statistics = ref({} as Statistics);
 if (hasRights.value) {
   statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
-}
-
-onMounted(setup);
-async function setup() {
-  loading.value = true;
-  try {
-    const response = await QuestionnaireApi.getAnswers(props.questionnaire?.uuid, accountStore.currentAccount!.uuid);
-    aq.value = response.data as AnsweredQuestionnaire;
-    alreadyVoted.value = true;
-  } catch (e) {
-    console.error('Failed to fetch answered questionnaire.');
-    alreadyVoted.value = false;
-  }
-  loading.value = false;
 }
 
 async function submitAnswers(pendingValidation: Promise<any>) {
@@ -100,8 +93,6 @@ async function submitAnswers(pendingValidation: Promise<any>) {
   loading.value = true;
   try {
     const response = await QuestionnaireApi.saveAnswer(aq.value, props.questionnaire?.uuid);
-    alreadyVoted.value = true;
-    // TODO: replace with async store hydration
     appStore.addToast({
       text: 'Abgestimmt.',
       color: 'success',
@@ -123,8 +114,8 @@ async function submitAnswers(pendingValidation: Promise<any>) {
       color: 'error',
     });
   }
-  //await setup();
   loading.value = false;
+  answerStore.hydrateSpecific(props.questionnaire?.uuid, account.value!.uuid);
 }
 
 async function deleteQuestionnaire() {
@@ -153,13 +144,27 @@ async function deleteQuestionnaire() {
     });
   }
   loading.value = false;
-  surveyStore.hydrateSpecificOf(props.event.uuid!);
+  questionnaireStore.hydrateSpecificOf(props.event.uuid!);
+}
+
+const badgeData = computed(() => {
+  if (alreadyVoted.value) {
+    return { code: 0, color: 'primary', text: 'abgestimmt', icon: 'mdi-check' };
+  }
+  if (isClosed.value) {
+    return { code: -1, color: 'grey', text: 'geschlossen', icon: 'mdi-close' };
+  }
+  return { code: 1, color: 'success', text: 'offen', icon: 'mdi-circle' };
+});
+
+function setChoice(index: number, choice: Choice) {
+  (aq.value.answers[index]).choice = choice;
 }
 
 </script>
 
 <template>
-  <v-expansion-panel v-if="!isDelete">
+  <v-expansion-panel>
 
     <v-expansion-panel-title>
       <div class="d-flex flex-row justify-start align-center w-100">
@@ -168,8 +173,8 @@ async function deleteQuestionnaire() {
         </strong>
         <v-spacer />
         <v-badge
-          :content="isClosed ? 'geschlossen' : 'offen'"
-          :color="isClosed ? 'grey' : 'success'"
+          :content="badgeData.text"
+          :color="badgeData.color"
           class="text-capitalize"
           inline
         />
@@ -234,7 +239,8 @@ async function deleteQuestionnaire() {
               label="Eigene Antwort"
               variant="solo"
               :disabled="alreadyVoted || loading"
-              v-model="(aq.answers[index]).answer"
+              :model-value="(savedAq?.answers?.[index])?.answer"
+              @input="e => (aq.answers[index]).answer = e.target.value"
             >
             </v-textarea>
 
@@ -243,13 +249,14 @@ async function deleteQuestionnaire() {
               hide-details="auto"
               class="pa-2"
               :disabled="alreadyVoted || loading"
-              v-model="(aq.answers[index]).choice"
+              :model-value="(savedAq?.answers?.[index])?.choice || question.choices[0]"
             >
               <v-radio
                 v-for="(option, oIndex) in question.choices"
                 :key="oIndex"
                 :value="option"
                 :label="option.choice"
+                @focus="() => setChoice(index, option)"
               />
             </v-radio-group>
 

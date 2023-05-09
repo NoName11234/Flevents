@@ -4,7 +4,7 @@ import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {Statistics} from "@/models/statistics";
 
-export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
+export const useQuestionnaireStatisticsStore = defineStore('questionnaireStatistics', {
   state: () => ({
     cachedStatistics: new Map<string, Statistics>,
     specificLoading: new Map<string, boolean>,
