@@ -154,7 +154,10 @@ async function submit(pendingValidation: Promise<any>) {
             label="Startzeit"
             type="datetime-local"
             v-model="fleventsEvent.startTime"
-            :rules="[() => fleventsEvent.startTime !== '' || 'Events müssen Startdatum und -zeit haben.']"
+            :rules="[
+              () => fleventsEvent.startTime !== '' || 'Events müssen Startdatum und -zeit haben.',
+              () => new Date(fleventsEvent.startTime).getTime() - new Date().getTime() > 0 || 'Startzeit muss in der Zukunft liegen.'
+              ]"
             hide-details="auto"
             required
           />
@@ -162,7 +165,10 @@ async function submit(pendingValidation: Promise<any>) {
             label="Endzeit"
             type="datetime-local"
             v-model="fleventsEvent.endTime"
-            :rules="[() => fleventsEvent.endTime !== '' || 'Events müssen Enddatum und -zeit haben.']"
+            :rules="[
+              () => fleventsEvent.endTime !== '' || 'Events müssen Enddatum und -zeit haben.',
+              () => new Date(fleventsEvent.endTime).getTime() - new Date(fleventsEvent.startTime).getTime() > 0 || 'Endzeit muss nach Startzeit liegen.'
+              ]"
             hide-details="auto"
             required
           />

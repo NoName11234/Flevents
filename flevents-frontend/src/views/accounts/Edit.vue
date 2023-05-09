@@ -20,14 +20,15 @@ const tooltip = ref("");
 const formLoading = ref(false);
 const loading = computed(() => formLoading.value||storeLoading.value);
 
-async function submit() {
+async function submit(pendingValidation: Promise<any>) {
   tooltip.value = "";
-  if (account.value === null) {
-    tooltip.value = "Error: Account ist null.";
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
+    tooltip.value = "Es wurden nicht alle erforderlichen Angaben gemacht.";
     return;
   }
-  if (account.value.firstname === "" || account.value.lastname === "" || account.value.email === "") {
-    tooltip.value = "Nicht alle Felder wurden angegeben.";
+  if (account.value === null) {
+    tooltip.value = "Error: Account ist null.";
     return;
   }
   let secret = account.value.secret;
@@ -39,10 +40,7 @@ async function submit() {
   } else {
     account.value.secret = undefined;
   }
-  if (!account.value.email.match(VALIDATION.EMAIL)) {
-    tooltip.value = "Die angegebene E-Mail-Adresse ist ungültig.";
-    return;
-  }
+
   formLoading.value = true;
   try {
     const response = await accountApi.editMe(account.value);
@@ -76,7 +74,7 @@ async function submit() {
     <v-form
       v-if="account"
       validate-on="submit"
-      @submit.prevent="submit()"
+      @submit.prevent="submit"
     >
       <v-container class="d-flex flex-column gap-3">
 
@@ -106,7 +104,10 @@ async function submit() {
           label="Mailadresse"
           v-model="account.email"
           prepend-inner-icon="mdi-email"
-          :rules="[() => account?.email !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[
+            () => account?.email !== '' || 'Dieses Feld wird benötigt.',
+            () => account?.email.match(VALIDATION.EMAIL) !== null || 'Die angegebene E-Mail-Adresse ist ungültig.'
+            ]"
           hide-details="auto"
           required
         />

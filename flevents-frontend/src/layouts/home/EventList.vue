@@ -82,7 +82,15 @@ const eventList = computed(() => {
     );
   }
 
-  return events.sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
+  if (currentFilters.dateAscending !== true) {
+    // Default (descending)
+    events = events.sort((a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
+  } else {
+    // Special (ascending)
+    events = events.sort((a, b) => new Date(a.endTime).getTime() - new Date(b.endTime).getTime());
+  }
+
+  return events;
 });
 
 function updateList(newFilters: EventListFilterOptions) {

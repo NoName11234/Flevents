@@ -21,11 +21,6 @@ let loadTimeout = setTimeout(() => {}, 0);
 
 const filterOptions = ref({
   queryText: '',
-  // fromDate: undefined,
-  // toDate: undefined,
-  // attending: undefined,
-  // eventRole: undefined,
-  // organizationUuids: undefined,
 } as EventListFilterOptions);
 
 const dialogFilterOptions = ref({} as EventListFilterOptions);
@@ -35,6 +30,7 @@ const filtersActive = computed(() =>
   || filterOptions.value.organizationUuids !== undefined && filterOptions.value.organizationUuids.length > 0
   || filterOptions.value.fromDate !== undefined
   || filterOptions.value.toDate !== undefined
+  || filterOptions.value.dateAscending !== undefined
 );
 
 async function applySearch() {
@@ -55,7 +51,9 @@ async function abortFilters() {
 }
 
 async function clearFilters() {
-  filterOptions.value = { queryText: filterOptions.value.queryText };
+  filterOptions.value = {
+    queryText: filterOptions.value.queryText
+  };
   emits.call(emits,'update', filterOptions.value);
 }
 
@@ -129,6 +127,8 @@ async function applyFilters() {
           :items="organizations"
           :item-title="o => o.name"
           :item-value="o => o.uuid"
+          menu-icon="mdi-chevron-down"
+          prepend-inner-icon="mdi-account-group"
           label="Organisationen"
           hide-details="auto"
           multiple
@@ -140,7 +140,9 @@ async function applyFilters() {
           :items="roles"
           :item-title="o => o.toString().toUpperCase()"
           :item-value="o => o"
-          label="Eventrolle"
+          menu-icon="mdi-chevron-down"
+          prepend-inner-icon="mdi-account-tie"
+          label="Eventrollen"
           hide-details="auto"
           multiple
           chips
@@ -150,6 +152,7 @@ async function applyFilters() {
           label="Events ab"
           type="datetime-local"
           v-model="dialogFilterOptions.fromDate"
+          prepend-inner-icon="mdi-calendar-start"
           hide-details="auto"
           required
         />
@@ -158,8 +161,20 @@ async function applyFilters() {
           label="Events bis"
           type="datetime-local"
           v-model="dialogFilterOptions.toDate"
+          prepend-inner-icon="mdi-calendar-end"
           hide-details="auto"
           required
+        />
+
+        <v-select
+          v-model="dialogFilterOptions.dateAscending"
+          :items="[true, false]"
+          :item-title="asc => asc ? 'Datum aufsteigend' : 'Datum absteigend'"
+          :item-value="asc => asc"
+          menu-icon="mdi-chevron-down"
+          :prepend-inner-icon="dialogFilterOptions.dateAscending ? 'mdi-sort-calendar-descending' : 'mdi-sort-calendar-ascending'"
+          label="Sortierung"
+          hide-details="auto"
         />
 
       </v-container>

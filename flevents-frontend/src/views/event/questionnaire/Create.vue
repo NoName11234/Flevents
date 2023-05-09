@@ -10,6 +10,7 @@ import questionnaireApi from "@/api/questionnaireApi";
 import {Choices} from "@/models/choices";
 import {AxiosError} from "axios";
 import {useSurveyStore} from "@/store/surveys";
+import {useEventStore} from "@/store/events";
 
 const router = useRouter();
 const route = useRoute();
@@ -97,9 +98,7 @@ async function submit(pendingValidation: Promise<any>){
   loading.value = true;
   try {
     const response = questionnaireApi.create(questionnaire.value, eventUuid);
-    // TODO: asynchron questionnaire-store aktualisieren
     await router.push(backRoute);
-    surveyStore.hydrateSpecificOf(eventUuid);
   } catch (e) {
     let errorMessage = '';
     if (e instanceof AxiosError) {
@@ -115,6 +114,7 @@ async function submit(pendingValidation: Promise<any>){
     tooltip.value = `Speichern des Fragebogens fehlgeschlagen: ${errorMessage}`;
   }
   loading.value = false;
+  surveyStore.hydrateSpecificOf(eventUuid);
 }
 
 </script>
@@ -138,7 +138,10 @@ async function submit(pendingValidation: Promise<any>){
           label="Einsendeschluss"
           type="datetime-local"
           v-model="questionnaire.closingDate"
-          :rules="[() => questionnaire.closingDate !== '' || 'Fragebögen müssen einen Einsendeschluss haben.']"
+          :rules="[
+            () => questionnaire.closingDate !== '' || 'Fragebögen müssen einen Einsendeschluss haben.',
+            () => new Date(questionnaire.closingDate).getTime() - new Date().getTime() > 0 || 'Einsendeschluss muss in der Zukunft liegen.'
+            ]"
           hide-details="auto"
           required
           prepend-inner-icon="mdi-timer-sand-complete"

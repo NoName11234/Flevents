@@ -15,6 +15,7 @@ import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
 import SurveyStats from "@/components/SurveyStats.vue";
 import {Statistics} from "@/models/statistics";
+import {useSurveyStore} from "@/store/surveys";
 
 const props = defineProps({
   questionnaire: {
@@ -27,9 +28,9 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(['update'])
 const accountStore = useAccountStore();
 const appStore = useAppStore();
+const surveyStore = useSurveyStore();
 const router = useRouter();
 const isDelete = ref(false);
 const tooltip = ref('');
@@ -39,15 +40,19 @@ const aq = ref({
   questionnaireId: props.questionnaire.uuid,
   userId: accountStore.currentAccount!.uuid,
   answers: props.questionnaire.questions.map(question => {
-    if(question.choices.length != 0) {
-      return {choice: question.choices[0]}as AnsweredQuestion
-    }else{
-        return {answer: ''} as AnsweredQuestion;
+    if (question?.choices?.length != 0) {
+      return { choice: question?.choices[0] } as AnsweredQuestion
+    } else {
+        return { answer: '' } as AnsweredQuestion;
     }
   }),
 } as AnsweredQuestionnaire);
 const alreadyVoted = ref(false);
 const loading = ref(true);
+
+const isClosed = computed(() =>
+  new Date(props.questionnaire.closingDate).getTime() - new Date().getTime() <= 0
+);
 
 const hasRights = computed(() => {
   let eventRoles = [
@@ -126,9 +131,6 @@ async function deleteQuestionnaire() {
   loading.value = true;
   try {
     const response = await QuestionnaireApi.delete(props.questionnaire?.uuid);
-    // TODO: replace with async store hydration
-    isDelete.value = true;
-    emits("update", props.questionnaire?.uuid);
     appStore.addToast({
       text: 'Fragebogen gelöscht.',
       color: 'success',
@@ -151,6 +153,7 @@ async function deleteQuestionnaire() {
     });
   }
   loading.value = false;
+  surveyStore.hydrateSpecificOf(props.event.uuid!);
 }
 
 </script>
@@ -159,14 +162,17 @@ async function deleteQuestionnaire() {
   <v-expansion-panel v-if="!isDelete">
 
     <v-expansion-panel-title>
-      <div class="d-flex flex-row justify-start align-center gap-3 w-100">
+      <div class="d-flex flex-row justify-start align-center w-100">
         <strong>
           {{ questionnaire.title }}
         </strong>
-        <span class="text-grey">
-          {{ DatetimeService.getDate(new Date(questionnaire.closingDate)) }}
-        </span>
         <v-spacer />
+        <v-badge
+          :content="isClosed ? 'geschlossen' : 'offen'"
+          :color="isClosed ? 'grey' : 'success'"
+          class="text-capitalize"
+          inline
+        />
       </div>
     </v-expansion-panel-title>
 
@@ -206,6 +212,7 @@ async function deleteQuestionnaire() {
           style="display: contents;"
           validate-on="submit"
           @submit.prevent="submitAnswers"
+          :disabled="isClosed"
         >
           <v-card
             v-for="(question, index) in questionnaire.questions"
@@ -271,7 +278,7 @@ async function deleteQuestionnaire() {
               prepend-icon="mdi-check"
               color="primary"
               type="submit"
-              :disabled="loading || alreadyVoted"
+              :disabled="loading || alreadyVoted || isClosed"
               :loading="loading"
             >
               {{ alreadyVoted ? 'Abgestimmt' : 'Abstimmen' }}

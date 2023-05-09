@@ -129,7 +129,7 @@ class EventsApi {
    * @param eventUuid the uuid of the event
    * @param accountUuid the uuid of the account
    */
-  attendeeCheckIn(eventUuid: string, accountUuid: string){
+  checkInAttendee(eventUuid: string, accountUuid: string){
     return api.post(`${base}/${eventUuid}/attendees/check-in/${accountUuid}`);
   }
 
@@ -138,8 +138,17 @@ class EventsApi {
    * @param eventUuid the uuid of the event
    * @param accountUuid the uuid of the account
    */
-  attendeeCheckOut(eventUuid: string, accountUuid: string){
+  checkOutAttendee(eventUuid: string, accountUuid: string){
     return api.post(`${base}/${eventUuid}/attendees/check-out/${accountUuid}`);
+  }
+
+  /**
+   * Registers an anonymous account for the event.
+   * @param eventUuid the uuid of the event
+   * @param account the minimal data of the attendee
+   */
+  addUnregisteredAttendee(eventUuid: string, account: AccountPreview) {
+    return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, account);
   }
 
   /**
@@ -170,6 +179,20 @@ class EventsApi {
     });
   }
 
+  /**
+   * Accepts an invitation link as an anonymous User.
+   * @param uuid the uuid of the event
+   * @param email the email to accept the invitation with
+   * @param token the invitation token
+   */
+  acceptInvitationAnonymously(uuid: string, email: string, token: string) {
+    return api.post(`${base}/${uuid}/accept-invitation/anonymously`,{},{
+      params: {
+        token: token,
+        mailAddress: email,
+      }
+    });
+  }
 
   /**
    * Books a User to an Event.
@@ -184,23 +207,6 @@ class EventsApi {
     });
   }
 
-
-
-  /**
-   * Accepts an invitation link as an anonymous User.
-   * @param eventUuid the uuid of the event
-   * @param account the account, only containing the mail
-   */
-  acceptAnonymousInvitation(eventUuid: string, account: AccountPreview) {
-    return api.post(`${base}/${eventUuid}/add-account/add-anonymous`, account);
-  }
-  registerAnonymously(eventUuid: string, mail: string, invToken: string) {
-    const mailAdd = mail;
-    return api.post(`${base}/${eventUuid}/accept-invitation/anonymously`,{},{params: {
-        token: invToken,
-        mailAddress: mail
-      }});
-  }
   /**
    * Enrolls the current user to the event.
    * @param uuid the uuid of the event
