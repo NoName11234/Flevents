@@ -237,7 +237,7 @@ public class EventControllerService {
     public void sendAutomaticEmails(){
         List<Event> events = eventService.getEvents();
         LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        now.minusHours(2);
+        //now.plusHours(2);
         for(Event event:events) {
             if (now.equals(event.getMailConfig().getInfoMessageTime().withMinute(0).withSecond(0).withNano(0))) {
                 try {
@@ -314,11 +314,13 @@ public class EventControllerService {
      * @param eventId the event to add the account
      * @param accountId the account to be added.
      */
-    public void addAccountToEvent(String eventId, String accountId) {
+    public void addAccountToEvent(String eventId, String accountId) throws MessagingException {
         Event event = getEventById(eventId);
+        FleventsAccount account = accountService.getAccountById(accountId);
         if(LocalDateTime.now().isAfter(event.getEndTime())){
             throw new IllegalArgumentException(strings.getString("eventControllerService.EventIsOver"));
         }
-        eventService.addAccountToEvent(event,accountService.getAccountById(accountId),EventRole.attendee);
+        eventService.addAccountToEvent(event,account,EventRole.attendee);
+        eMailService.sendEventregistrationMail(event,account);
     }
 }
