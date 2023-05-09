@@ -2,6 +2,7 @@
  * Service to control all stores.
  * Partly taken from Directus' hydrate.ts.
  * @author David Maier
+ * @since Weekly Build 1
  * @see https://github.com/directus/directus/blob/main/app/src/hydrate.ts
  */
 
@@ -9,17 +10,21 @@ import {useAppStore} from "@/store/app";
 import {useAccountStore} from "@/store/account";
 import {useOrganizationStore} from "@/store/organizations";
 import {usePostStore} from "@/store/posts";
-import {useSurveyStore} from "@/store/surveys";
+import {useQuestionnaireStore} from "@/store/questionnaires";
 import {useEventStore} from "@/store/events";
 import {StoreDefinition} from "pinia";
 
+/**
+ * Use-definitions of all stores that should be hydrated on startup.
+ * The stores will be hydrated in the given order (if they have a `hydrate`-function implemented).
+ */
 const stores = [
   useAppStore,
   useAccountStore,
   useOrganizationStore,
-  usePostStore,
-  useSurveyStore,
   useEventStore,
+  usePostStore,
+  useQuestionnaireStore,
 ] as StoreDefinition[];
 
 type GenericStore = {

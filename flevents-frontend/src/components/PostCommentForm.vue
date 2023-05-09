@@ -7,7 +7,7 @@ import {storeToRefs} from "pinia";
 import commentApi from "@/api/commentsApi";
 import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
-import {useEventStore} from "@/store/events";
+import {usePostStore} from "@/store/posts";
 
 const props = defineProps({
   eventUuid: {
@@ -21,7 +21,7 @@ const props = defineProps({
 });
 
 const appStore = useAppStore();
-const eventStore = useEventStore();
+const postStore = usePostStore();
 
 const accountStore = useAccountStore();
 const { currentAccount: account } = storeToRefs(accountStore);
@@ -68,7 +68,7 @@ async function submit() {
     });
   }
   loading.value = false;
-  eventStore.hydrateSpecific(props.eventUuid);
+  postStore.hydrateSpecificOf(props.eventUuid);
 }
 
 </script>

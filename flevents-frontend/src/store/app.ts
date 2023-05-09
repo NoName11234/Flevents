@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import {UI} from "@/constants";
 import {Toast} from "@/models/toast";
 
+/**
+ * Store for state management of global app-data.
+ * @author David Maier
+ * @since Weekly Build 1
+ */
 export const useAppStore = defineStore('app', {
   state: () => ({
     /**

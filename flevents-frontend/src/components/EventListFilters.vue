@@ -2,7 +2,7 @@
 import {computed, ref} from "vue";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
-import {EventListFilterOptions} from "@/models/EventListFilterOptions";
+import {EventListFilterOptions} from "@/models/eventListFilterOptions";
 import {EventRole} from "@/models/eventRole";
 
 const emits = defineEmits<{

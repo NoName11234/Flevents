@@ -5,6 +5,11 @@ import {STORES} from "@/constants";
 import ConsoleApi from "@/api/consoleApi";
 import OrganizationsApi from "@/api/organizationsApi";
 
+/**
+ * Store for state management of platform-console relevant data.
+ * @author David Maier
+ * @since Weekly Build 3
+ */
 export const usePlatformStore = defineStore('platform', {
   state: () => ({
     organizationIds: [] as string[],

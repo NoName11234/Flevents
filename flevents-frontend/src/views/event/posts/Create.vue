@@ -5,13 +5,13 @@ import {useRoute, useRouter} from "vue-router";
 import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
-import {useEventStore} from "@/store/events";
 import IconService from "@/service/iconService";
+import {usePostStore} from "@/store/posts";
 
 const router = useRouter();
 const route = useRoute();
 
-const eventStore = useEventStore();
+const postStore = usePostStore();
 
 const tooltip = ref("");
 const loading = ref(false);
@@ -68,7 +68,7 @@ async function submit() {
     }
   }
   loading.value = false;
-  eventStore.hydrateSpecific(eventUuid);
+  postStore.hydrateSpecificOf(eventUuid);
 }
 
 </script>
@@ -207,9 +207,5 @@ async function submit() {
 </template>
 
 <style scoped>
-
-.w-custom {
-  min-width: 250px;
-}
 
 </style>

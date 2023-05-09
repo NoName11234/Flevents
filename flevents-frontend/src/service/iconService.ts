@@ -51,4 +51,9 @@ class IconService {
   }
 }
 
+/**
+ * Util-class for determining matching icons for file types.
+ * @author David Maier
+ * @since Weekly Build 4
+ */
 export default new IconService();

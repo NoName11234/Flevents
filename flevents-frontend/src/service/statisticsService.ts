@@ -5,6 +5,11 @@ import {FreeTextQuestionSummary} from "@/models/freeTextQuestionSummary";
 
 class StatisticsService {
 
+  /**
+   * Converts a single choice question and its summary to a diagram data object.
+   * @param question the single choice question
+   * @param summary the question's summary
+   */
   toDiagramData(question: SingleChoiceQuestion, summary: SingleChoiceQuestionSummary) {
     return {
       labels: question.choices.map(c => c.choice),
@@ -18,6 +23,10 @@ class StatisticsService {
     } as any;
   }
 
+  /**
+   * Unifies answers of a free text question to eliminate duplicates and count them.
+   * @param summary the free text question's summary
+   */
   unifyTextResults(summary: FreeTextQuestionSummary) {
     let counts = new Map<string, number>;
     let currentAnswer = '';

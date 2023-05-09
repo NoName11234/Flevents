@@ -22,7 +22,7 @@ class QuestionnaireApi {
    */
   create(questionnaire: Questionnaire, eventUuid: string) {
     return api.post(`/questionnaires`, questionnaire, {
-      params: { "eventId": eventUuid}
+      params: { "eventId": eventUuid }
     });
   }
 
@@ -47,17 +47,17 @@ class QuestionnaireApi {
    * @param questionnaireUuid the uuid of the questionnaire
    * @param userUuid the Uuid of the user
    */
-  getAnswers(questionnaireUuid : string, userUuid: string) {
+  getAnswers(questionnaireUuid: string, userUuid: string) {
     return api.get(`/questionnaires/${questionnaireUuid}/answers/${userUuid}`);
   }
 
   /**
-   * saves the Answer of the questionnaire.
+   * Saves the Answer of the questionnaire.
    * @param answeredQuestionnaire the answered questionnaire
    * @param questionnaireId the Uuid of the questionnaire
    */
-  saveAnswer(answeredQuestionnaire : AnsweredQuestionnaire, questionnaireId : string){
-    return api.post(`/questionnaires/${questionnaireId}/answers`, answeredQuestionnaire)
+  saveAnswer(answeredQuestionnaire: AnsweredQuestionnaire, questionnaireId: string){
+    return api.post(`/questionnaires/${questionnaireId}/answers`, answeredQuestionnaire);
   }
 
   /**
@@ -72,7 +72,7 @@ class QuestionnaireApi {
    * Retrieves statistics about the questionnaire.
    * @param questionnaireUuid the uuid of the questionnaire
    */
-  getStatistics(questionnaireUuid : string) {
+  getStatistics(questionnaireUuid: string) {
     return api.get(`/questionnaires/${questionnaireUuid}/statistics`);
   }
 }

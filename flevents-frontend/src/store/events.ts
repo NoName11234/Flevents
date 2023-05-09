@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 import AccountApi from "@/api/accountsApi";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {useAccountStore} from "@/store/account";
@@ -7,6 +7,11 @@ import eventApi from "@/api/eventsApi";
 import {computed} from "vue";
 import {STORES} from "@/constants";
 
+/**
+ * Store for state management of Events.
+ * @author David Maier
+ * @since Weekly Build 1
+ */
 export const useEventStore = defineStore('events', {
   state: () => ({
     bookedEventsIds: [] as string[],
@@ -40,7 +45,7 @@ export const useEventStore = defineStore('events', {
   },
   actions: {
     /**
-     * Hydrates the store by requesting the data from the api.
+     * Hydrates the store by requesting the data from the API.
      */
     async hydrate() {
       if (this.loading === true) {

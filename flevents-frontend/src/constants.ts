@@ -87,6 +87,11 @@ export const VALIDATION = {
    */
   MAX_ATTACHMENT_SIZE: Number.MAX_VALUE,
 
+  /**
+   * Maximum offset for event-mails in hours.
+   */
+  MAX_MAIL_OFFSET: 1000000,
+
 }
 
 export const COLORS = {

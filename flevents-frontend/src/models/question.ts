@@ -1,9 +1,9 @@
-import {Choices} from "@/models/choices";
+import {Choice} from "@/models/choice";
 import {QuestionType} from "@/models/questionType";
 
 export type Question = {
   uuid: string;
   question: string;
   questionType: QuestionType
-  choices: Choices[];
+  choices: Choice[];
 }

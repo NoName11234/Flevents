@@ -1,5 +1,5 @@
 
-export type Choices = {
+export type Choice = {
   uuid: string;
   choice: string;
 }

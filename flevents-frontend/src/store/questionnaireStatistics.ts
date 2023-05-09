@@ -4,7 +4,12 @@ import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {Statistics} from "@/models/statistics";
 
-export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
+/**
+ * Store for state management of statistics of Questionnaires.
+ * @author David Maier
+ * @since Weekly Build 4
+ */
+export const useQuestionnaireStatisticsStore = defineStore('questionnaireStatistics', {
   state: () => ({
     cachedStatistics: new Map<string, Statistics>,
     specificLoading: new Map<string, boolean>,
@@ -12,6 +17,11 @@ export const useSurveyStatisticsStore = defineStore('surveyStatistics', {
     lastCaching: new Map<string, Date>,
   }),
   actions: {
+
+    /**
+     * Hydrates the store by requesting specific questionnaire statistics from the api.
+     * @param questionnaireUuid the uuid of the questionnaire
+     */
     async hydrateSpecific(questionnaireUuid: string) {
       if (this.specificLoading.get(questionnaireUuid) === true) {
         // Do not hydrate if already hydrating

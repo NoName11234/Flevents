@@ -2,8 +2,8 @@
 
 import {useRoute, useRouter} from "vue-router";
 import Heading from "@/components/Heading.vue";
-import {useSurveyStore} from "@/store/surveys";
-import {useSurveyStatisticsStore} from "@/store/surveyStatistics";
+import {useQuestionnaireStore} from "@/store/questionnaires";
+import {useQuestionnaireStatisticsStore} from "@/store/questionnaireStatistics";
 import {computed, onMounted, onUnmounted, ref} from "vue";
 import {useAppStore} from "@/store/app";
 import {Bar, Pie} from "vue-chartjs";
@@ -22,7 +22,7 @@ import {SingleChoiceQuestionSummary} from "@/models/singleChoiceQuestionSummary"
 import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {FreeTextQuestionSummary} from "@/models/freeTextQuestionSummary";
 import {Statistics} from "@/models/statistics";
-import SurveyStats from "@/components/SurveyStats.vue";
+import SurveyStats from "@/components/QuestionnaireStats.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -33,11 +33,11 @@ const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { 
 
 const appStore = useAppStore();
 
-const surveyStore = useSurveyStore();
+const surveyStore = useQuestionnaireStore();
 const questionnaire = surveyStore.getQuestionnaireGetter(questionnaireUuid);
 const questionnaireLoading = computed(() => surveyStore.specificLoading.get(questionnaireUuid));
 
-const statisticsStore = useSurveyStatisticsStore();
+const statisticsStore = useQuestionnaireStatisticsStore();
 const statistics = statisticsStore.getStatisticsGetterOf(questionnaireUuid);
 const statisticsLoading = computed(() => statisticsStore.specificLoading.get(questionnaireUuid));
 

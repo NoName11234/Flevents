@@ -2,14 +2,13 @@
 import Heading from "@/components/Heading.vue";
 import {computed, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
-import {Post} from "@/models/post";
 import postApi from "@/api/postsApi";
 import {AxiosError} from "axios";
-import {useEventStore} from "@/store/events";
 import attachmentsApi from "@/api/attachmentsApi";
 import {Attachment} from "@/models/attachment";
 import {useAppStore} from "@/store/app";
 import IconService from "@/service/iconService";
+import {usePostStore} from "@/store/posts";
 
 const router = useRouter();
 const route = useRoute();
@@ -21,13 +20,8 @@ const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { 
 
 const appStore = useAppStore();
 
-const eventStore = useEventStore();
-const event = eventStore.getEventGetter(eventUuid);
-
-const post = computed({
-  get: () => event.value.posts.find(p => p.uuid === postUuid) as Post,
-  set: v => event.value.posts[event.value.posts!.findIndex(p => p.uuid)] = v as Post,
-});
+const postStore = usePostStore();
+const post = postStore.getPostGetter(postUuid, eventUuid);
 
 const tooltip = ref("");
 const loading = ref(false);
@@ -80,6 +74,7 @@ async function submit() {
       unsuccessful.push(attachment.filename);
     }
   }
+
   // Only notify if removal was unsuccessful.
   if (unsuccessful.length > 0) {
     appStore.addToast({
@@ -105,7 +100,7 @@ async function submit() {
     }
   }
   loading.value = false;
-  eventStore.hydrateSpecific(eventUuid);
+  postStore.hydrateSpecificOf(eventUuid);
 }
 
 </script>

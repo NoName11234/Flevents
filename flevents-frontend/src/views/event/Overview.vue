@@ -1,30 +1,28 @@
 <script setup lang="ts">
-import {computed, onMounted, Ref, ref} from "vue";
-import {useRoute} from "vue-router";
-import Heading from "@/components/Heading.vue";
-import {AxiosError} from "axios";
 import router from "@/router";
-import EventPost from "@/components/EventPost.vue";
+import eventApi from "@/api/eventsApi";
+import {computed, ref} from "vue";
+import {VALIDATION} from "@/constants";
+import {AxiosError} from "axios";
 import {Account} from "@/models/account";
 import {EventRole} from "@/models/eventRole";
-import {Questionnaire} from "@/models/questionnaire";
-import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
-import {useEventStore} from "@/store/events";
-import {useSurveyStore} from "@/store/surveys";
 import {AccountPreview} from "@/models/accountPreview";
-import {useAccountStore} from "@/store/account";
-import {storeToRefs} from "pinia";
-import eventApi from "@/api/eventsApi";
-import {useAppStore} from "@/store/app";
-import {useOrganizationStore} from "@/store/organizations";
-import MailConfigCard from "@/components/MailConfigCard.vue";
 import {MailConfig} from "@/models/mailConfig";
 import {FleventsEvent} from "@/models/fleventsEvent";
-import QuestionnaireApi from "@/api/questionnaireApi";
-import api from "@/api/api";
 import {OrganizationRole} from "@/models/organizationRole";
+import {useRoute} from "vue-router";
+import {useEventStore} from "@/store/events";
+import {useQuestionnaireStore} from "@/store/questionnaires";
+import {useAccountStore} from "@/store/account";
+import {storeToRefs} from "pinia";
+import {useAppStore} from "@/store/app";
+import {useOrganizationStore} from "@/store/organizations";
 import {usePostStore} from "@/store/posts";
-import {VALIDATION} from "@/constants";
+import Heading from "@/components/Heading.vue";
+import PostDisplay from "@/components/PostDisplay.vue";
+import QuestionnaireDisplay from "@/components/QuestionnaireDisplay.vue";
+import MailConfigCard from "@/components/MailConfigCard.vue";
+import DatetimeService from "../../service/datetimeService";
 
 const openContext = ref(false);
 const address = ref("");
@@ -43,14 +41,14 @@ const appStore = useAppStore();
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
-const posts = computed(() => event.value
-  .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
-// TODO: Re-hydrate post store in all necessary places to stay up-to-date
-// const postStore = usePostStore();
-// const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
-//   ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
-const surveyStore = useSurveyStore();
+setTimeout(() => console.log(event.value.mailConfig), 1000);
+
+const postStore = usePostStore();
+const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
+  ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
+
+const surveyStore = useQuestionnaireStore();
 const questionnaires = computed(() => surveyStore.getQuestionnairesGetterOf(eventUuid).value
   ?.sort((a, b) => new Date(b.closingDate).getTime() - new Date(a.closingDate).getTime()));
 
@@ -189,26 +187,6 @@ async function disEnroll(){
   }
   enrollLoading.value = false;
   eventStore.hydrate();
-}
-
-function parseDate(from: any, to: any) {
-  let short = {
-    timeStyle: "short",
-  } as Intl.DateTimeFormatOptions;
-  let long = {
-    dateStyle: "long",
-    timeStyle: "short",
-  } as Intl.DateTimeFormatOptions;
-  let start = new Date(from);
-  let end = new Date(to);
-  if (isSameDay(start, end)) {
-    return start.toLocaleString("DE-de", long)
-      + " - "
-      + end.toLocaleString("DE-de", short);
-  }
-  return start.toLocaleString("DE-de", long)
-    + " - "
-    + end.toLocaleString("DE-de", long);
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -479,7 +457,7 @@ async function updateMailConfig(config: MailConfig) {
       <v-window-item value="info">
         <template v-if="event?.description">
           <v-container>
-            {{event?.description}}
+            {{ event?.description }}
           </v-container>
           <v-divider />
         </template>
@@ -489,21 +467,21 @@ async function updateMailConfig(config: MailConfig) {
             prepend-icon="mdi-clock"
             subtitle="Zeitraum"
           >
-            {{parseDate(event?.startTime, event?.endTime)}}
+            {{ DatetimeService.formatDateRange(event?.startTime, event?.endTime) }}
           </v-list-item>
           <v-list-item
             v-if="event?.location"
             prepend-icon="mdi-map-marker"
             subtitle="Ort"
           >
-            {{event?.location}}
+            {{ event?.location }}
           </v-list-item>
           <v-list-item
             v-if="event?.organizationPreview?.name"
             prepend-icon="mdi-account-group"
             subtitle="Organisation"
           >
-            {{event?.organizationPreview?.name}}
+            {{ event?.organizationPreview?.name }}
           </v-list-item>
         </v-list>
         <v-divider/>
@@ -584,7 +562,7 @@ async function updateMailConfig(config: MailConfig) {
           variant="accordion"
           multiple
         >
-          <EventPost
+          <PostDisplay
             v-for="(post, pIndex) in posts"
             :event-uuid="eventUuid"
             :post="post"
@@ -628,8 +606,6 @@ async function updateMailConfig(config: MailConfig) {
       <v-window-item value="mails">
         <MailConfigCard
           :config="event.mailConfig"
-          :event-start="new Date(event.startTime)"
-          :event-end="new Date(event.endTime)"
           @update="updateMailConfig"
         />
       </v-window-item>
@@ -679,9 +655,6 @@ async function updateMailConfig(config: MailConfig) {
               <th v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer">
                 Rolle
               </th>
-<!--              <th>-->
-<!--                Bestätigt-->
-<!--              </th>-->
               <th v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer">
                 Entfernen
               </th>
@@ -729,10 +702,6 @@ async function updateMailConfig(config: MailConfig) {
                   </v-menu>
                 </v-btn>
               </td>
-<!--              <td>-->
-<!--                <v-icon v-if="item.role !== 'invited'" icon="mdi-check-circle" color="gray"/>-->
-<!--                <v-icon v-if="item.role === 'invited'" icon="mdi-close-circle" color="gray"/>-->
-<!--              </td>-->
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
                 <v-btn
                   variant="text"

@@ -7,9 +7,9 @@ import {Question} from "@/models/question";
 import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {QuestionType} from "@/models/questionType";
 import questionnaireApi from "@/api/questionnaireApi";
-import {Choices} from "@/models/choices";
+import {Choice} from "@/models/choice";
 import {AxiosError} from "axios";
-import {useSurveyStore} from "@/store/surveys";
+import {useQuestionnaireStore} from "@/store/questionnaires";
 import {useEventStore} from "@/store/events";
 
 const router = useRouter();
@@ -20,14 +20,13 @@ const loading = ref(false);
 const questionnaire = ref({
   eventId:  eventUuid as string,
   title: '',
-  closingDate: '',
   questions: [{
     question: '',
     questionType: QuestionType.FreeText
   }] as Question[],
 } as Questionnaire);
 
-const surveyStore = useSurveyStore();
+const questionnaireStore = useQuestionnaireStore();
 
 const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { tab: 'polls' } };
 
@@ -52,8 +51,8 @@ async function addQuestion(type: QuestionType) {
       question = {
         question: '',
         choices: [
-          {choice: ''} as Choices,
-          {choice: ''} as Choices,
+          {choice: ''} as Choice,
+          {choice: ''} as Choice,
         ],
         questionType: QuestionType.SingleChoice,
       } as Question;
@@ -78,7 +77,7 @@ async function removeQuestion(index: number) {
 
 async function addChoice(question: Question) {
   tooltip.value = '';
-  question.choices.push({choice: ''} as Choices);
+  question.choices.push({choice: ''} as Choice);
 }
 async function removeChoice(question: any, index: number) {
   if (question.choices.length <= 2) {
@@ -114,7 +113,7 @@ async function submit(pendingValidation: Promise<any>){
     tooltip.value = `Speichern des Fragebogens fehlgeschlagen: ${errorMessage}`;
   }
   loading.value = false;
-  surveyStore.hydrateSpecificOf(eventUuid);
+  questionnaireStore.hydrateSpecificOf(eventUuid);
 }
 
 </script>

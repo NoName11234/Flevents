@@ -5,8 +5,9 @@ import {STORES} from "@/constants";
 import AccountApi from "@/api/accountsApi";
 
 /**
- * Stores the events received from the API.
- *
+ * Store for state management of the current Account.
+ * @author David Maier
+ * @since Weekly Build 1
  */
 export const useAccountStore = defineStore({
   id: 'accountStore',
@@ -17,6 +18,9 @@ export const useAccountStore = defineStore({
     lastSuccessfulHydration: undefined as Date|undefined,
   }),
   actions: {
+    /**
+     * Hydrates the store by requesting the data from the API.
+     */
     async hydrate() {
       if (this.loading === true) {
         // Do not hydrate if already hydrating

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {Post} from "@/models/post";
-import Comment from "@/components/Comment.vue";
+import Comment from "@/components/PostComment.vue";
 import AccountAvatar from "@/components/AccountAvatar.vue";
-import CommentForm from "@/components/CommentForm.vue";
+import CommentForm from "@/components/PostCommentForm.vue";
 import {computed, ref} from "vue";
 import postApi from "@/api/postsApi";
 import {useAppStore} from "@/store/app";
@@ -10,11 +10,11 @@ import {AxiosError} from "axios";
 import {storeToRefs} from "pinia";
 import {useAccountStore} from "@/store/account";
 import DatetimeService from "../service/datetimeService";
-import {useEventStore} from "@/store/events";
 import IconService from "@/service/iconService";
+import {usePostStore} from "@/store/posts";
 
 const appStore = useAppStore();
-const eventStore = useEventStore();
+const postStore = usePostStore();
 
 const loading = ref(false);
 
@@ -73,11 +73,7 @@ async function deletePost() {
     });
   }
   loading.value = false;
-  eventStore.hydrateSpecific(props.eventUuid);
-}
-
-async function downloadAttachment(url: string) {
-  window.open(url, '_blank')?.focus();
+  postStore.hydrateSpecificOf(props.eventUuid);
 }
 
 </script>
@@ -96,7 +92,7 @@ async function downloadAttachment(url: string) {
         </strong>
 
         <span class="text-grey">
-          {{ DatetimeService.getDateTime(new Date(post.creationDate)) }}
+          {{ DatetimeService.getDateTime(post.creationDate) }}
         </span>
 
       </div>
