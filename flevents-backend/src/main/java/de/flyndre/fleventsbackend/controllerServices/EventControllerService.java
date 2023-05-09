@@ -314,11 +314,13 @@ public class EventControllerService {
      * @param eventId the event to add the account
      * @param accountId the account to be added.
      */
-    public void addAccountToEvent(String eventId, String accountId) {
+    public void addAccountToEvent(String eventId, String accountId) throws MessagingException {
         Event event = getEventById(eventId);
+        FleventsAccount account = accountService.getAccountById(accountId);
         if(LocalDateTime.now().isAfter(event.getEndTime())){
             throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
         }
-        eventService.addAccountToEvent(event,accountService.getAccountById(accountId),EventRole.attendee);
+        eventService.addAccountToEvent(event,account,EventRole.attendee);
+        eMailService.sendEventregistrationMail(event,account);
     }
 }

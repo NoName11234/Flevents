@@ -25,4 +25,6 @@ public interface EMailService{
     void sendThankMessage(Event event) throws MessagingException;
 
     void sendRegistraitionMail(FleventsAccount account) throws MessagingException;
+
+    void sendEventregistrationMail(Event event, FleventsAccount account) throws MessagingException;
 }
