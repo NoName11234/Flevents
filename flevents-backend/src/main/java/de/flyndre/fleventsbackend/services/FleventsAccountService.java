@@ -138,11 +138,18 @@ public class FleventsAccountService {
      * @return FleventsAccount which has been created
      */
     public FleventsAccount createAnonymousAccount(String email){
-        if(fleventsAccountRepository.findByEmail(email).isPresent()){
-            throw new IllegalArgumentException("Email already in use");
+        Optional<FleventsAccount> optional;
+        if(!(optional= fleventsAccountRepository.findByEmail(email)).isEmpty()&&optional.get().getIsActive()){
+            throw new IllegalArgumentException("The provided email is already in use");
+        }
+        if(optional.isPresent()){
+            FleventsAccount oldAcc = optional.get();
+            oldAcc.setEmail(null);
+            fleventsAccountRepository.save(oldAcc);
         }
         FleventsAccount account = new FleventsAccount();
         account.setEmail(email);
+        account.setIsActive(false);
         return fleventsAccountRepository.save(account);
     }
 
