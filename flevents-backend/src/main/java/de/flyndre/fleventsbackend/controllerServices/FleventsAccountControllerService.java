@@ -54,8 +54,7 @@ public class FleventsAccountControllerService {
     }
 
     public JwtResponse reevaluate(Authentication auth){
-        UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal();
-        return authService.authorize(getAccountById(user.getId()), user.getPassword());
+        return authService.refresh(auth);
     }
 
 
