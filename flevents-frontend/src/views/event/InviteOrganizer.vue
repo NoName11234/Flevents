@@ -43,7 +43,6 @@ async function submit() {
       const response = await eventApi.inviteOrganizer(eventUuid, email);
       successfulInvitations.push(email);
     } catch (e) {
-      console.log(`Invitation of ${email} failed.`);
       failedInvitations.push(email);
     }
   }

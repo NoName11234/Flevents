@@ -50,7 +50,6 @@ async function submit(pendingValidation: Promise<any>) {
     accountStore.hydrate().then();
     await router.push({name: 'home.account'});
   } catch (e) {
-    console.log('Failed to edit account', e);
     if (e instanceof AxiosError) {
       if (e.code === AxiosError.ERR_BAD_REQUEST) {
         tooltip.value = 'Ungültige Eingaben';

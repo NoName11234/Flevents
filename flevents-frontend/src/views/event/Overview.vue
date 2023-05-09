@@ -42,8 +42,6 @@ const appStore = useAppStore();
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
 
-setTimeout(() => console.log(event.value.mailConfig), 1000);
-
 const postStore = usePostStore();
 const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
   ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));

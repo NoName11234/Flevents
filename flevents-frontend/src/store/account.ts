@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import {Account} from "@/models/account";
-import {useAppStore} from "@/store/app";
 import {STORES} from "@/constants";
 import AccountApi from "@/api/accountsApi";
 
@@ -28,16 +27,12 @@ export const useAccountStore = defineStore({
       }
       this.loading = true;
       this.error = false;
-      const appStore = useAppStore();
-      if (!appStore.currentAccountId) {
-        throw Error('There is no logged in account present.');
-      }
       try {
         const { data } = await AccountApi.getMe();
         this.currentAccount = data as Account;
         this.lastSuccessfulHydration = new Date();
       } catch (e) {
-        console.log(e);
+        console.error(`Failed to load currently logged-in account.`, e);
         this.error = true;
       } finally {
         this.loading = false;

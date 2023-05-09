@@ -50,7 +50,6 @@ async function submit() {
       const response = await organizationsApi.invite(organizationUuid, email, role.value);
       successfulInvitations.push(email);
     } catch (e) {
-      console.log(`Invitation of ${email} failed.`);
       failedInvitations.push(email);
     }
   }
