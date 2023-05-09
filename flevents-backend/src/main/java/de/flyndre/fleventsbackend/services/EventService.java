@@ -2,8 +2,6 @@ package de.flyndre.fleventsbackend.services;
 
 import de.flyndre.fleventsbackend.Models.*;
 import de.flyndre.fleventsbackend.Models.questionnaire.QuestionnaireModel;
-import de.flyndre.fleventsbackend.dtos.AccountInformation;
-import de.flyndre.fleventsbackend.dtos.AccountPreview;
 import de.flyndre.fleventsbackend.repositories.EventRegistrationRepository;
 import de.flyndre.fleventsbackend.repositories.EventRepository;
 import de.flyndre.fleventsbackend.repositories.MailConfigRepository;
@@ -78,7 +76,7 @@ public class EventService {
     public Event getEventById(String eventId){
         Optional<Event> optional = eventRepository.findById(eventId);
         if(!optional.isPresent()){
-            throw new NoSuchElementException("Could not found any event with the given eventId");
+            throw new NoSuchElementException(strings.getString("eventService.EventNotFoundById"));
         }
         return optional.get();
     }
@@ -136,7 +134,7 @@ public class EventService {
     public EventRegistration getEventRegistration(String eventId,String accountId, EventRole role){
         Optional<EventRegistration> optional = eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(accountId,eventId,role);
         if(!optional.isPresent()){
-            throw new NoSuchElementException(String.format("Found no registration related to the given parameter accountId:%s, eventId:%s,role:%s",accountId,eventId,role.toString()));
+            throw new NoSuchElementException(String.format(strings.getString("eventService.EventRegistrationNotFound"),accountId,eventId,role.toString()));
         }
         return optional.get();
     }
@@ -168,13 +166,13 @@ public class EventService {
     public Event setEventById(String eventId, Event event){
         Event srcEvent = eventRepository.findById(eventId).get();
         if(event.getStartTime()!=null&&event.getEndTime()==null&&event.getStartTime().isAfter(srcEvent.getEndTime())) {
-            throw new IllegalArgumentException(strings.getString("event.NoValidTime"));
+            throw new IllegalArgumentException(strings.getString("eventService.NoValidTime"));
         }
         if(event.getEndTime()!=null&&event.getEndTime()==null&&event.getEndTime().isBefore(srcEvent.getStartTime())){
-            throw new IllegalArgumentException(strings.getString("event.NoValidTime"));
+            throw new IllegalArgumentException(strings.getString("eventService.NoValidTime"));
         }
         if(event.getEndTime()!=null&&event.getEndTime()!=null&&event.getEndTime().isBefore(event.getStartTime())){
-            throw new IllegalArgumentException(strings.getString("event.NoValidTime"));
+            throw new IllegalArgumentException(strings.getString("eventService.NoValidTime"));
         }
         srcEvent.merge(event);
         srcEvent = eventRepository.save(srcEvent);
@@ -190,7 +188,7 @@ public class EventService {
      */
     public EventRegistration addAccountToEvent(Event event, FleventsAccount account, EventRole role){
         if(eventRegistrationRepository.findByAccount_UuidAndEvent_UuidAndRole(account.getUuid(), event.getUuid(), role).isPresent()){
-            throw new IllegalArgumentException("this account is already registered in this event with the given role");
+            throw new IllegalArgumentException(strings.getString("eventService.AccountAlreadyRegistered"));
         }
         return eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
     }
@@ -215,10 +213,10 @@ public class EventService {
     public void changeRole(Event event, FleventsAccount account, EventRole fromRole, EventRole toRole){
         Optional<EventRegistration> optional = event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(fromRole)).findAny();
         if(!optional.isPresent()){
-            throw new NoSuchElementException("Cannot find a registration according to the given values");
+            throw new NoSuchElementException(strings.getString("eventService.AccountToBeChangedNotFound"));
         }
         if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(toRole)).findAny().isPresent()){
-            throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
+            throw new IllegalArgumentException(strings.getString("eventService.AccountAlreadyRegisteredWithRole"));
         }
         EventRegistration registration = optional.get();
         registration.setRole(toRole);
@@ -234,10 +232,10 @@ public class EventService {
     public void acceptInvitation(Event event, FleventsAccount account, EventRole role){
         Optional<EventRegistration> optional = event.getAttendees().stream().filter(registration -> registration.getRole().equals(EventRole.invited)).findAny();
         if(!optional.isPresent()){
-            throw new NoSuchElementException("No open invitations left for this event");
+            throw new NoSuchElementException(strings.getString("eventService.NoInvitationsLeft"));
         }
         if(event.getAttendees().stream().filter(registration -> registration.getAccount().equals(account)&&registration.getRole().equals(role)).findAny().isPresent()){
-            throw new IllegalArgumentException("Theres already a registration with this role for the given parameter");
+            throw new IllegalArgumentException(strings.getString("eventService.RegistrationAlreadyExists"));
         }
         eventRegistrationRepository.save(new EventRegistration(null,event,account,role, false));
         eventRegistrationRepository.delete(optional.get());
@@ -290,7 +288,7 @@ public class EventService {
         List<EventRegistration> eventRegistrations =  eventRegistrationRepository.findByEvent_UuidAndRole(eventId, EventRole.attendee);
         List<String> checkedIns = null;
         if(eventRegistrations.isEmpty()){
-            throw new NoSuchElementException("This Event doesnt have any registrations");
+            throw new NoSuchElementException(strings.getString("eventService.NoRegistrationsInEvent"));
         }
         for (EventRegistration er :eventRegistrations
         ) {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import javax.naming.directory.InvalidAttributesException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  * This Service provides logic and usage for the InvitationToken repository.
@@ -23,6 +24,7 @@ public class InvitationTokenService {
     public InvitationTokenService(InvitationTokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
     /**
      * Creates and saves the given token to the database.
@@ -42,10 +44,10 @@ public class InvitationTokenService {
     public InvitationToken validate(String token,String invitedToId) throws InvalidAttributesException {
         Optional<InvitationToken> optional = tokenRepository.findById(token);
         if(!optional.isPresent()){
-            throw new NoSuchElementException("Token not found");
+            throw new NoSuchElementException(strings.getString("invitationTokenService.TokenNotFound"));
         }
         if(!optional.get().getInvitedToId().equals(invitedToId)){
-            throw new InvalidAttributesException("The given token does belong to the given id");
+            throw new InvalidAttributesException(strings.getString("invitationTokenService.WrongTokenForMail"));
         }
         return optional.get();
     }

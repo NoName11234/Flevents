@@ -38,6 +38,7 @@ public class FleventsAccountControllerService {
     private final EMailServiceImpl eMailService;
 
     private final AuthService authService;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
 
     public FleventsAccountControllerService(FleventsAccountService fleventsAccountService, EventService eventService, OrganizationService organizationService, EMailServiceImpl eMailService, AuthService authService){
@@ -54,8 +55,7 @@ public class FleventsAccountControllerService {
     }
 
     public JwtResponse reevaluate(Authentication auth){
-        UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal();
-        return authService.authorize(getAccountById(user.getId()), user.getPassword());
+        return authService.refresh(auth);
     }
 
 
@@ -135,7 +135,7 @@ public class FleventsAccountControllerService {
             return account;
         }catch (MessagingException e) {
             deleteAccount(account.getUuid());
-            throw new RuntimeException("Was not able to send the registration mail, so the account was not created", e);
+            throw new RuntimeException(strings.getString("accountControllerService.AccountNotCreatedBecauseOfMail"), e);
         }
     }
 

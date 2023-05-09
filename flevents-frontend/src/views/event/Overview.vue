@@ -24,6 +24,7 @@ import QuestionnaireApi from "@/api/questionnaireApi";
 import api from "@/api/api";
 import {OrganizationRole} from "@/models/organizationRole";
 import {usePostStore} from "@/store/posts";
+import {VALIDATION} from "@/constants";
 
 const openContext = ref(false);
 const address = ref("");
@@ -113,13 +114,17 @@ const eventStatus = computed(() => {
       return { code: NaN, text: 'STATUS NICHT ERMITTELBAR', color: 'error', icon: "mdi-exclamation-thick" };
   }
 });
-async function addAnonAcc(){
+async function addAnonAcc(pendingValidation: Promise<any>) {
+  const validation = await pendingValidation;
+  if (validation.valid !== true) {
+    return;
+  }
   enrollLoading.value = true;
   try {
-    const response = await eventApi.acceptAnonymousInvitation(eventUuid, anonAcc.value);
+    const response = await eventApi.addUnregisteredAttendee(eventUuid, anonAcc.value);
     await eventStore.hydrateSpecific(eventUuid);
     appStore.addToast({
-      text: 'Unangemeldeter Nutzer angemeldet.',
+      text: 'Unangemeldeten Nutzer hinzugefügt.',
       color: 'success',
     });
   } catch (e) {
@@ -783,7 +788,7 @@ async function updateMailConfig(config: MailConfig) {
                 hide-details="auto"
                 density="compact"
                 v-model="item.checkedIn"
-                @click="item.checkedIn ? eventApi.attendeeCheckOut(eventUuid, item.uuid) : eventApi.attendeeCheckIn(eventUuid, item.uuid)"
+                @click="item.checkedIn ? eventApi.checkOutAttendee(eventUuid, item.uuid) : eventApi.checkInAttendee(eventUuid, item.uuid)"
               />
             </td>
           </tr>
@@ -856,48 +861,61 @@ async function updateMailConfig(config: MailConfig) {
     width="30rem"
   >
     <v-card>
-      <v-card-title class="text-h5">
-        Account hinzufügen
-      </v-card-title>
-      <v-card-text>
-        <v-text-field
-          class="mt-2"
-          v-model="anonAcc.firstname"
-          label="Vorname"
-          prepend-inner-icon="mdi-account"
-          :rules="[() => anonAcc.firstname !== '' || 'Dieses Feld wird benötigt.']"
-          required
-        ></v-text-field>
-        <v-text-field
-          class="mt-2"
-          v-model="anonAcc.lastname"
-          label="Nachname"
-          prepend-inner-icon="mdi-account"
-          :rules="[() => anonAcc.lastname !== '' || 'Dieses Feld wird benötigt.']"
-          required
-        ></v-text-field>
-        <v-text-field
-          class="mt-2"
-          v-model="anonAcc.email"
-          label="Mailadresse"
-          prepend-inner-icon="mdi-email"
-          :rules="[() => anonAcc.email !== '' || 'Dieses Feld wird benötigt.']"
-          required
-        ></v-text-field>
-      </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-btn
-          variant="flat"
-          @click="addAnon = false"
-        >Schließen
-        </v-btn>
-        <v-btn
-          color="primary"
-          variant="flat"
-          @click="addAnonAcc()"
-        >Hinzufügen
-        </v-btn>
-      </v-card-actions>
+      <v-form
+        validate-on="submit"
+        @submit.prevent="addAnonAcc"
+      >
+        <v-card-title class="text-h5">
+          Unangemeldeter Teilnehmer
+        </v-card-title>
+        <v-divider />
+        <v-card-text>
+          <v-text-field
+            class="mt-2"
+            v-model="anonAcc.firstname"
+            label="Vorname"
+            prepend-inner-icon="mdi-account"
+            :rules="[() => anonAcc.firstname !== '' || 'Dieses Feld wird benötigt.']"
+            required
+          ></v-text-field>
+          <v-text-field
+            class="mt-2"
+            v-model="anonAcc.lastname"
+            label="Nachname"
+            prepend-inner-icon="mdi-account"
+            :rules="[() => anonAcc.lastname !== '' || 'Dieses Feld wird benötigt.']"
+            required
+          ></v-text-field>
+          <v-text-field
+            class="mt-2"
+            v-model="anonAcc.email"
+            label="Mailadresse"
+            prepend-inner-icon="mdi-email"
+            :rules="[
+              () => anonAcc.email !== '' || 'Dieses Feld wird benötigt.',
+              () => anonAcc.email.match(VALIDATION.EMAIL) !== null || 'Die angegebene E-Mail-Adresse ist ungültig.'
+              ]"
+            required
+          ></v-text-field>
+        </v-card-text>
+        <v-divider />
+        <v-card-actions class="justify-end">
+          <v-btn
+            variant="flat"
+            @click="addAnon = false"
+          >
+            Abbrechen
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="flat"
+            type="submit"
+            prepend-icon="mdi-check"
+          >
+            Hinzufügen
+          </v-btn>
+        </v-card-actions>
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
