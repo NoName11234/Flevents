@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.naming.directory.InvalidAttributesException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * This Class is the service for the OrganizationController class.
@@ -27,6 +28,7 @@ public class OrganizationControllerService {
     private final EMailServiceImpl eMailService;
 
     private final AuthService authService;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
     public OrganizationControllerService(OrganizationService organizationService, FleventsAccountService fleventsAccountService, EventService eventService, InvitationTokenService invitationTokenService, EMailServiceImpl eMailService, AuthService authService){
         this.organizationService = organizationService;

@@ -14,8 +14,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +35,8 @@ public class EMailServiceImpl implements EMailService{
     private String baseurl;
     @Value("${frontend.port}")
     private String frontendPort;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
+
 
     public EMailServiceImpl(JavaMailSender javaMailSender, ModelMapper modelMapper){
         this.javaMailSender=javaMailSender;
@@ -97,16 +101,16 @@ public class EMailServiceImpl implements EMailService{
     public void sendOrganizationInvitation(Organization organization, String emailAddress, String token) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
-        details.setSubject("Invitation to be a part of "+organization.getName());
+        details.setSubject(MessageFormat.format(strings.getString("mailService.OrgaInvitationSubject"), organization.getName()));
         MailConfig mailConfig = organization.getMailConfig();
         if (
             mailConfig == null
             || mailConfig.getOrganizationInvitation() == null || mailConfig.getOrganizationInvitation().equals("")
             //|| mailConfig.getOrganizationInvitation().isEmpty()
         ) {
-            details.setMsgBody("You are invited to join the organization " + organization.getName() + " at the flevents event manage platform. To join click the following link: " + baseurl + ":" + frontendPort + "/organizations/join/" + organization.getUuid() + "?token=" + token);
+            details.setMsgBody(MessageFormat.format(strings.getString("mailService.OrgaInvitationBodyDefault"), organization.getName(),baseurl,frontendPort,organization.getUuid(),token));
         }else {
-            details.setMsgBody(organization.getMailConfig().getOrganizationInvitation() + "\nUm beizutreten klicken sie auf folgenden Link: " + baseurl + ":" + frontendPort + "/organizations/join/" + organization.getUuid() + "?token=" + token);
+            details.setMsgBody(MessageFormat.format(strings.getString("mailService.OrgaInvitationBodyCustom"), organization.getMailConfig().getOrganizationInvitation(),baseurl,frontendPort,organization.getUuid(),token));
         }
         sendSimpleEmail(details);
     }
@@ -122,7 +126,7 @@ public class EMailServiceImpl implements EMailService{
     public void sendEventInvitaion(Event event, String emailAddress, String token) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
-        details.setSubject("Invitation to be part of "+event.getName());
+        details.setSubject(MessageFormat.format(strings.getString("mailService.EventInvitationSubject"), event.getName()));
 
         MailConfig mailConfig = event.getMailConfig();
 
@@ -131,9 +135,9 @@ public class EMailServiceImpl implements EMailService{
             || mailConfig.getRegisterMessage() == null || mailConfig.getRegisterMessage().equals("")
             //|| mailConfig.getEventInvitation().isEmpty()
         ) {
-            details.setMsgBody("You are invited to join the event "+event.getName()+" at the flevents event manage platform. To join click the following link: "+ baseurl+":"+frontendPort+"/join/" +event.getUuid()+"?token="+token);
+            details.setMsgBody(MessageFormat.format(strings.getString("mailService.EventInvitationBodyDefault"), event.getName(),baseurl,frontendPort,event.getUuid(),token));
         } else {
-            details.setMsgBody(event.getMailConfig().getRegisterMessage() + "\nUm dem Event beizutreten, klicken sie auf den folgenden Link: "+ baseurl+":"+frontendPort+"/join/" +event.getUuid()+"?token="+token);
+            details.setMsgBody(MessageFormat.format(strings.getString("mailService.EventInvitationBodyCustom"), event.getMailConfig().getRegisterMessage(),baseurl,frontendPort,event.getUuid(),token));
         }
 
         sendSimpleEmail(details);
@@ -149,8 +153,8 @@ public class EMailServiceImpl implements EMailService{
     public void sendNewPassword(String emailAddress, String secret) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
-        details.setSubject("New flevents password");
-        details.setMsgBody("Here is your new password for you flevents account. Use this to login to your account. Please change your password in the account settings immediately. \n Password: "+secret);
+        details.setSubject(strings.getString("mailService.ResetPasswordSubject"));
+        details.setMsgBody(MessageFormat.format(strings.getString("mailService.ResetPasswordBody"), secret));
         sendSimpleEmail(details);
     }
 
@@ -164,10 +168,10 @@ public class EMailServiceImpl implements EMailService{
     public void sendReminder(Event event, String emailAddress) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
-        details.setSubject("Reminder for event: "+event.getName());
+        details.setSubject(MessageFormat.format(strings.getString("mailService.ReminderSubject"), event.getName()));
 
         if(event.getMailConfig() == null || event.getMailConfig().getInfoMessage().equals("")){
-            details.setMsgBody("The event "+event.getName()+" starts tomorrow at "+event.getStartTime() + "! Dont miss it!");
+            details.setMsgBody(MessageFormat.format(strings.getString("mailService.ReminderBodyDefault"), event.getName(),event.getStartTime()));
         }else{
             details.setMsgBody(event.getMailConfig().getInfoMessage());
         }
@@ -185,14 +189,14 @@ public class EMailServiceImpl implements EMailService{
     public void sendFeedback(Event event, String emailAddress) throws MessagingException {
         EmailDetails details = new EmailDetails();
         details.setTo(new ArrayList<String>(Arrays.asList(emailAddress)));
-        details.setSubject("Thank you for your participation at "+event.getName());
+        details.setSubject(MessageFormat.format(strings.getString("mailService.FeedbackSubject"), event.getName()));
         MailConfig mailConfig = event.getMailConfig();
         if(
             mailConfig == null
             || mailConfig.getFeedbackMessage() == null
             || mailConfig.getFeedbackMessage().equals("")
         ){
-            details.setMsgBody("Thank you for your participation at " + event.getName() + ". We hope you had a great time!");
+            details.setMsgBody(MessageFormat.format(strings.getString("mailService.FeedbackBodyDefault"), event.getName()));
         }else{
             details.setMsgBody(event.getMailConfig().getFeedbackMessage());
         }
@@ -207,7 +211,7 @@ public class EMailServiceImpl implements EMailService{
     @Override
     public void sendAlertMessage(Event event) throws MessagingException {
         EmailDetails details = new EmailDetails();
-        details.setSubject("Last information for "+event.getName());
+        details.setSubject(MessageFormat.format(strings.getString("mailService.AlertSubject"), event.getName()));
         details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
         details.setMsgBody(event.getMailConfig().getInfoMessage());
         sendSimpleEmail(details);
@@ -216,7 +220,7 @@ public class EMailServiceImpl implements EMailService{
     @Override
     public void sendThankMessage(Event event) throws MessagingException {
         EmailDetails details = new EmailDetails();
-        details.setSubject("Thanks to be part of "+event.getName());
+        details.setSubject(MessageFormat.format(strings.getString("mailService.ThankSubject"), event.getName()));
         details.setBcc(event.getAttendees().stream().map(registration -> registration.getAccount().getEmail()).collect(Collectors.toList()));
         details.setMsgBody(event.getMailConfig().getFeedbackMessage());
         sendSimpleEmail(details);
@@ -225,9 +229,9 @@ public class EMailServiceImpl implements EMailService{
     @Override
     public void sendRegistraitionMail(FleventsAccount account) throws MessagingException {
         EmailDetails details = new EmailDetails();
-        details.setSubject("You have been registered on flevents.");
+        details.setSubject(strings.getString("mailService.RegistrationSubject"));
         details.setTo(Arrays.asList(account.getEmail()));
-        details.setMsgBody(String.format("Hi %s,\n we are glad that you choose to register you at flevents. You're account is now ready to use. Visit simple our website and enjoy our great tool. \n Your flevents team",account.getFirstname()));
+        details.setMsgBody(String.format(strings.getString("mailService.RegistrationBody"),account.getFirstname()));
         sendSimpleEmail(details);
     }
 }

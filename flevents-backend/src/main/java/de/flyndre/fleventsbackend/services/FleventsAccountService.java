@@ -3,26 +3,14 @@ package de.flyndre.fleventsbackend.services;
 import de.flyndre.fleventsbackend.Models.Event;
 import de.flyndre.fleventsbackend.Models.FleventsAccount;
 import de.flyndre.fleventsbackend.Models.questionnaire.AnsweredQuestionnaireModel;
-import de.flyndre.fleventsbackend.dtos.AccountInformation;
-import de.flyndre.fleventsbackend.dtos.EmailDetails;
-import de.flyndre.fleventsbackend.dtos.EventInformation;
 import de.flyndre.fleventsbackend.repositories.FleventsAccountRepository;
-import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +25,7 @@ public class FleventsAccountService {
     private FleventsAccountRepository fleventsAccountRepository;
     private EMailService eMailService;
     private ModelMapper mapper;
+    private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
     @Autowired
     PasswordEncoder encoder;
@@ -55,7 +44,7 @@ public class FleventsAccountService {
     public FleventsAccount getAccountById(String accountId){
         Optional<FleventsAccount> optional = fleventsAccountRepository.findById(accountId);
         if(!optional.isPresent()){
-            throw new NoSuchElementException("Found no account for the given id");
+            throw new NoSuchElementException(strings.getString("accountService.NoAccountWithThisId"));
         }
         return optional.get();
     }
@@ -69,10 +58,10 @@ public class FleventsAccountService {
     public FleventsAccount validate(String email, String secret){
         Optional<FleventsAccount> account = fleventsAccountRepository.findByEmail(email);
         if(account.isEmpty()){
-            throw new NoSuchElementException("Theres no account to the given email");
+            throw new NoSuchElementException(strings.getString("accountService.MailNotValid"));
         }
         if(!account.get().getSecret().equals(secret)){
-            throw new IllegalArgumentException("The given secret is not valid to this account")
+            throw new IllegalArgumentException(strings.getString("accountService.SecretNotValid"))
 ;        }
         return account.get();
     }
@@ -85,7 +74,7 @@ public class FleventsAccountService {
     public FleventsAccount getAccountByMail(String mail){
         Optional<FleventsAccount> optional = fleventsAccountRepository.findByEmail(mail);
         if(!optional.isPresent()){
-            throw new NoSuchElementException("Theres no account to the given email");
+            throw new NoSuchElementException(strings.getString("accountService.NoAccountWithThisMail"));
         }
         return optional.get();
     }
@@ -111,14 +100,14 @@ public class FleventsAccountService {
      */
     public FleventsAccount createAccount(FleventsAccount account){
         if(account.getEmail()==null){
-            throw new IllegalArgumentException("No email provided");
+            throw new IllegalArgumentException(strings.getString("accountService.AccountNotCreatedNoMail"));
         }
         if(account.getSecret()==null){
-            throw new IllegalArgumentException("No secret provided");
+            throw new IllegalArgumentException(strings.getString("accountService.AccountNotCreatedNoSecret"));
         }
         Optional<FleventsAccount> optional;
         if(!(optional= fleventsAccountRepository.findByEmail(account.getEmail())).isEmpty()&&optional.get().getIsActive()){
-            throw new IllegalArgumentException("The provided email is already in use");
+            throw new IllegalArgumentException(strings.getString("accountService.AccountNotCreatedMailInUse"));
         }
         if(optional.isPresent()){
             FleventsAccount oldAcc = optional.get();
@@ -140,7 +129,7 @@ public class FleventsAccountService {
     public FleventsAccount createAnonymousAccount(String email){
         Optional<FleventsAccount> optional;
         if(!(optional= fleventsAccountRepository.findByEmail(email)).isEmpty()&&optional.get().getIsActive()){
-            throw new IllegalArgumentException("The provided email is already in use");
+            throw new IllegalArgumentException(strings.getString("accountService.AnonymAccountNotCreatedMailInUse"));
         }
         if(optional.isPresent()){
             FleventsAccount oldAcc = optional.get();
@@ -163,7 +152,7 @@ public class FleventsAccountService {
      */
     public FleventsAccount createAnonymousAccountWithName(String email, String firstname, String lastname){
         if(fleventsAccountRepository.findByEmail(email).isPresent()){
-            throw new IllegalArgumentException("Email already in use");
+            throw new IllegalArgumentException(strings.getString("accountService.AnonymAccountWithNameNotCreatedMailInUse"));
         }
         FleventsAccount account = new FleventsAccount();
         account.setEmail(email);
@@ -182,12 +171,12 @@ public class FleventsAccountService {
     public FleventsAccount editAccount(String accountId, FleventsAccount account){
         Optional<FleventsAccount> existingAcc = fleventsAccountRepository.findById(accountId);
         if (existingAcc.isEmpty()) {
-            throw new NoSuchElementException("No account with specified account id found");
+            throw new NoSuchElementException(strings.getString("accountService.AccountIdToBeEditedNotFound"));
         }
         if(account.getEmail() != null) {
             Optional<FleventsAccount> existingAccEmail = fleventsAccountRepository.findByEmail(account.getEmail());
             if(existingAccEmail.isPresent() && !existingAccEmail.get().getUuid().equals(account.getUuid())) {
-                throw new IllegalArgumentException("This email is already in use");
+                throw new IllegalArgumentException(strings.getString("accountService.AccountToBeEditedMailInUse"));
             }
         }
         FleventsAccount srcAccount = existingAcc.get();
