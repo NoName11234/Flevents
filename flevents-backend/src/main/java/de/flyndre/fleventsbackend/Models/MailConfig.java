@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
+
 /**
  * This Class is the Config for Mailings.
  * It provides  a Merge-Method.
@@ -30,9 +33,9 @@ public class MailConfig {
     private String uuid;
     private String registerMessage;
     private String infoMessage;
-    private LocalDateTime infoMessageTime;
+    private Duration infoMessageOffset;
     private String feedbackMessage;
-    private LocalDateTime feedbackMessageTime;
+    private Duration feedbackMessageOffset;
     private String organizationInvitation;
     private String eventInvitation;
 
@@ -45,14 +48,14 @@ public class MailConfig {
         if(mailConfig.infoMessage !=null){
             this.infoMessage =mailConfig.getInfoMessage();
         }
-        if(mailConfig.infoMessageTime !=null){
-            this.infoMessageTime =mailConfig.getInfoMessageTime();
+        if(mailConfig.infoMessageOffset !=null){
+            this.infoMessageOffset =mailConfig.getInfoMessageOffset();
         }
         if(mailConfig.feedbackMessage !=null){
             this.feedbackMessage =mailConfig.getFeedbackMessage();
         }
-        if(mailConfig.feedbackMessageTime !=null){
-            this.feedbackMessageTime =mailConfig.getFeedbackMessageTime();
+        if(mailConfig.feedbackMessageOffset !=null){
+            this.feedbackMessageOffset =mailConfig.getFeedbackMessageOffset();
         }
         if(mailConfig.organizationInvitation !=null){
             this.organizationInvitation =mailConfig.getOrganizationInvitation();

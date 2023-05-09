@@ -6,6 +6,7 @@ import de.flyndre.fleventsbackend.repositories.OrganizationAccountRepository;
 import de.flyndre.fleventsbackend.repositories.OrganizationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -71,8 +72,7 @@ public class OrganizationService {
      */
     public Organization createOrganisation(Organization organisation){
         organisation.setUuid(null);
-        LocalDateTime localDateTime = LocalDateTime.now();
-        MailConfig mailConfig = new MailConfig(null, "","", localDateTime ,"", localDateTime,"","");
+        MailConfig mailConfig = new MailConfig(null, "","", Duration.ofHours(1)  ,"", Duration.ofHours(1),"","");
         mailConfigRepository.save(mailConfig);
         organisation.setMailConfig(mailConfig);
         return organizationRepository.save(organisation);
@@ -210,7 +210,7 @@ public class OrganizationService {
      * @param localDateTime the time to set
      * @param mailText the text for the MailConfiguration to set
      */
-    public void setMailConfigEventInfo(Organization organization, String mailText, LocalDateTime localDateTime) {
+    public void setMailConfigEventInfo(Organization organization, String mailText, Duration localDateTime) {
         if(mailText.isEmpty()){
             throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
         }
@@ -219,7 +219,7 @@ public class OrganizationService {
         }
         MailConfig mailConfig = organization.getMailConfig();
         mailConfig.setInfoMessage(mailText);
-        mailConfig.setInfoMessageTime(localDateTime);
+        mailConfig.setInfoMessageOffset(localDateTime);
         mailConfigRepository.save(mailConfig);
         organization.setMailConfig(mailConfig);
         organizationRepository.save(organization);
@@ -231,14 +231,14 @@ public class OrganizationService {
      * @param localDateTime the time to set
      * @param mailText the text for the MailConfiguration to set
      */
-    public void setMailConfigEventFeedback(Organization organization, String mailText, LocalDateTime localDateTime) {
+    public void setMailConfigEventFeedback(Organization organization, String mailText, Duration localDateTime) {
         if(mailText.isEmpty()){
             throw new IllegalArgumentException("The Mailconfig is empty, cant change it");
         }
 
         MailConfig mailConfig = organization.getMailConfig();
         mailConfig.setFeedbackMessage(mailText);
-        mailConfig.setInfoMessageTime(localDateTime);
+        mailConfig.setInfoMessageOffset(localDateTime);
         mailConfigRepository.save(mailConfig);
         organization.setMailConfig(mailConfig);
         organizationRepository.save(organization);

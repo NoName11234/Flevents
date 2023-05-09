@@ -343,6 +343,7 @@ public class OrganizationController {
     * @param mailConfigPreview the mailConfigPreview filled with all information for the mail configuration
     * @return ResponseEntity with the http status code
     */
+   /*
    @PostMapping("/{organizationId}/mailConfigEventInfo")
    public ResponseEntity setMailConfigEventInfo(@PathVariable String organizationId,@RequestBody MailConfigPreview mailConfigPreview){
       try{
@@ -352,7 +353,7 @@ public class OrganizationController {
       catch (Exception e){
          return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
       }
-   }
+   }*/
 
    /**
     * Sets the Email-Configuration for the event feedback in the specified organization.
@@ -360,6 +361,7 @@ public class OrganizationController {
     * @param mailConfigPreview the mailConfigPreview filled with all information for the mail configuration
     * @return ResponseEntity with the http status code
     */
+   /*
    @PostMapping("/{organizationId}/mailConfigFeedback")
    public ResponseEntity setMailConfigEventFeedback(@PathVariable String organizationId,@RequestBody MailConfigPreview mailConfigPreview){
       try{
@@ -369,7 +371,7 @@ public class OrganizationController {
       catch (Exception e){
          return new ResponseEntity(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
       }
-   }
+   }*/
 
    /**
     * Gets the Email-Configuration for the organization invitation in the specified organization.
