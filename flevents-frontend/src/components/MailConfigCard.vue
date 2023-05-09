@@ -32,7 +32,7 @@ async function submit() {
   props.config!.infoMessageTime = infoMessageTime.toISOString();
 
   let feedbackMessageTime = new Date(props.eventEnd);
-  feedbackMessageTime.setHours((new Date(props.eventEnd).getHours() - (feedbackOffset.value ?? 0)));
+  feedbackMessageTime.setHours((new Date(props.eventEnd).getHours() + (feedbackOffset.value ?? 0)));
   props.config!.feedbackMessageTime = feedbackMessageTime.toISOString();
   emits.call(emits, 'update', props.config);
 }

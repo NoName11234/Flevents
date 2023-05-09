@@ -234,4 +234,13 @@ public class EMailServiceImpl implements EMailService{
         details.setMsgBody(String.format(strings.getString("mailService.RegistrationBody"),account.getFirstname()));
         sendSimpleEmail(details);
     }
+
+    @Override
+    public void sendEventregistrationMail(Event event, FleventsAccount account) throws MessagingException {
+        EmailDetails details = new EmailDetails();
+        details.setSubject("Added as Attendee to "+event.getName());
+        details.setTo(Arrays.asList(account.getEmail()));
+        details.setMsgBody(String.format("You were added to the event %s as an attendee. Please go to %s:%s an check out our account for further information",event.getName(),baseurl,frontendPort));
+        sendSimpleEmail(details);
+    }
 }
