@@ -42,6 +42,8 @@ const appStore = useAppStore();
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
 
+setTimeout(() => console.log(event.value.mailConfig), 1000);
+
 const postStore = usePostStore();
 const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
   ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
@@ -604,8 +606,6 @@ async function updateMailConfig(config: MailConfig) {
       <v-window-item value="mails">
         <MailConfigCard
           :config="event.mailConfig"
-          :event-start="new Date(event.startTime)"
-          :event-end="new Date(event.endTime)"
           @update="updateMailConfig"
         />
       </v-window-item>
@@ -655,9 +655,6 @@ async function updateMailConfig(config: MailConfig) {
               <th v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer">
                 Rolle
               </th>
-<!--              <th>-->
-<!--                Bestätigt-->
-<!--              </th>-->
               <th v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer">
                 Entfernen
               </th>
@@ -705,10 +702,6 @@ async function updateMailConfig(config: MailConfig) {
                   </v-menu>
                 </v-btn>
               </td>
-<!--              <td>-->
-<!--                <v-icon v-if="item.role !== 'invited'" icon="mdi-check-circle" color="gray"/>-->
-<!--                <v-icon v-if="item.role === 'invited'" icon="mdi-close-circle" color="gray"/>-->
-<!--              </td>-->
               <td v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer">
                 <v-btn
                   variant="text"

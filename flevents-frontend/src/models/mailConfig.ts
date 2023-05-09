@@ -1,9 +1,12 @@
+import {Duration} from "@/models/duration";
+
 export interface MailConfig {
-    uuid: string;
-    organizationInvitation: string;
-    registerMessage: string;
-    infoMessage: string;
-    infoMessageTime: string;
-    feedbackMessage: string;
-    feedbackMessageTime: string;
+  uuid: string;
+  registerMessage: string;
+  infoMessage: string;
+  infoMessageOffset: Duration;
+  feedbackMessage: string;
+  feedbackMessageOffset: Duration;
+  organizationInvitation: string;
+  eventInvitation: string;
 }
