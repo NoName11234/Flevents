@@ -27,8 +27,8 @@ async function deleteAccount() {
       text: `Ihr Account wurde erfolgreich gelöscht.`,
       color: "success",
     });
-    await logout();
     await router.push({ name: 'accounts.login' });
+    await logout();
   } catch (e) {
     let errorMessage;
     if (e instanceof AxiosError) {
