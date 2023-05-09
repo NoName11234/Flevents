@@ -237,7 +237,7 @@ public class EventControllerService {
     public void sendAutomaticEmails(){
         List<Event> events = eventService.getEvents();
         LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
-        now.plusHours(2);
+        //now.plusHours(2);
         for(Event event:events) {
             if (now.equals(event.getMailConfig().getInfoMessageTime().withMinute(0).withSecond(0).withNano(0))) {
                 try {
