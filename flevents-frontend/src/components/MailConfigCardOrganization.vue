@@ -15,9 +15,6 @@ const emits = defineEmits<{
 
 const tooltip = ref('');
 
-const infoOffset = ref(1);
-const feedbackOffset = ref(1);
-
 async function submit() {
   emits.call(emits, 'update', props.config);
 }

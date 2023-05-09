@@ -57,7 +57,8 @@ async function submit(pendingValidation: Promise<any>) {
         min="0"
         type="number"
         :model-value="DurationService.extractHours(config.infoMessageOffset)"
-        @input="e => config.infoMessageOffset = DurationService.toDuration(Number.parseInt(e.target.value))"
+        @input="(e: Event) => config.infoMessageOffset = DurationService.toDuration(
+          Number.parseInt((e.target as HTMLInputElement).value))"
         hide-details="auto"
         :rules="[
           v => v >= 0 || 'Kann nicht kleiner 0 sein.',
@@ -82,7 +83,8 @@ async function submit(pendingValidation: Promise<any>) {
         min="0"
         type="number"
         :model-value="DurationService.extractHours(config.feedbackMessageOffset)"
-        @input="e => config.feedbackMessageOffset = DurationService.toDuration(Number.parseInt(e.target.value))"
+        @input="(e: Event) => config.feedbackMessageOffset = DurationService.toDuration(
+          Number.parseInt((e.target as HTMLInputElement).value))"
         hide-details="auto"
         :rules="[
           v => v >= 0 || 'Kann nicht kleiner 0 sein.',

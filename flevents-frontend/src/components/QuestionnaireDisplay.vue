@@ -240,7 +240,7 @@ function setChoice(index: number, choice: Choice) {
               variant="solo"
               :disabled="alreadyVoted || loading"
               :model-value="(savedAq?.answers?.[index])?.answer"
-              @input="e => (aq.answers[index]).answer = e.target.value"
+              @input="(e: Event) => (aq.answers[index]).answer = (e.target as HTMLInputElement).value"
             >
             </v-textarea>
 
