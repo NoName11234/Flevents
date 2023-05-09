@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import {Comment} from "@/models/comment";
 import ColorService from "@/service/colorService";
 import DatetimeService from "../service/datetimeService";
 import {computed, ref} from "vue";
 import {storeToRefs} from "pinia";
 import {useAccountStore} from "@/store/account";
 import commentsApi from "@/api/commentsApi";
-import {useEventStore} from "@/store/events";
 import {useAppStore} from "@/store/app";
 import {AxiosError} from "axios";
+import {usePostStore} from "@/store/posts";
 
 const props = defineProps({
   comment: {
@@ -30,7 +29,7 @@ const props = defineProps({
   },
 });
 
-const eventStore = useEventStore();
+const postStore = usePostStore();
 const appStore = useAppStore();
 
 const loading = ref(false);
@@ -49,7 +48,6 @@ async function deleteComment() {
       text: 'Kommentar gelöscht.',
       color: 'success',
     });
-    eventStore.hydrateSpecific(props.eventUuid);
   } catch (e) {
     let errorMessage = '';
     if (e instanceof AxiosError) {
@@ -68,6 +66,7 @@ async function deleteComment() {
     });
   }
   loading.value = false;
+  postStore.hydrateSpecificOf(props.eventUuid);
 }
 
 </script>

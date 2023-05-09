@@ -23,7 +23,7 @@ export const usePostStore = defineStore('posts', {
      * Hydrates the store by requesting the posts of the given event uuid from the API.
      * @param eventUuid the uuid of the event associated with requested posts
      */
-    async hydrateSpecific(eventUuid: string) {
+    async hydrateSpecificOf(eventUuid: string) {
       if (this.specificLoading.get(eventUuid) === true) {
         // Do not hydrate if already hydrating
         return;
@@ -63,7 +63,7 @@ export const usePostStore = defineStore('posts', {
         requestedPosts === undefined
         || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
       ) {
-        this.hydrateSpecific(eventUuid);
+        this.hydrateSpecificOf(eventUuid);
       }
       return requestedPosts?.map(pUuid => this.cachedPosts.get(pUuid) as Post) || [] as Post[];
     },
@@ -90,7 +90,7 @@ export const usePostStore = defineStore('posts', {
         requestedPost === undefined
         || lastUpdate !== undefined && new Date().getTime() - lastUpdate.getTime() > STORES.CACHE_MAX_AGE
       ) {
-        this.hydrateSpecific(eventUuid);
+        this.hydrateSpecificOf(eventUuid);
       }
       return requestedPost || {} as Post;
     },

@@ -43,12 +43,10 @@ const appStore = useAppStore();
 
 const eventStore = useEventStore();
 const event = eventStore.getEventGetter(eventUuid);
-const posts = computed(() => event.value
-  .posts?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
-// TODO: Re-hydrate post store in all necessary places to stay up-to-date
-// const postStore = usePostStore();
-// const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
-//   ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
+
+const postStore = usePostStore();
+const posts = computed(() => postStore.getPostsGetterOf(eventUuid).value
+  ?.sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()));
 
 const surveyStore = useSurveyStore();
 const questionnaires = computed(() => surveyStore.getQuestionnairesGetterOf(eventUuid).value
