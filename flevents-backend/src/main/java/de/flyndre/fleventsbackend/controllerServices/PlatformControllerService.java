@@ -21,6 +21,7 @@ public class PlatformControllerService {
     private final InvitationTokenService  invitationTokenService;
     private final EventService eventService;
 
+
     public PlatformControllerService(OrganizationService organizationService, EMailService eMailService, InvitationTokenService invitationTokenService, EventService eventService) {
         this.organizationService = organizationService;
         this.eMailService = eMailService;

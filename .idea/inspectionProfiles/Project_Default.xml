@@ -3,7 +3,7 @@
     <option name="myName" value="Project Default" />
     <inspection_tool class="HardCodedStringLiteral" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreForAssertStatements" value="true" />
-      <option name="ignoreForExceptionConstructors" value="true" />
+      <option name="ignoreForExceptionConstructors" value="false" />
       <option name="ignoreForSpecifiedExceptionConstructors" value="" />
       <option name="ignoreForJUnitAsserts" value="true" />
       <option name="ignoreForClassReferences" value="true" />

@@ -159,7 +159,7 @@ public class EventControllerService {
     public void acceptInvitation(String eventId, String accountId, String token) throws InvalidAttributesException {
         Event event = getEventById(eventId);
         if(LocalDateTime.now().isAfter(event.getEndTime())){
-            throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
+            throw new IllegalArgumentException(strings.getString("eventControllerService.EventIsOver"));
         }
         FleventsAccount account = accountService.getAccountById(accountId);
         InvitationToken invitationToken = invitationTokenService.validate(token,eventId);
@@ -211,7 +211,7 @@ public class EventControllerService {
     public void registerAnonymousAccountToEvent(String eventId, String mailAddress){
         Event event = getEventById(eventId);
         if(LocalDateTime.now().isAfter(event.getEndTime())){
-            throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
+            throw new IllegalArgumentException(strings.getString("eventControllerService.EventIsOver"));
         }
         FleventsAccount account = accountService.createAnonymousAccount(mailAddress);
         eventService.addAccountToEvent(event,account,EventRole.attendee);
@@ -318,7 +318,7 @@ public class EventControllerService {
         Event event = getEventById(eventId);
         FleventsAccount account = accountService.getAccountById(accountId);
         if(LocalDateTime.now().isAfter(event.getEndTime())){
-            throw new IllegalArgumentException(strings.getString("event.EventIsOver"));
+            throw new IllegalArgumentException(strings.getString("eventControllerService.EventIsOver"));
         }
         eventService.addAccountToEvent(event,account,EventRole.attendee);
         eMailService.sendEventregistrationMail(event,account);
