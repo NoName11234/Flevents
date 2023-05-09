@@ -1,9 +1,12 @@
 package de.flyndre.fleventsbackend.controllerServices;
 
 import de.flyndre.fleventsbackend.Models.*;
+import de.flyndre.fleventsbackend.controller.OrganizationController;
 import de.flyndre.fleventsbackend.dtos.EventPreview;
 import de.flyndre.fleventsbackend.services.*;
 import jakarta.mail.MessagingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,7 @@ public class EventControllerService {
     private final InvitationTokenService invitationTokenService;
     private final PostService postService;
     private final AuthService authService;
+    private final Logger logger = LoggerFactory.getLogger(OrganizationController.class);
     private static ResourceBundle strings = ResourceBundle.getBundle("ConfigStrings");
 
     public EventControllerService(EventService eventService, FleventsAccountService fleventsAccountService, OrganizationService organizationService, FleventsAccountService accountService, EMailServiceImpl eMailService, InvitationTokenService invitationTokenService, PostService postService, AuthService authService){
@@ -239,19 +243,23 @@ public class EventControllerService {
         LocalDateTime now = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
         //now.plusHours(2);
         for(Event event:events) {
-            if (now.equals(event.getStartTime().minus(event.getMailConfig().getInfoMessageOffset()).withMinute(0).withSecond(0).withNano(0))) {
-                try {
-                    eMailService.sendAlertMessage(event);
-                } catch (MessagingException e) {
-                    throw new RuntimeException(e);
+            try {
+                if (now.equals(event.getStartTime().minus(event.getMailConfig().getInfoMessageOffset()).withMinute(0).withSecond(0).withNano(0))) {
+                    try {
+                        eMailService.sendAlertMessage(event);
+                    } catch (MessagingException e) {
+                        logger.error("Mailsending Error", e);
+                    }
                 }
-            }
-            if (now.equals(event.getEndTime().plus(event.getMailConfig().getInfoMessageOffset()).withMinute(0).withSecond(0).withNano(0))) {
-                try {
-                    eMailService.sendThankMessage(event);
-                } catch (MessagingException e) {
-                    throw new RuntimeException(e);
+                if (now.equals(event.getEndTime().plus(event.getMailConfig().getFeedbackMessageOffset()).withMinute(0).withSecond(0).withNano(0))) {
+                    try {
+                        eMailService.sendThankMessage(event);
+                    } catch (MessagingException e) {
+                        logger.error("Mailsending Error", e);
+                    }
                 }
+            }catch (Exception e){
+                logger.error("Mailsending Error", e);
             }
         }
     }
