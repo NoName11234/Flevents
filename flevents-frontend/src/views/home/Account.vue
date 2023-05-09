@@ -10,7 +10,6 @@ import {useAppStore} from "@/store/app";
 import {AxiosError} from "axios";
 import organizationsApi from "@/api/organizationsApi";
 import {useRouter} from "vue-router";
-import {AccountPreview} from "@/models/accountPreview";
 import {OrganizationPreview} from "@/models/organizationPreview";
 
 const router = useRouter();
@@ -20,7 +19,6 @@ const showDeleteDialog = ref(false);
 const showLeaveDialog = ref(false);
 const { currentAccount: account } = storeToRefs(accountStore);
 const selectedOrga = ref(undefined as undefined|OrganizationPreview);
-const select = ref(false);
 
 async function deleteAccount() {
   try {
@@ -30,6 +28,7 @@ async function deleteAccount() {
       color: "success",
     });
     await logout();
+    await router.push({ name: 'accounts.login' });
   } catch (e) {
     let errorMessage;
     if (e instanceof AxiosError) {

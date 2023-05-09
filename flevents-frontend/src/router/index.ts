@@ -136,7 +136,7 @@ const routes = [
         meta: {
           public: true,
         },
-        component: () => import(/* webpackChunkName: "accounts" */ '@/views/forms/Login.vue'),
+        component: () => import(/* webpackChunkName: "accounts" */ '@/views/accounts/Login.vue'),
       }
     ],
   },
