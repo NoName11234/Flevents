@@ -100,7 +100,7 @@ async function deletePost() {
     </v-expansion-panel-title>
 
     <v-expansion-panel-text>
-      <div class="d-flex flex-column my-1 mx-n3">
+      <div class="d-flex flex-column mt-1 mb-n1 mx-n3">
         <v-card
           elevation="0"
           :loading="loading"

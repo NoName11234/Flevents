@@ -11,6 +11,7 @@ import api from "@/api/api";
 import eventApi from "@/api/eventsApi";
 import {useAppStore} from "@/store/app";
 import {VALIDATION} from "@/constants";
+import {load} from "webfontloader";
 const route = useRoute()
 const router = useRouter();
 
@@ -18,6 +19,7 @@ const eventUuid = route.params.uuid as string;
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
+const loading = ref(false);
 const role = ref(EventRole.attendee) as Ref<EventRole.attendee|EventRole.tutor>;
 
 const appStore = useAppStore();
@@ -38,6 +40,7 @@ function remove(item: any){
 
 // submit
 async function submit() {
+  loading.value = true;
   let failedInvitations = [];
   let successfulInvitations = [];
   for (let i in chips.value) {
@@ -65,6 +68,7 @@ async function submit() {
       color: 'success',
     });
   }
+  loading.value = true;
   await router.push(backRoute);
 }
 </script>
@@ -73,7 +77,7 @@ async function submit() {
 
   <Heading :text="`Zu ${event.name} einladen`" />
 
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
       <v-container class="d-flex flex-column gap-3">
         <v-combobox

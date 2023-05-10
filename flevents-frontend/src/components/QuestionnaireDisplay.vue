@@ -78,10 +78,7 @@ const hasRights = computed(() => {
 });
 
 const statisticsStore = useQuestionnaireStatisticsStore();
-let statistics = ref({} as Statistics);
-if (hasRights.value) {
-  statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
-}
+const statistics = statisticsStore.getStatisticsGetterOf(props.questionnaire.uuid);
 
 async function submitAnswers(pendingValidation: Promise<any>) {
   tooltip.value = '';
@@ -182,7 +179,7 @@ function setChoice(index: number, choice: Choice) {
     </v-expansion-panel-title>
 
     <v-expansion-panel-text>
-      <div class="d-flex flex-column gap-3 my-3">
+      <div class="d-flex flex-column gap-3 mt-1 mb-n1 mx-n3">
 
         <v-card
           elevation="0"
@@ -192,7 +189,7 @@ function setChoice(index: number, choice: Choice) {
 
           <SurveyStats
             :questionnaire="questionnaire"
-            :statistics="statistics"
+            :statistics="hasRights ? statistics : undefined"
           />
 
           <template v-if="hasRights">
