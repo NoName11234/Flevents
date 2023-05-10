@@ -55,6 +55,11 @@ public class QuestionnaireControllerService {
                 authService.validateRights(auth, Arrays.asList(OrganizationRole.admin),event.getOrganization().getUuid());
     }
 
+    /**
+     * Returns all questionnaires from the specified event.
+     * @param eventId the id of the event to get the questionnaires from
+     * @return List of all questionnaires from the event
+     */
     public List<Questionnaire> getQuestionnaires(String eventId){
         List<QuestionnaireModel> questionnaireModels = questionnaireService.getQuestionnaires(eventService.getEventById(eventId));
         List<Questionnaire> questionnaires = new ArrayList<>();
@@ -64,14 +69,31 @@ public class QuestionnaireControllerService {
         return questionnaires;
     }
 
+    /**
+     * Returns the specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to be returned
+     * @return the specified questionnaire
+     */
     public Questionnaire getQuestionnaire(String questionnaireId){
         return convertQuestionnaireModelToQuestionnaire(questionnaireService.getQuestionnaire(questionnaireId));
     }
 
+    /**
+     * Returns a AnsweredQuestionnaire from a specified questionnaire and a specified user.
+     * @param questionnaireId the id of the questionnaire
+     * @param userId the id of the user
+     * @return the AnsweredQuestionnaireModel
+     */
     public AnsweredQuestionnaireModel getAnswerFromUser(String questionnaireId, String userId){
         return questionnaireService.getAnswerFromUser(fleventsAccountService.getAccountById(userId), questionnaireService.getQuestionnaire(questionnaireId));
     }
 
+    /**
+     * Creates a questionnaire in the specified event.
+     * @param eventId the event to create the questionnaire in
+     * @param questionnaire the questionnaire to be created in the event
+     * @return the created QuestionnaireModel
+     */
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
         QuestionnaireModel questionnaireModel = convertQuestionnaireToQuestionnaireModel(questionnaire);
         questionnaireModel.setCreationDate(new Timestamp(System.currentTimeMillis()));
@@ -82,11 +104,21 @@ public class QuestionnaireControllerService {
         return questionnaireModel;
     }
 
+    /**
+     * Overwrites the specified questionnaire with the given questionnaire.
+     * @param questionnaireId the id of the questionnaire to be overwritten
+     * @param questionnaire the new questionnaire
+     * @return the overwritten QuestionnaireModel
+     */
     public QuestionnaireModel editQuestionnaire(String questionnaireId, Questionnaire questionnaire){
         QuestionnaireModel newQm = convertQuestionnaireToQuestionnaireModel(questionnaire);
         return questionnaireService.editQuestionnaire(questionnaireId,newQm);
     }
 
+    /**
+     * Deletes the specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to be deleted
+     */
     public void deleteQuestionnaire(String questionnaireId) {
         QuestionnaireModel questionnaire = questionnaireService.getQuestionnaire(questionnaireId);
 
@@ -121,6 +153,12 @@ public class QuestionnaireControllerService {
 
     }
 
+    /**
+     * Adds an AnsweredQuestionnaire to the specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to add the answer to
+     * @param answeredQuestionnaire the new answer
+     * @return the AnsweredQuestionnaireModel with the added answer
+     */
     public AnsweredQuestionnaireModel addAnswer(String questionnaireId, AnsweredQuestionnaire answeredQuestionnaire){
         answeredQuestionnaire.setQuestionnaireId(questionnaireId);
         AnsweredQuestionnaireModel newAqm = convertAnsweredQuestionnaireToAnsweredQuestionnaireModel(answeredQuestionnaire);
@@ -129,6 +167,11 @@ public class QuestionnaireControllerService {
         return questionnaireService.saveNewAnsweredQuestionnaireModel(newAqm);
     }
 
+    /**
+     * Returns a summary of all answers of a specified questionnaire.
+     * @param questionnaireId the id of the questionnaire to get the summary from
+     * @return the Statistics dto with the summary of the Questionnaire answers
+     */
     public Statistics getStatistics(String questionnaireId){
         QuestionnaireModel questionnaireModel = questionnaireService.getQuestionnaire(questionnaireId);
         Statistics statistics = new Statistics();
@@ -174,7 +217,6 @@ public class QuestionnaireControllerService {
                             votes.set(b, votes.get(b)+1);
                         }
                     }
-
                 }
             }
         }
