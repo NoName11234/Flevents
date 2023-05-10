@@ -3,7 +3,7 @@ package de.flyndre.fleventsbackend.dtos.questionnaire;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -12,7 +12,7 @@ public class Questionnaire {
     private String uuid;
     private String eventId;
     private String title;
-    private Timestamp creationDate;
-    private Timestamp closingDate;
+    private LocalDateTime creationDate;
+    private LocalDateTime closingDate;
     private List<Question> questions;
 }

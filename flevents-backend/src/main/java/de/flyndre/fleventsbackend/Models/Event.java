@@ -8,11 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.Length;
 
-import java.net.URI;
-import java.sql.Blob;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;

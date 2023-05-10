@@ -13,7 +13,8 @@ import de.flyndre.fleventsbackend.services.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -74,7 +75,7 @@ public class QuestionnaireControllerService {
 
     public QuestionnaireModel createQuestionnaire(String eventId, Questionnaire questionnaire){
         QuestionnaireModel questionnaireModel = convertQuestionnaireToQuestionnaireModel(questionnaire);
-        questionnaireModel.setCreationDate(new Timestamp(System.currentTimeMillis()));
+        questionnaireModel.setCreationDate(LocalDateTime.now());
         questionnaireModel.setEvent(eventService.getEventById(eventId));
         questionnaireService.saveNewQuestionnaireModel(questionnaireModel);
         //for test purposes
