@@ -72,9 +72,7 @@ public class OrganizationService {
      */
     public Organization createOrganisation(Organization organisation){
         organisation.setUuid(null);
-        MailConfig mailConfig = new MailConfig(null, "","", Duration.ofHours(1)  ,"", Duration.ofHours(1),"","");
-        mailConfigRepository.save(mailConfig);
-        organisation.setMailConfig(mailConfig);
+        organisation.setMailConfig(new MailConfig());
         return organizationRepository.save(organisation);
     }
 

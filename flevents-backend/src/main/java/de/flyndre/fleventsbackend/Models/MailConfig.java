@@ -25,19 +25,19 @@ import java.time.Period;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MailConfig {
+public class MailConfig implements Cloneable {
 
     @Id
     @GeneratedValue(generator="system-uuid")
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String uuid;
-    private String registerMessage;
-    private String infoMessage;
-    private Duration infoMessageOffset;
-    private String feedbackMessage;
-    private Duration feedbackMessageOffset;
-    private String organizationInvitation;
-    private String eventInvitation;
+    private String registerMessage="";
+    private String infoMessage="";
+    private Duration infoMessageOffset = Duration.ofHours(1);
+    private String feedbackMessage ="";
+    private Duration feedbackMessageOffset=Duration.ofHours(1);
+    private String organizationInvitation= "";
+    private String eventInvitation="";
 
 
 
@@ -64,5 +64,9 @@ public class MailConfig {
             this.eventInvitation =mailConfig.getEventInvitation();
         }
 
+    }
+
+    public MailConfig copy() {
+        return new MailConfig(null,registerMessage,infoMessage,infoMessageOffset,feedbackMessage,feedbackMessageOffset,organizationInvitation,eventInvitation);
     }
 }
