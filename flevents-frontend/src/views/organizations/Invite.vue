@@ -20,6 +20,8 @@ const backRoute = { name: 'organizations.organization', params: { uuid: organiza
 const address = ref("");
 const chips =  ref(new Array<any>());
 const tooltip = ref('');
+const loading = ref(false);
+
 const role = ref(OrganizationRole.member) as Ref<OrganizationRole>;
 
 const appStore = useAppStore();
@@ -38,6 +40,7 @@ function remove(item: any){
 }
 
 async function submit() {
+  loading.value = true;
   let failedInvitations = [];
   let successfulInvitations = [];
   for (let i in chips.value) {
@@ -65,6 +68,7 @@ async function submit() {
       color: 'success',
     });
   }
+  loading.value = false;
   await router.push(backRoute);
 }
 </script>
@@ -73,7 +77,7 @@ async function submit() {
 
   <Heading :text="`Zu ${organization.name} einladen`" />
 
-  <v-card>
+  <v-card :loading="loading" :disabled="loading">
     <v-form validate-on="submit" @submit.prevent="submit()">
 
       <v-container class="d-flex flex-column gap-3" >
