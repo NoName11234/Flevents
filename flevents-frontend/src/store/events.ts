@@ -21,6 +21,7 @@ export const useEventStore = defineStore('events', {
 
     cachedEvents: new Map<string, FleventsEvent>,
     specificLoading: new Map<string, boolean>,
+    specificError: new Map<string, boolean>,
     lastCaching: new Map<string, Date>,
 
     loading: false,
@@ -94,7 +95,7 @@ export const useEventStore = defineStore('events', {
         // Do not hydrate if already hydrating
         return;
       }
-      this.error = false;
+      this.specificError.set(uuid, false);
       this.specificLoading.set(uuid, true);
       try {
         const response = await eventApi.get(uuid);
@@ -102,7 +103,7 @@ export const useEventStore = defineStore('events', {
         this.lastCaching.set(uuid, new Date());
       } catch (e) {
         console.warn(`Failed to fetch event with id ${uuid}.`, e);
-        this.error = true;
+        this.specificError.set(uuid, true);
       } finally {
         this.specificLoading.set(uuid, false);
       }
