@@ -67,7 +67,6 @@ const hasRights = computed(() => {
   if (hasEventRights) return true;
   let organizationRoles = [
     OrganizationRole.admin,
-    OrganizationRole.organizer,
   ];
   let hasOrganizationRights = account.value!.organizationPreviews.find(o => o.uuid === props.event?.organizationPreview?.uuid && organizationRoles.includes(o.role as OrganizationRole));
   if (hasOrganizationRights) return true;
