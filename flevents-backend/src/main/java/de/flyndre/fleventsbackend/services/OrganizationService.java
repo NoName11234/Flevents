@@ -73,6 +73,7 @@ public class OrganizationService {
     public Organization createOrganisation(Organization organisation){
         organisation.setUuid(null);
         organisation.setMailConfig(new MailConfig());
+        mailConfigRepository.save(organisation.getMailConfig());
         return organizationRepository.save(organisation);
     }
 

@@ -59,6 +59,8 @@ public class FullApiTest {
         OrganizationPreview organizationPreview = new OrganizationPreview();
         organizationPreview.setName("Test Orga");
         organizationPreview.setDescription("Test description");
+        organizationPreview.setCustomerNumber("001");
+        organizationPreview.setPhoneContact("0193293093");
         var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/platform/organizations")
                         .param("email","test@flyndre.de")
                         .contentType(MediaType.APPLICATION_JSON)
