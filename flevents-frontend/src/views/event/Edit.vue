@@ -9,6 +9,7 @@ import {storeToRefs} from "pinia";
 import {useEventStore} from "@/store/events";
 import eventApi from "@/api/eventsApi";
 import FileService from "@/service/fileService";
+import {FleventsEvent} from "@/models/fleventsEvent";
 const router = useRouter()
 const route = useRoute();
 
@@ -20,7 +21,8 @@ const tooltip = ref('');
 
 const eventStore = useEventStore();
 const storeLoading = computed(() => eventStore.specificLoading.get(eventUuid));
-const fleventsEvent = eventStore.getEventGetter(eventUuid);
+const savedEvent = eventStore.getEventGetter(eventUuid);
+const fleventsEvent = ref({} as FleventsEvent);
 
 const organizationStore = useOrganizationStore();
 const { managedOrganizations: organizations } = storeToRefs(organizationStore);
@@ -40,16 +42,12 @@ function previewImage(e: any) {
   imgUrl.value = URL.createObjectURL(file);
 }
 function resetImage() {
-  imgUrl.value = fleventsEvent.value?.image || '';
-}
-
-function convertTZ(date : any, tzString: any) {
-  return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tzString}));
+  imgUrl.value = savedEvent.value?.image ?? '';
 }
 
 onMounted(async () =>{
-  selectedOrga.value = fleventsEvent.value?.organizationPreview;
-  imgUrl.value = fleventsEvent.value?.image == null ? "" : fleventsEvent.value.image;
+  selectedOrga.value = savedEvent.value?.organizationPreview;
+  imgUrl.value = savedEvent.value?.image == null ? "" : savedEvent.value.image;
 })
 
 async function submit(pendingValidation: Promise<any>) {
@@ -120,7 +118,8 @@ async function submit(pendingValidation: Promise<any>) {
 
           <v-text-field
             label="Eventname"
-            v-model="fleventsEvent.name"
+            :model-value="savedEvent.name"
+            @input="(e: Event) => fleventsEvent.name = (e.target as HTMLInputElement).value"
             :rules="[() => fleventsEvent.name !== '' || 'Events müssen einen Namen haben.']"
             hide-details="auto"
             required
@@ -129,7 +128,8 @@ async function submit(pendingValidation: Promise<any>) {
           <v-text-field
             label="Ort"
             prepend-inner-icon="mdi-map-marker"
-            v-model="fleventsEvent.location"
+            :model-value="savedEvent.location"
+            @input="(e: Event) => fleventsEvent.location = (e.target as HTMLInputElement).value"
             :rules="[() => fleventsEvent.location !== '' || 'Events müssen einen Ort haben.']"
             hide-details="auto"
             required
@@ -139,10 +139,11 @@ async function submit(pendingValidation: Promise<any>) {
             <v-text-field
               label="Startzeit"
               type="datetime-local"
-              v-model="fleventsEvent.startTime"
+              :model-value="savedEvent.startTime"
+              @input="(e: Event) => fleventsEvent.startTime = (e.target as HTMLInputElement).value"
               :rules="[
-                () => fleventsEvent.startTime !== '' || 'Events müssen Startdatum und -zeit haben.',
-                () => new Date(fleventsEvent.startTime).getTime() - new Date().getTime() > 0 || 'Startzeit muss in der Zukunft liegen.'
+                v => v !== '' || 'Events müssen Startdatum und -zeit haben.',
+                v => new Date(v).getTime() - new Date().getTime() > 0 || 'Startzeit muss in der Zukunft liegen.'
                 ]"
               hide-details="auto"
               required
@@ -150,10 +151,11 @@ async function submit(pendingValidation: Promise<any>) {
             <v-text-field
               label="Endzeit"
               type="datetime-local"
-              v-model="fleventsEvent.endTime"
+              :model-value="savedEvent.endTime"
+              @input="(e: Event) => fleventsEvent.endTime = (e.target as HTMLInputElement).value"
               :rules="[
-                () => fleventsEvent.endTime !== '' || 'Events müssen Enddatum und -zeit haben.',
-                () => new Date(fleventsEvent.endTime).getTime() - new Date(fleventsEvent.startTime).getTime() > 0 || 'Endzeit muss nach Startzeit liegen.'
+                v => v !== '' || 'Events müssen Enddatum und -zeit haben.',
+                v => new Date(v).getTime() - new Date(fleventsEvent.startTime ?? savedEvent.startTime).getTime() > 0 || 'Endzeit muss nach Startzeit liegen.'
                 ]"
               hide-details="auto"
               required
@@ -165,7 +167,8 @@ async function submit(pendingValidation: Promise<any>) {
             label="Beschreibung"
             hide-details="auto"
             no-resize
-            v-model="fleventsEvent.description"
+            :model-value="savedEvent.description"
+            @input="(e: Event) => fleventsEvent.description = (e.target as HTMLInputElement).value"
           ></v-textarea>
 
           <v-file-input

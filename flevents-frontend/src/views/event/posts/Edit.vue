@@ -9,6 +9,7 @@ import {Attachment} from "@/models/attachment";
 import {useAppStore} from "@/store/app";
 import IconService from "@/service/iconService";
 import {usePostStore} from "@/store/posts";
+import {Post} from "@/models/post";
 
 const router = useRouter();
 const route = useRoute();
@@ -21,7 +22,8 @@ const backRoute = { name: 'events.event', params: { uuid: eventUuid }, query: { 
 const appStore = useAppStore();
 
 const postStore = usePostStore();
-const post = postStore.getPostGetter(postUuid, eventUuid);
+const savedPost = postStore.getPostGetter(postUuid, eventUuid);
+const post = ref({} as Post);
 
 const tooltip = ref("");
 const loading = ref(false);
@@ -52,9 +54,11 @@ async function addAttachment() {
   inputFiles.value = [];
 }
 
-async function submit() {
+async function submit(pendingValidation: Promise<any>) {
   tooltip.value = '';
-  if (post.value.title === '') {
+  const validation = await pendingValidation;
+  if (validation?.valid !== true) {
+    tooltip.value = 'Nicht alle erforderlichen Angaben wurden gemacht';
     return;
   }
   if (post.value.content === '' && files.value.length === 0) {
@@ -109,19 +113,21 @@ async function submit() {
   <Heading text="Post bearbeiten" />
 
   <v-card :loading="loading" :disabled="loading">
-    <v-form validate-on="submit" @submit.prevent="submit()">
+    <v-form validate-on="submit" @submit.prevent="submit">
       <v-container class="d-flex flex-column gap-3">
 
         <v-text-field
-          v-model="post.title"
+          :model-value="savedPost.title"
+          @input="(e: Event) => post.title = (e.target as HTMLInputElement).value"
           label="Titel"
-          :rules="[() => post.title !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[v => v !== '' || 'Dieses Feld wird benötigt.']"
           hide-details="auto"
           required
         />
 
         <v-textarea
-          v-model="post.content"
+          :model-value="savedPost.content"
+          @input="(e: Event) => post.content = (e.target as HTMLInputElement).value"
           label="Text"
           hide-details="auto"
           prepend-inner-icon="mdi-text"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {MailConfig} from "@/models/mailConfig";
 import DurationService from "@/service/durationService";
 import {VALIDATION} from "@/constants";
@@ -16,6 +16,16 @@ const emits = defineEmits<{
 }>();
 
 const tooltip = ref('');
+
+const infoMessageOffset = computed({
+  get: () => DurationService.extractHours(props.config.infoMessageOffset),
+  set: v => props.config.infoMessageOffset = DurationService.toDuration(v)
+});
+
+const feedbackMessageOffset = computed({
+  get: () => DurationService.extractHours(props.config.feedbackMessageOffset),
+  set: v => props.config.feedbackMessageOffset = DurationService.toDuration(v)
+});
 
 async function submit(pendingValidation: Promise<any>) {
   tooltip.value = '';
@@ -56,9 +66,7 @@ async function submit(pendingValidation: Promise<any>) {
         prepend-inner-icon="mdi-clock"
         min="0"
         type="number"
-        :model-value="DurationService.extractHours(config.infoMessageOffset)"
-        @input="(e: Event) => config.infoMessageOffset = DurationService.toDuration(
-          Number.parseInt((e.target as HTMLInputElement).value))"
+        v-model="infoMessageOffset"
         hide-details="auto"
         :rules="[
           v => v >= 0 || 'Kann nicht kleiner 0 sein.',
@@ -82,9 +90,7 @@ async function submit(pendingValidation: Promise<any>) {
         prepend-inner-icon="mdi-clock"
         min="0"
         type="number"
-        :model-value="DurationService.extractHours(config.feedbackMessageOffset)"
-        @input="(e: Event) => config.feedbackMessageOffset = DurationService.toDuration(
-          Number.parseInt((e.target as HTMLInputElement).value))"
+        v-model="feedbackMessageOffset"
         hide-details="auto"
         :rules="[
           v => v >= 0 || 'Kann nicht kleiner 0 sein.',

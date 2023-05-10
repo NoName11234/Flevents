@@ -5,6 +5,7 @@ import {AxiosError} from "axios";
 import {useOrganizationStore} from "@/store/organizations";
 import organizationsApi from "@/api/organizationsApi";
 import {VALIDATION} from "@/constants";
+import {Organization} from "@/models/organization";
 const props = defineProps({
   backRoute: {
     required: true,
@@ -26,15 +27,17 @@ const imageFile: Ref<Array<File>> = ref([]);
 const loading = ref(false);
 
 const organizationStore = useOrganizationStore()
-const organization = organizationStore.getOrganizationGetter(organizationUuid);
+const savedOrganization = organizationStore.getOrganizationGetter(organizationUuid);
+const organization = ref({
+  icon: savedOrganization.value.icon ?? ''
+} as Organization);
 
-const initialIcon = organization.value.icon;
 function previewImage(e: any) {
   const file = e.target.files[0];
   organization.value.icon = URL.createObjectURL(file);
 }
 function resetImage() {
-  organization.value.icon = initialIcon;
+  organization.value.icon = savedOrganization.value.icon ?? '';
 }
 function getBase64(file : any) {
   return new Promise(function (resolve, reject) {
@@ -86,9 +89,10 @@ async function submit(pendingValidation: Promise<any>) {
     >
       <v-container class="d-flex flex-column gap-3">
         <v-text-field
-          v-model="organization.name"
+          :model-value="savedOrganization.name"
+          @input="(e: Event) => organization.name = (e.target as HTMLInputElement).value"
           label="Name"
-          :rules="[() => organization.name !== '' || 'Dieses Feld wird benötigt.']"
+          :rules="[v => v !== '' || 'Dieses Feld wird benötigt.']"
           required
           hide-details="auto"
         />
@@ -98,7 +102,8 @@ async function submit(pendingValidation: Promise<any>) {
           hide-details="auto"
           prepend-inner-icon="mdi-text"
           no-resize
-          v-model="organization.description"
+          :model-value="savedOrganization.description"
+          @input="(e: Event) => organization.description = (e.target as HTMLInputElement).value"
         ></v-textarea>
         <v-textarea
           name="input-7-1"
@@ -106,15 +111,17 @@ async function submit(pendingValidation: Promise<any>) {
           hide-details="auto"
           prepend-inner-icon="mdi-map-marker"
           no-resize
-          v-model="organization.address"
+          :model-value="savedOrganization.address"
+          @input="(e: Event) => organization.address = (e.target as HTMLInputElement).value"
         ></v-textarea>
         <v-text-field
-          v-model="organization.phoneContact"
+          :model-value="savedOrganization.phoneContact"
+          @input="(e: Event) => organization.phoneContact = (e.target as HTMLInputElement).value"
           label="Telefonkontakt"
           prepend-inner-icon="mdi-phone"
           :rules="[
-            () => organization.phoneContact !== '' || 'Dieses Feld wird benötigt.',
-            () => (organization.phoneContact?.match(VALIDATION.PHONE)?.length ?? 0) > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
+            v => v !== '' || 'Dieses Feld wird benötigt.',
+            v => (v?.match(VALIDATION.PHONE)?.length ?? 0) > 0 || 'Muss mit +(Ländervorwahl) oder 0 beginnen.'
             ]"
           required
           hide-details="auto"

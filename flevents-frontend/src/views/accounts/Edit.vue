@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import Heading from "@/components/Heading.vue";
-import {computed, Ref, ref} from "vue";
-import axios, {AxiosError} from "axios";
+import {computed, ref} from "vue";
+import {AxiosError} from "axios";
 import {useRouter} from "vue-router";
 import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import accountApi from "@/api/accountsApi";
-import api from "@/api/api";
 import {VALIDATION} from "@/constants";
+import {Account} from "@/models/account";
 
 const router = useRouter();
 const accountStore = useAccountStore();
-const { currentAccount: account, loading: storeLoading, error } = storeToRefs(accountStore);
+const { currentAccount: savedAccount, loading: storeLoading, error } = storeToRefs(accountStore);
+const account = ref({} as Account);
 
 const showPass = ref(false);
 const showCorr = ref(false);
@@ -82,7 +83,8 @@ async function submit(pendingValidation: Promise<any>) {
         >
 
           <v-text-field
-            v-model="account.firstname"
+            :model-value="savedAccount!.firstname"
+            @input="(e: Event) => account.firstname = (e.target as HTMLInputElement).value"
             label="Vorname"
             prepend-inner-icon="mdi-account"
             :rules="[() => account?.firstname !== '' || 'Dieses Feld wird benötigt.']"
@@ -90,7 +92,8 @@ async function submit(pendingValidation: Promise<any>) {
             required
           />
           <v-text-field
-            v-model="account.lastname"
+            :model-value="savedAccount!.lastname"
+            @input="(e: Event) => account.lastname = (e.target as HTMLInputElement).value"
             label="Nachname"
             prepend-inner-icon="mdi-account"
             :rules="[() => account?.lastname !== '' || 'Dieses Feld wird benötigt.']"
@@ -101,11 +104,12 @@ async function submit(pendingValidation: Promise<any>) {
 
         <v-text-field
           label="Mailadresse"
-          v-model="account.email"
+          :model-value="savedAccount!.email"
+          @input="(e: Event) => account.email = (e.target as HTMLInputElement).value"
           prepend-inner-icon="mdi-email"
           :rules="[
             () => account?.email !== '' || 'Dieses Feld wird benötigt.',
-            () => account?.email.match(VALIDATION.EMAIL) !== null || 'Die angegebene E-Mail-Adresse ist ungültig.'
+            () => account?.email?.match(VALIDATION.EMAIL) !== null || 'Die angegebene E-Mail-Adresse ist ungültig.'
             ]"
           hide-details="auto"
           required
@@ -118,7 +122,8 @@ async function submit(pendingValidation: Promise<any>) {
         </small>
         <v-text-field
           label="Neues Passwort"
-          v-model="account.secret"
+          :model-value="savedAccount!.secret"
+          @input="(e: Event) => account.secret = (e.target as HTMLInputElement).value"
           :append-inner-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'"
           :type="showPass ? 'text' : 'password'"
           @click:append-inner="showPass = !showPass"
