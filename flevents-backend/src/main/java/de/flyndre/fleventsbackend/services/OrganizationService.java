@@ -100,6 +100,9 @@ public class OrganizationService {
         if(!optional.isPresent()){
             throw new IllegalArgumentException("The given account is no part of the given organization");
         }
+        if(organizationAccountRepository.findByOrganization_UuidAndRole(organization.getUuid(),OrganizationRole.admin).size()<2){
+            throw new IllegalArgumentException("You cant delete the last admin account of an organization.");
+        }
         organizationAccountRepository.delete(optional.get());
     }
 
