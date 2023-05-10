@@ -31,7 +31,7 @@ const inputFiles = ref([] as File[]);
 const files = ref([] as File[]);
 const deletedAttachments = ref([] as Attachment[]);
 const attachmentsInput = ref();
-const remainingExistingAttachments = computed(() => post.value.attachments?.filter(a => !deletedAttachments.value.includes(a)));
+const remainingExistingAttachments = computed(() => savedPost.value.attachments?.filter(a => !deletedAttachments.value.includes(a)));
 
 async function removeAttachment(index: number) {
   files.value.splice(index, 1);
