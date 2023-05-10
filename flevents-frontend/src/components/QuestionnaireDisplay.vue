@@ -179,7 +179,7 @@ function setChoice(index: number, choice: Choice) {
     </v-expansion-panel-title>
 
     <v-expansion-panel-text>
-      <div class="d-flex flex-column gap-3 my-3">
+      <div class="d-flex flex-column gap-3 mt-1 mb-n1 mx-n3">
 
         <v-card
           elevation="0"

@@ -560,6 +560,9 @@ async function updateMailConfig(config: MailConfig) {
           variant="accordion"
           multiple
         >
+          <v-container v-if="posts?.length <= 0" class="text-grey">
+            Keine Posts vorhanden.
+          </v-container>
           <PostDisplay
             v-for="(post, pIndex) in posts"
             :event-uuid="eventUuid"
@@ -592,6 +595,9 @@ async function updateMailConfig(config: MailConfig) {
           variant="accordion"
           multiple
         >
+          <v-container v-if="questionnaires?.length <= 0" class="text-grey">
+            Keine Umfragen vorhanden.
+          </v-container>
           <QuestionnaireDisplay
             v-for="(questionnaire, index) in questionnaires"
             :key="index"
