@@ -66,6 +66,10 @@ public class MailConfig implements Cloneable {
 
     }
 
+    /**
+     * Copy the MailConfig by value
+     * @return a new {@link MailConfig} object with the same values but with a null uuid
+     */
     public MailConfig copy() {
         return new MailConfig(null,registerMessage,infoMessage,infoMessageOffset,feedbackMessage,feedbackMessageOffset,organizationInvitation,eventInvitation);
     }
