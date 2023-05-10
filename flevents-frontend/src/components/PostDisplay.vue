@@ -167,8 +167,9 @@ async function deletePost() {
                 :text="attachment.filename"
                 :prepend-icon="IconService.getIconForFileType(attachment.filename)"
                 variant="tonal"
-                link
+                target="_blank"
                 :href="attachment.url"
+                link
               >
               </v-chip>
             </v-chip-group>
