@@ -36,9 +36,8 @@ export const useQuestionnaireStatisticsStore = defineStore('questionnaireStatist
       } catch (e) {
         console.warn(`Failed to fetch statistics of questionnaire with id ${questionnaireUuid}.`, e);
         this.specificError.set(questionnaireUuid, true);
-      } finally {
-        this.specificLoading.set(questionnaireUuid, false);
       }
+      this.specificLoading.set(questionnaireUuid, false);
     },
 
     /**

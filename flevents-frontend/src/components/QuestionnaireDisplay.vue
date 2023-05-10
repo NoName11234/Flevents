@@ -113,6 +113,7 @@ async function submitAnswers(pendingValidation: Promise<any>) {
   }
   loading.value = false;
   answerStore.hydrateSpecific(props.questionnaire?.uuid, account.value!.uuid);
+  statisticsStore.hydrateSpecific(props.questionnaire.uuid);
 }
 
 async function deleteQuestionnaire() {

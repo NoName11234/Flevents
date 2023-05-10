@@ -3,7 +3,6 @@ import {STORES} from "@/constants";
 import questionnaireApi from "@/api/questionnaireApi";
 import {computed} from "vue";
 import {AnsweredQuestionnaire} from "@/models/answeredQuestionnaire";
-import {AxiosError, HttpStatusCode} from "axios";
 
 /**
  * Store for state management of answers to questionnaires.
