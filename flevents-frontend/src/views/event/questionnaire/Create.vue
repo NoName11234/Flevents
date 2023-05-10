@@ -96,7 +96,7 @@ async function submit(pendingValidation: Promise<any>){
   }
   loading.value = true;
   try {
-    const response = questionnaireApi.create(questionnaire.value, eventUuid);
+    const response = await questionnaireApi.create(questionnaire.value, eventUuid);
     await router.push(backRoute);
   } catch (e) {
     let errorMessage = '';
