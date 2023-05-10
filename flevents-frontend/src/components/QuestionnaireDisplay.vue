@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import {Questionnaire} from "@/models/questionnaire";
-import {computed, onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 import {AnsweredQuestionnaire} from "@/models/answeredQuestionnaire";
-import {useRouter} from "vue-router";
 import {EventRole} from "@/models/eventRole";
 import {OrganizationRole} from "@/models/organizationRole";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {AnsweredQuestion} from "@/models/answeredQuestion";
 import {useAccountStore} from "@/store/account";
 import QuestionnaireApi from "@/api/questionnaireApi";
-import DatetimeService from "@/service/datetimeService";
 import {useQuestionnaireStatisticsStore} from "@/store/questionnaireStatistics";
 import {AxiosError} from "axios";
 import {useAppStore} from "@/store/app";
 import SurveyStats from "@/components/QuestionnaireStats.vue";
-import {Statistics} from "@/models/statistics";
 import {useQuestionnaireStore} from "@/store/questionnaires";
 import {useAnsweredQuestionnaireStore} from "@/store/answeredQuestionnaires";
 import {storeToRefs} from "pinia";

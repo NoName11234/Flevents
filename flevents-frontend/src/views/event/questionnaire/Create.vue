@@ -4,13 +4,11 @@ import {ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {Questionnaire} from "@/models/questionnaire";
 import {Question} from "@/models/question";
-import {SingleChoiceQuestion} from "@/models/singleChoiceQuestion";
 import {QuestionType} from "@/models/questionType";
 import questionnaireApi from "@/api/questionnaireApi";
 import {Choice} from "@/models/choice";
 import {AxiosError} from "axios";
 import {useQuestionnaireStore} from "@/store/questionnaires";
-import {useEventStore} from "@/store/events";
 
 const router = useRouter();
 const route = useRoute();
