@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {onMounted, Ref, ref} from "vue";
+import {computed, onMounted, Ref, ref} from "vue";
 import {FleventsEvent} from "@/models/fleventsEvent";
 import {RouteLocationRaw, useRouter} from 'vue-router';
 import {AxiosError} from "axios"
@@ -8,8 +8,8 @@ import {useAccountStore} from "@/store/account";
 import {storeToRefs} from "pinia";
 import eventApi from "@/api/eventsApi";
 import {useEventStore} from "@/store/events";
-import {useOrganizationStore} from "@/store/organizations";
 import FileService from "@/service/fileService";
+import {OrganizationRole} from "@/models/organizationRole";
 
 const props = defineProps({
   backRoute: {
@@ -45,11 +45,13 @@ const fleventsEvent = ref((props.presetEvent ?
 
 const eventStore = useEventStore();
 
-const organizationStore = useOrganizationStore();
-const { managedOrganizations } = storeToRefs(organizationStore);
-
 const accountStore = useAccountStore();
 const { currentAccount: account } = storeToRefs(accountStore);
+
+const managedOrganizations = computed(() =>
+  account.value!.organizationPreviews
+    .filter(o => [OrganizationRole.organizer, OrganizationRole.admin].includes(o.role as OrganizationRole))
+);
 
 const imageFile: Ref<Array<File>> = ref([]);
 
