@@ -374,6 +374,30 @@ async function updateMailConfig(config: MailConfig) {
   eventStore.hydrateSpecific(eventUuid);
 }
 
+async function exportAttendees() {
+  const element = document.createElement('a');
+  element.setAttribute(
+    'href',
+    'data:text/plain;charset=utf-8,'
+    + encodeURIComponent(
+      attendees.value
+        .map(a => `${a.firstname}, ${a.lastname}, ${a.email}, ${a.checkedIn ? 'Anwesend' : 'Nicht anwesend'}`)
+        .join('\n')
+    )
+  );
+  element.setAttribute(
+    'download',
+    `Anwesenheitsliste_${event.value.name}_${DatetimeService.getDate(event.value.startTime)}.txt`
+  );
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
 </script>
 
 <template>
@@ -413,13 +437,11 @@ async function updateMailConfig(config: MailConfig) {
       >
         Posts
       </v-tab>
-      <!-- TODO: hier eventuell anpassen, weil ja auch Orgaleute die Umfrage sehen dürfen -->
       <v-tab
-       value="polls"
-      :disabled="storesLoading"
-       v-if="validateRole === EventRole.tutor || validateRole === EventRole.organizer || validateRole === EventRole.attendee || validateRole === OrganizationRole.organizer || validateRole === OrganizationRole.admin"
-        >
-       Umfragen
+        value="polls"
+        :disabled="storesLoading"
+      >
+        Umfragen
       </v-tab>
       <v-tab
         v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
@@ -607,14 +629,21 @@ async function updateMailConfig(config: MailConfig) {
         </v-expansion-panels>
       </v-window-item>
 
-      <v-window-item value="mails">
+      <v-window-item
+        value="mails"
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+      >
         <MailConfigCard
           :config="event.mailConfig"
           @update="updateMailConfig"
         />
       </v-window-item>
 
-      <v-window-item value="attendees" :disabled="attendeesLoading">
+      <v-window-item
+        value="attendees"
+        :disabled="attendeesLoading"
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+      >
         <v-progress-linear
           :active="attendeesLoading"
           color="grey-lighten-1"
@@ -720,7 +749,10 @@ async function updateMailConfig(config: MailConfig) {
         </v-table>
       </v-window-item>
 
-      <v-window-item value="attendance">
+      <v-window-item
+        value="attendance"
+        v-if="validateRole === EventRole.tutor || validateRole == EventRole.organizer"
+      >
         <v-container class="d-flex flex-column flex-sm-row justify-start gap">
           <v-btn
             prepend-icon="mdi-account-plus"
@@ -729,6 +761,17 @@ async function updateMailConfig(config: MailConfig) {
             @click="addAnon = true"
           >
             Unangemeldeter Teilnehmer
+          </v-btn>
+
+          <v-spacer />
+
+          <v-btn
+            prepend-icon="mdi-tray-arrow-down"
+            variant="text"
+            :disabled="attendees?.length <= 0"
+            @click="exportAttendees()"
+          >
+            Liste Herunterladen
           </v-btn>
         </v-container>
 
@@ -754,7 +797,7 @@ async function updateMailConfig(config: MailConfig) {
             v-for="(item, index) in attendees"
             :key="index"
           >
-            <td>{{item.firstname}} {{item.lastname}}</td>
+            <td>{{item.firstname}}&nbsp;{{item.lastname}}</td>
             <td>{{item.email}}</td>
             <td>
               <v-checkbox
@@ -770,7 +813,11 @@ async function updateMailConfig(config: MailConfig) {
 
       </v-window-item>
 
-      <v-window-item value="organizers" :disabled="organizersLoading">
+      <v-window-item
+        value="organizers"
+        :disabled="organizersLoading"
+        v-if="validateRole == EventRole.organizer"
+      >
         <v-progress-linear
           :active="organizersLoading"
           color="grey-lighten-1"
@@ -810,7 +857,7 @@ async function updateMailConfig(config: MailConfig) {
             v-for="(item, index) in organizers"
             :key="index"
           >
-            <td>{{item.firstname}} {{item.lastname}}</td>
+            <td>{{item.firstname}}&nbsp;{{item.lastname}}</td>
             <td>{{item.email}}</td>
             <td><v-btn
               :disabled="organizers.length <= 1"
