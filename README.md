@@ -1,37 +1,41 @@
+![Flevents Logo](flevents-frontend/src/assets/logo-and-text.png)
+
 # Flevents
-Flevents is a Event-Managment Software that is beeing developted as a student project at DHBW Stuttgart Campus Horb.
+
+Flevents is an event management software that is being developed as a student project at DHBW Stuttgart Campus Horb.
 
 ## The Developers
 
-The Developers of this Project consists of five Students at the DHBW Stuttgart Campus Horb.
+The team of this project consists of five students from DHBW Stuttgart Campus Horb.
 
-| Role | Name |
-| --- | --- |
-| Project-Leader | Lukas&nbsp;Burkhardt |
-| Technical Assistent | Paul&nbsp;Lehmann |
-| Reserach- and Testcommissioner | Pascal&nbsp;Fuchs |
-| Modelling- und Implementationcommissioner | Ruben&nbsp;Kraft |
-| Quality Assurance- und Documentationcomissioner | David&nbsp;Maier |
+| Role                                              | Name                 |
+|---------------------------------------------------|----------------------|
+| Project-Leader                                    | Lukas&nbsp;Burkhardt |
+| Technical Assistent                               | Paul&nbsp;Lehmann    |
+| Research- and Test Commissioner                   | Pascal&nbsp;Fuchs    |
+| Modelling- und Implementation Commissioner        | Ruben&nbsp;Kraft     |
+| Quality Assurance- und Documentation Commissioner | David&nbsp;Maier     |
 
 ## Techstack
 
 ### Backend
 
-The Backend is beeing developted in Spring Boot. It also uses features of Spring MVC, Spring Data as well as Spring Security.
-It consists of a REST-API, with witch the Frontend can communicate.
+The Backend is being developed in Spring Boot.
+It also uses Spring MVC, Spring Data as well as Spring Security.
+It consists of a REST-API, with which the frontend can communicate.
 The Endpoints are saved with JWT-Tokens, wich need to be obtained by registering an Account and perform an Login with it.
 
 ### Frontend
 
-The Frontend ist written in Vue.js. TypeScript is beeing used as Scripting-Language in the Frontend.
+The Frontend ist written in Vue.js. TypeScript is used as Scripting-Language in the Frontend.
 
 ### Databases
 
-As Object-Relational Mapper Hibernate is beeing used, this enables many Databases wich can be configured in the applications.properties.
+As Object-Relational Mapper Hibernate is utilized, which enables many Databases wich can be configured in the applications.properties.
 
 ## Structure of the software
 
-the Software consists off of two main folders.
+The Software consists inside the two main folders:
 
 ### /flevents-backend
 
