@@ -1,4 +1,4 @@
-![Flevents Logo](flevents-frontend/src/assets/logo-and-text.png)
+![Flevents Logo](docs/flevents.png)
 
 # Flevents
 
@@ -9,7 +9,7 @@ Flevents is an event management software that is being developed as a student pr
 The team of this project consists of five students from DHBW Stuttgart Campus Horb.
 
 | Role                                              | Name                 |
-|---------------------------------------------------|----------------------|
+| ------------------------------------------------- | -------------------- |
 | Project-Leader                                    | Lukas&nbsp;Burkhardt |
 | Technical Assistent                               | Paul&nbsp;Lehmann    |
 | Research- and Test Commissioner                   | Pascal&nbsp;Fuchs    |
